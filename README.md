@@ -1,2 +1,2 @@
 # fav_bpini
-Repository for BPINI@ZČU/FAV
+Repository for KIV/BPINI@ZČU-FAV
