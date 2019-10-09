@@ -11,3 +11,11 @@ class LoadCamera extends VrpFinderEvent {
   @override
   List<Object> get props => [];
 }
+
+class TextFound extends VrpFinderEvent {
+  final String textFound;
+
+  TextFound(this.textFound);
+  @override
+  List<Object> get props => [textFound];
+}

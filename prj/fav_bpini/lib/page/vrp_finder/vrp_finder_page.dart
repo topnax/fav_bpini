@@ -2,7 +2,7 @@
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
-import 'package:fav_bpini/bloc/vrp_finder/bloc.dart';
+import 'package:favbpini/bloc/vrp_finder/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -34,61 +34,53 @@ class VrpFinderPageState extends State<VrpFinderPage> {
           builder: (BuildContext context, VrpFinderState state) {
         if (state is CameraInitialState) {
           BlocProvider.of<VrpFinderBloc>(context).dispatch(LoadCamera());
-          return Center(
-              child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator());
         } else if (state is CameraLoadingState) {
-          return Center(
-              child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator());
         } else if (state is CameraLoadedState) {
-          return _buildCameraPreviewStack(state.controller);
+          return _buildCameraPreviewStack(state);
         }
         return Center(child: Text("No state found"));
       }),
     ));
   }
 
-  Widget _buildCameraPreviewStack(CameraController controller) {
+  Widget _buildCameraPreviewStack(CameraLoadedState state) {
     return Builder(
       builder: (context) {
         return Stack(
             alignment: AlignmentDirectional.topCenter,
             children: <Widget>[
               // fullscreen camera preview
-              CameraPreview(controller),
+              CameraPreview(state.controller),
 
               // blur previous layer
               BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: _sigma, sigmaY: _sigma),
-                  child: Container(color: Colors.black.withOpacity(0))),
+                  child: Container(color: Colors.blue.withOpacity(0.2))),
 
-              Padding(
-                padding: const EdgeInsets.only(top: 42.0),
-                child: Text(
-                  "Vyfotit fotku",
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_back_ios),
+                    color: Colors.white,
+                    iconSize: 30,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
                 ),
               ),
 
               // center another camera preview with correct aspect ratio
               Center(
                 child: AspectRatio(
-                  aspectRatio: controller.value.aspectRatio,
+                  aspectRatio: state.controller.value.aspectRatio,
                   child: Stack(children: <Widget>[
-                    CameraPreview(controller),
-                    Container(
-                      color: Colors.transparent,
-                      child: new Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 30.0),
-                            child: OutlineButton(
-                              onPressed: () {},
-                              child: Container(width: 50, height: 85),
-                              borderSide:
-                                  BorderSide(color: Colors.white, width: 7),
-                              shape: StadiumBorder(),
-                            ),
-                          )),
-                    ),
+                    CameraPreview(state.controller),
+                    Center(child: Text("\$" + state.ocrText, style: TextStyle(color: Colors.white,fontSize: 16))),
                   ]),
                 ),
               ),

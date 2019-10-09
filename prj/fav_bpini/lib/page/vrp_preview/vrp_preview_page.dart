@@ -26,6 +26,28 @@ class VrpPreviewPageState extends State<VrpPreviewPage>
         mainAxisSize: MainAxisSize.min,
         children: [
           Center(child: _buildVrp("9H9", "7903")),
+          RaisedButton(
+            shape: new RoundedRectangleBorder(
+                borderRadius: new BorderRadius.circular(18.0),),
+            onPressed: () {
+              Navigator.of(context).pushNamed(
+                '/finder',
+              );
+            },
+            color: Colors.blue,
+            textColor: Colors.white,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(right: 5.0),
+                  child: Icon(Icons.add),
+                ),
+                Text("New VRP".toUpperCase(),
+                    style: TextStyle(fontSize: 20)),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -42,23 +64,26 @@ class VrpPreviewPageState extends State<VrpPreviewPage>
 
   Widget _buildVrpContentRow(String firstPart, String secondPart) {
     return Padding(
-      padding: EdgeInsets.all(15),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            firstPart,
-            style: _vrpStyle,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-          ),
-          Text(
-            secondPart,
-            style: _vrpStyle,
-          )
-        ],
+      padding: EdgeInsets.all(8),
+      child: Padding(
+        padding: const EdgeInsets.only(top:10.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              firstPart,
+              style: _vrpStyle,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+            Text(
+              secondPart,
+              style: _vrpStyle,
+            )
+          ],
+        ),
       ),
     );
   }

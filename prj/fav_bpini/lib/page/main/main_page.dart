@@ -1,6 +1,6 @@
-import 'package:fav_bpini/app_localizations.dart';
-import 'package:fav_bpini/page/vrp_finder/vrp_finder_page.dart';
-import 'package:fav_bpini/page/vrp_preview/vrp_preview_page.dart';
+import 'package:favbpini/app_localizations.dart';
+import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
+import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
 import 'package:flutter/material.dart';
 
 class MainPage extends StatefulWidget {
@@ -21,12 +21,10 @@ class MainPageState extends State<MainPage>
 
   final _tabPages = <Widget>[
     VrpPreviewPage(),
-    VrpFinderPage(),
     Center(child: Icon(Icons.settings, size: 64.0, color: Colors.blue)),
   ];
   static const _tabs = <Tab>[
     Tab(icon: Icon(Icons.format_list_bulleted)),
-    Tab(icon: Icon(Icons.photo_camera)),
     Tab(icon: Icon(Icons.settings)),
   ];
 

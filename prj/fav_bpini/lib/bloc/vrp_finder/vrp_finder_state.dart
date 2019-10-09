@@ -24,11 +24,13 @@ class CameraInitialState extends VrpFinderState {
 @immutable
 class CameraLoadedState extends VrpFinderState {
   final CameraController controller;
+  final bool textFound;
+  final String ocrText;
 
-  CameraLoadedState(this.controller);
+  CameraLoadedState(this.controller, this.textFound, this.ocrText);
 
   @override
-  List<Object> get props => [controller];
+  List<Object> get props => [controller, textFound, ocrText];
 }
 
 @immutable

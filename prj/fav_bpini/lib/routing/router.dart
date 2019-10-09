@@ -1,4 +1,5 @@
-import 'package:fav_bpini/page/main/main_page.dart';
+import 'package:favbpini/page/main/main_page.dart';
+import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
 import 'package:flutter/material.dart';
 
 class Router {
@@ -9,6 +10,8 @@ class Router {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => MainPage());
+      case '/finder':
+        return MaterialPageRoute(builder: (_) => VrpFinderPage());
 //      case '/camera':
 //        return MaterialPageRoute(builder: (_) => TakePictureScreen(args));
 
