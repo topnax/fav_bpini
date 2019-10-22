@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:favbpini/bloc/vrp_finder/bloc.dart';
+import 'package:favbpini/widget/vrp_highlighter_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -80,10 +81,15 @@ class VrpFinderPageState extends State<VrpFinderPage> {
                   aspectRatio: state.controller.value.aspectRatio,
                   child: Stack(children: <Widget>[
                     CameraPreview(state.controller),
-                    Center(child: Text("\$" + state.ocrText, style: TextStyle(color: Colors.white,fontSize: 16))),
+                    Center(
+                        child: Text("\$" + state.ocrText,
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 16))),
                   ]),
                 ),
               ),
+            if (state.detectedTextBlocks.length > 0) Center(child: AspectRatio(aspectRatio: state.controller.value.aspectRatio, child: CustomPaint(painter: VrpHighlighterPainter(state.detectedTextBlocks, state.imageSize),),),),
+            if (state.detectedTextBlocks.length > 0) Center(child: Text("Hehehehehehehehe")),
             ]);
       },
     );

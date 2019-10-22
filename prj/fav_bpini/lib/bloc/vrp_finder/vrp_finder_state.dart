@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:meta/meta.dart';
 
 @immutable
@@ -26,11 +29,14 @@ class CameraLoadedState extends VrpFinderState {
   final CameraController controller;
   final bool textFound;
   final String ocrText;
+  final Size imageSize;
+  final List<TextBlock> detectedTextBlocks;
 
-  CameraLoadedState(this.controller, this.textFound, this.ocrText);
+
+  CameraLoadedState(this.controller, this.textFound, this.ocrText, this.detectedTextBlocks, this.imageSize);
 
   @override
-  List<Object> get props => [controller, textFound, ocrText];
+  List<Object> get props => [controller, textFound, ocrText, detectedTextBlocks, imageSize];
 }
 
 @immutable

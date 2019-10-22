@@ -12,6 +12,8 @@ class MainPageState extends State<MainPage>
     with SingleTickerProviderStateMixin {
   TabController _tabController;
 
+  get versionNumber => 4;
+
   @override
   void initState() {
     super.initState();
@@ -38,7 +40,7 @@ class MainPageState extends State<MainPage>
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context).translate("app_title")),
+          title: Text(AppLocalizations.of(context).translate("app_title")+ " vc"+ versionNumber.toString()),
           centerTitle: true,
         ),
         body: TabBarView(

@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 
 class OcrManager {
 
-  static Future<String> scanText(CameraImage availableImage) async {
+  static Future<List<TextBlock>> scanText(CameraImage availableImage) async {
     /*
      * https://firebase.google.com/docs/ml-kit/android/recognize-text
      * .setWidth(480)   // 480x360 is typically sufficient for
@@ -45,7 +45,7 @@ class OcrManager {
       }
     }
 
-    return visionText?.text;
+    return visionText.blocks;
   }
 
   Uint8List concatenatePlanes(List<Plane> planes) {

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:favbpini/ocr/ocr.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import './bloc.dart';
 
@@ -34,30 +35,33 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
           await controller.startImageStream((CameraImage availableImage) async {
             _streamStarted = true;
             if (_isScanBusy) {
-//              print("1.5 -------- isScanBusy, skipping...");
               return;
             }
-
-//            print("1 -------- isScanBusy = true");
-//            print("Camera.dart: " + availableImage.width.toString() + " - " + availableImage.height.toString());
             _isScanBusy = true;
 
-            String textDetected = await OcrManager.scanText(availableImage);
+            List<TextBlock> detectedTextBlocks =
+                await OcrManager.scanText(availableImage);
 
-            if (textDetected != null) {
-              debugPrint("textDetected: " + textDetected);
-              dispatch(TextFound(textDetected));
+            if (detectedTextBlocks != null) {
+              dispatch(TextFound(
+                  "",
+                  detectedTextBlocks,
+                  Size(availableImage.width.toDouble(),
+                      availableImage.height.toDouble())));
             }
 
             _isScanBusy = false;
           });
         }
 
-        yield CameraLoadedState(controller, false, "");
+        yield CameraLoadedState(
+            controller, false, "", new List<TextBlock>(), Size(0, 0));
       }
     } else if (event is TextFound && currentState is CameraLoadedState) {
+      debugPrint("yielding");
       yield CameraLoadedState((currentState as CameraLoadedState).controller,
-          true, event.textFound);
+          true, event.textFound, event.detectedTextBlocks, event.imageSize);
+      debugPrint("yielded");
     }
   }
 

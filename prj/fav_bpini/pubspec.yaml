@@ -14,7 +14,7 @@ description: A application created within the KIV&#x2F;PRJ5 and KIV&#x2F;BPINI.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
   flutter:
@@ -56,7 +56,7 @@ flutter:
   #  - images/a_dot_ham.jpeg
 
   assets:
-  - lang/cz.json
+  - lang/cs.json
   - lang/en.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
