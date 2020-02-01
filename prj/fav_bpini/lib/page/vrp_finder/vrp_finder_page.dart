@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:favbpini/bloc/vrp_finder/bloc.dart';
 import 'package:favbpini/widget/vrp_highlighter_painter.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -12,8 +11,6 @@ class VrpFinderPage extends StatefulWidget {
   @override
   VrpFinderPageState createState() => VrpFinderPageState();
 }
-
-TextStyle _vrpStyle = TextStyle(fontSize: 60, fontFamily: "SfAtarianSystem");
 
 class VrpFinderPageState extends State<VrpFinderPage> {
   var _sigma = 10.0;
@@ -25,7 +22,7 @@ class VrpFinderPageState extends State<VrpFinderPage> {
     // Make sure to dispose of the controller when the Widget is disposed
     super.dispose();
   }
-
+int c = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,48 +40,25 @@ class VrpFinderPageState extends State<VrpFinderPage> {
           return Center(child: CircularProgressIndicator());
         } else if (state is CameraLoadedState) {
           return _buildCameraPreviewStack(state);
-        } else if (state is VrpFoundState) {
-//            Navigator.of(context).pushNamed("/found", arguments: state.textBlock);
-          return _getVrpPreview(state, context);
+        } else if (state is GyroRetrieved) {
+          if (state.gyroEvents.length < 1) {
+            return Text("none");
+          }
+          c++;
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Text((state.gyroEvents[state.gyroEvents.length - 1].x*100).toString() + "\n" +(state.gyroEvents[state.gyroEvents.length - 1].y*100).toString() + "\n" +(state.gyroEvents[state.gyroEvents.length - 1].z*100).toString() + "\n- " + c.toString()),
+            ),
+          );
+//          return ListView.builder(itemCount: state.gyroEvents.length
+//              ,itemBuilder: (context, index) {
+//           return ListTile(title: Text(getProduct(gyroEvents.)),)    ;
+//          });
         }
         return Center(child: Text("No state found"));
       }),
     ));
-  }
-
-  Container _getVrpPreview(VrpFoundState state, BuildContext context) {
-    TextElement te1 = state.textLine.elements[0];
-    TextElement te2 = state.textLine.elements[1];
-
-    double widthRatio = te1.boundingBox.width / te2.boundingBox.width;
-    double spaceBetweenElements = state.textLine.boundingBox.width - (te1.boundingBox.width + te2.boundingBox.width);
-    double spaceToLineRatio = spaceBetweenElements / state.textLine.boundingBox.width;
-    return Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text("$widthRatio\n$spaceBetweenElements\n$spaceToLineRatio"),
-          ),
-          _buildVrp(state.textLine.text.split(" ")[0],
-              state.textLine.text.split(" ")[1]),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: FloatingActionButton(
-                    child: Icon(Icons.replay),
-                    onPressed: () => BlocProvider.of<VrpFinderBloc>(context)
-                        .dispatch(LoadCamera())),
-              )
-            ],
-          )
-        ],
-      ),
-    );
   }
 
   Widget _buildCameraPreviewStack(CameraLoadedState state) {
@@ -129,91 +103,10 @@ class VrpFinderPageState extends State<VrpFinderPage> {
                   ]),
                 ),
               ),
-              if (state.detectedTextBlocks.length > 0)
-                Center(
-                  child: AspectRatio(
-                    aspectRatio: state.controller.value.aspectRatio,
-                    child: CustomPaint(
-                      painter: VrpHighlighterPainter(
-                          state.detectedTextBlocks, state.imageSize),
-                    ),
-                  ),
-                ),
-              if (state.detectedTextBlocks.length > 0)
-                Center(child: Text("Hehehehehehehehe")),
+            if (state.detectedTextBlocks.length > 0) Center(child: AspectRatio(aspectRatio: state.controller.value.aspectRatio, child: CustomPaint(painter: VrpHighlighterPainter(state.detectedTextBlocks, state.imageSize),),),),
+            if (state.detectedTextBlocks.length > 0) Center(child: Text("Hehehehehehehehe")),
             ]);
       },
-    );
-  }
-
-  Widget _buildVrp(String firstPart, String secondPart) {
-    return Container(
-      decoration: BoxDecoration(
-          color: Colors.black, borderRadius: BorderRadius.circular(6)),
-      child: Padding(
-          padding: EdgeInsets.all(4),
-          child: _buildVrpInner(firstPart, secondPart)),
-    );
-  }
-
-  Widget _buildVrpContentRow(String firstPart, String secondPart) {
-    return Padding(
-      padding: EdgeInsets.all(8),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 10.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              firstPart,
-              style: _vrpStyle,
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-            ),
-            Text(
-              secondPart,
-              style: _vrpStyle,
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVrpInner(String firstPart, String secondPart) {
-    return Container(
-      decoration: BoxDecoration(color: Colors.blue[900]),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Container(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 2),
-              child: Column(
-                children: <Widget>[
-                  Icon(
-                    Icons.star_border,
-                    color: Colors.yellow,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                  ),
-                  Text(
-                    "CZ",
-                    style: TextStyle(color: Colors.white),
-                  )
-                ],
-              ),
-            ),
-          ),
-          Container(
-              decoration: BoxDecoration(color: Colors.white),
-              padding: EdgeInsets.only(top: 0),
-              child: _buildVrpContentRow(firstPart, secondPart))
-        ],
-      ),
     );
   }
 }

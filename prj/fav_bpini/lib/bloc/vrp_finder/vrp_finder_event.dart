@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:meta/meta.dart';
+import 'package:sensors/sensors.dart';
 
 @immutable
 abstract class VrpFinderEvent extends Equatable {
@@ -32,4 +33,13 @@ class TextFound extends VrpFinderEvent {
   TextFound(this.textFound, this.detectedTextBlocks, this.imageSize);
   @override
   List<Object> get props => [textFound, detectedTextBlocks, imageSize];
+}
+
+class GyroLoaded extends VrpFinderEvent {
+  final List<GyroscopeEvent> gyroEvents;
+
+  GyroLoaded(this.gyroEvents);
+
+  @override
+  List<Object> get props => [gyroEvents];
 }

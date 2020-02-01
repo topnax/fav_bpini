@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:meta/meta.dart';
+import 'package:sensors/sensors.dart';
 
 @immutable
 abstract class VrpFinderState extends Equatable {
@@ -58,4 +59,17 @@ class CameraErrorState extends VrpFinderState {
   @override
   List<Object> get props => [errorDescription];
 }
+
+@immutable
+class GyroRetrieved extends VrpFinderState {
+  final int c;
+  final List<GyroscopeEvent> gyroEvents;
+
+  GyroRetrieved(this.gyroEvents, this.c);
+
+  @override
+  List<Object> get props => [gyroEvents, c];
+}
+
+
 
