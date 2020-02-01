@@ -28,12 +28,11 @@ class VrpFinderPageState extends State<VrpFinderPage> {
         // You must wait until the controller is initialized before displaying the
         // camera preview. Use a FutureBuilder to display a loading spinner until
         // the controller has finished initializing
-        body: BlocProvider(
-      builder: (_) => VrpFinderBloc(),
+        body: BlocProvider(create: (BuildContext context) => VrpFinderBloc(),
       child: BlocBuilder<VrpFinderBloc, VrpFinderState>(
           builder: (BuildContext context, VrpFinderState state) {
         if (state is CameraInitialState) {
-          BlocProvider.of<VrpFinderBloc>(context).dispatch(LoadCamera());
+          BlocProvider.of<VrpFinderBloc>(context).add(LoadCamera());
           return Center(child: CircularProgressIndicator());
         } else if (state is CameraLoadingState) {
           return Center(child: CircularProgressIndicator());

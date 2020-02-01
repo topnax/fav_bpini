@@ -1,5 +1,4 @@
 import 'package:favbpini/app_localizations.dart';
-import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
 import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
 import 'package:flutter/material.dart';
 
@@ -54,10 +53,4 @@ class MainPageState extends State<MainPage>
         ));
   }
 
-  Widget _buildMainBody() {
-    return Container(
-        child: Center(
-      child: Text("Welcome to VRP App"),
-    ));
-  }
 }

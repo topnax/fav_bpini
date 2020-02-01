@@ -5,8 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 
 class OcrManager {
-
-  static Future<String> scanText(CameraImage availableImage) async {
+  static Future<List<TextBlock>> scanText(CameraImage availableImage) async {
     /*
      * https://firebase.google.com/docs/ml-kit/android/recognize-text
      * .setWidth(480)   // 480x360 is typically sufficient for
@@ -15,37 +14,24 @@ class OcrManager {
 
     final FirebaseVisionImageMetadata metadata = FirebaseVisionImageMetadata(
         rawFormat: availableImage.format.raw,
-        size: Size(availableImage.width.toDouble(),availableImage.height.toDouble()),
-        planeData: availableImage.planes.map((currentPlane) => FirebaseVisionImagePlaneMetadata(
-            bytesPerRow: currentPlane.bytesPerRow,
-            height: currentPlane.height,
-            width: currentPlane.width
-        )).toList(),
-        rotation: ImageRotation.rotation90
-    );
+        size: Size(
+            availableImage.width.toDouble(), availableImage.height.toDouble()),
+        planeData: availableImage.planes
+            .map((currentPlane) => FirebaseVisionImagePlaneMetadata(
+                bytesPerRow: currentPlane.bytesPerRow,
+                height: currentPlane.height,
+                width: currentPlane.width))
+            .toList(),
+        rotation: ImageRotation.rotation90);
 
-    final FirebaseVisionImage visionImage = FirebaseVisionImage.fromBytes(availableImage.planes[0].bytes, metadata);
-    final TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
-    final VisionText visionText = await textRecognizer.processImage(visionImage);
+    final FirebaseVisionImage visionImage =
+        FirebaseVisionImage.fromBytes(availableImage.planes[0].bytes, metadata);
+    final TextRecognizer textRecognizer =
+        FirebaseVision.instance.textRecognizer();
+    final VisionText visionText =
+        await textRecognizer.processImage(visionImage);
 
-    print("--------------------visionText:${visionText.text}");
-    for (TextBlock block in visionText.blocks) {
-      // final Rectangle<int> boundingBox = block.boundingBox;
-      // final List<Point<int>> cornerPoints = block.cornerPoints;
-      print(block.text);
-      //final List<RecognizedLanguage> languages = block.recognizedLanguages;
-
-      for (TextLine line in block.lines) {
-        // Same getters as TextBlock
-        print(line.text);
-        for (TextElement element in line.elements) {
-          // Same getters as TextBlock
-          print(element.text);
-        }
-      }
-    }
-
-    return visionText?.text;
+    return visionText?.blocks;
   }
 
   Uint8List concatenatePlanes(List<Plane> planes) {

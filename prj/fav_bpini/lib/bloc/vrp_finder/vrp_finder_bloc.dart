@@ -1,20 +1,21 @@
 import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:favbpini/ocr/ocr.dart';
-import 'package:flutter/material.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+
 import './bloc.dart';
 
 class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
   CameraController _cameraController;
-  Timer _timer;
   bool _isScanBusy = false;
 
   bool _streamStarted = false;
 
   VrpFinderBloc();
 
-  factory VrpFinderBloc.dispatch() => VrpFinderBloc()..dispatch(LoadCamera());
+  factory VrpFinderBloc.dispatch() => VrpFinderBloc()..add(LoadCamera());
 
   @override
   VrpFinderState get initialState => CameraInitialState();
@@ -34,20 +35,13 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
           await controller.startImageStream((CameraImage availableImage) async {
             _streamStarted = true;
             if (_isScanBusy) {
-//              print("1.5 -------- isScanBusy, skipping...");
               return;
             }
 
-//            print("1 -------- isScanBusy = true");
-//            print("Camera.dart: " + availableImage.width.toString() + " - " + availableImage.height.toString());
             _isScanBusy = true;
 
-            String textDetected = await OcrManager.scanText(availableImage);
-
-            if (textDetected != null) {
-              debugPrint("textDetected: " + textDetected);
-              dispatch(TextFound(textDetected));
-            }
+            List<TextBlock> detectedBlocks =
+                await OcrManager.scanText(availableImage);
 
             _isScanBusy = false;
           });
@@ -55,9 +49,9 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
 
         yield CameraLoadedState(controller, false, "");
       }
-    } else if (event is TextFound && currentState is CameraLoadedState) {
-      yield CameraLoadedState((currentState as CameraLoadedState).controller,
-          true, event.textFound);
+    } else if (event is TextFound && state is CameraLoadedState) {
+      yield CameraLoadedState(
+          (state as CameraLoadedState).controller, true, event.textFound);
     }
   }
 
@@ -75,12 +69,12 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
     return _cameraController;
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    debugPrint("Bloc disposed");
-    _cameraController.stopImageStream();
-    _cameraController.dispose();
-    _timer.cancel();
-  }
+//  @override
+//  void dispose() {
+//    super.dispose();
+//    debugPrint("Bloc disposed");
+//    _cameraController.stopImageStream();
+//    _cameraController.dispose();
+//    _timer.cancel();
+//  }
 }

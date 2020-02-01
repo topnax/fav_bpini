@@ -24,7 +24,7 @@ dependencies:
     sdk: flutter
 
   camera:
-  firebase_ml_vision: 0.8.0
+  firebase_ml_vision:
   path_provider: ^0.4.1
   flutter_bloc:
   equatable:
@@ -56,7 +56,7 @@ flutter:
   #  - images/a_dot_ham.jpeg
 
   assets:
-  - lang/cz.json
+  - lang/cs.json
   - lang/en.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
