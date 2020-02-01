@@ -1,16 +1,33 @@
 import 'package:favbpini/app_localizations.dart';
 import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
 import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 
 class MainPage extends StatefulWidget {
+
+  TextBlock vrpBlock = null;
+
   @override
-  MainPageState createState() => MainPageState();
+  MainPageState createState() => MainPageState(vrpBlock: vrpBlock);
+
+  MainPage({vrpBlock});
 }
 
 class MainPageState extends State<MainPage>
     with SingleTickerProviderStateMixin {
   TabController _tabController;
+  TextBlock vrpBlock = null;
+  MainPageState({vrpBlock}){
+    _tabPages = <Widget>[
+      VrpPreviewPage(vrpBlock: vrpBlock),
+      Center(child: Icon(Icons.settings, size: 64.0, color: Colors.blue)),
+    ];
+    _tabs = <Tab>[
+      Tab(icon: Icon(Icons.format_list_bulleted)),
+      Tab(icon: Icon(Icons.settings)),
+    ];
+  }
 
   get versionNumber => 4;
 
@@ -21,15 +38,8 @@ class MainPageState extends State<MainPage>
         TabController(length: _tabPages.length, vsync: this, initialIndex: 0);
   }
 
-  final _tabPages = <Widget>[
-    VrpPreviewPage(),
-    Center(child: Icon(Icons.settings, size: 64.0, color: Colors.blue)),
-  ];
-  static const _tabs = <Tab>[
-    Tab(icon: Icon(Icons.format_list_bulleted)),
-    Tab(icon: Icon(Icons.settings)),
-  ];
-
+  var _tabPages;
+  var _tabs;
   @override
   void dispose() {
     _tabController.dispose();

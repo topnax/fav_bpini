@@ -25,6 +25,16 @@ class CameraInitialState extends VrpFinderState {
 }
 
 @immutable
+class VrpFoundState extends VrpFinderState {
+  final TextLine textLine;
+  final Size imageSize;
+
+  VrpFoundState(this.textLine, this.imageSize);
+  @override
+  List<Object> get props => [textLine, imageSize];
+}
+
+@immutable
 class CameraLoadedState extends VrpFinderState {
   final CameraController controller;
   final bool textFound;

@@ -1,13 +1,22 @@
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 
 class VrpPreviewPage extends StatefulWidget {
+  TextBlock vrpBlock = null;
+
+  VrpPreviewPage({vrpBlock});
+
   @override
   VrpPreviewPageState createState() => VrpPreviewPageState();
 }
 
 class VrpPreviewPageState extends State<VrpPreviewPage>
     with SingleTickerProviderStateMixin {
+
+  TextBlock vrpBlock = null;
   TextStyle _vrpStyle = TextStyle(fontSize: 60, fontFamily: "SfAtarianSystem");
+
+  VrpPreviewPageState({vrpBlock});
 
   BoxDecoration myBoxDecoration() {
     return BoxDecoration(
@@ -25,7 +34,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage>
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Center(child: _buildVrp("9H9", "7903")),
+          if (vrpBlock == null) Center(child: _buildVrp("9H9", "7903")) else Center(child: _buildVrp(vrpBlock.text.split(" ")[0], vrpBlock.text.split(" ")[1])),
           RaisedButton(
             shape: new RoundedRectangleBorder(
                 borderRadius: new BorderRadius.circular(18.0),),

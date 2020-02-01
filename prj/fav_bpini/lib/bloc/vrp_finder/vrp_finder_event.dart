@@ -15,6 +15,15 @@ class LoadCamera extends VrpFinderEvent {
   List<Object> get props => [];
 }
 
+class VrpFound extends VrpFinderEvent {
+  final TextLine textLine;
+  final Size imageSize;
+
+  VrpFound(this.textLine, this.imageSize);
+  @override
+  List<Object> get props => [textLine, imageSize];
+}
+
 class TextFound extends VrpFinderEvent {
   final String textFound;
   final List<TextBlock> detectedTextBlocks;

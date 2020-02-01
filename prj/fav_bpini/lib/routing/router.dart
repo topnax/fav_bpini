@@ -10,6 +10,8 @@ class Router {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => MainPage());
+      case '/found':
+        return MaterialPageRoute(builder: (_) => MainPage(vrpBlock: settings.arguments));
       case '/finder':
         return MaterialPageRoute(builder: (_) => VrpFinderPage());
 //      case '/camera':

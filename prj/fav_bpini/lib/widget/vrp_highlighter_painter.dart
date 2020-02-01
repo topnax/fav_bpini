@@ -12,33 +12,34 @@ class VrpHighlighterPainter extends CustomPainter {
     Paint p = Paint();
     p.color = Colors.red;
     p.strokeWidth = 2;
-    p.style = PaintingStyle.stroke;
+    p.style = PaintingStyle.fill;
 
     final textStyle = TextStyle(
-      color: Colors.blue,
-      fontSize: 14,
+      color: Colors.white,
+      fontSize: 12,
     );
 
     for (TextBlock textBlock in textBlocks) {
       var rect = Rect.fromLTWH(
-          textBlock.boundingBox.left * size.width / imageSize.width,
-          textBlock.boundingBox.top * size.height / imageSize.height,
-          textBlock.boundingBox.width * size.width / imageSize.width,
-          textBlock.boundingBox.height * size.height / imageSize.height);
+          textBlock.boundingBox.left * size.height / imageSize.width,
+          textBlock.boundingBox.top * size.width / imageSize.height,
+          textBlock.boundingBox.width * size.height / imageSize.width,
+          textBlock.boundingBox.height * size.width / imageSize.height);
 
-//      final textPainter = TextPainter(
-//        text: TextSpan(text: textBlock.text, style: textStyle),
-//        textDirection: TextDirection.ltr,
-//      );
-//      textPainter.layout(
-//        minWidth: rect.width,
-//        maxWidth: rect.height,
-//      );
-      debugPrint("${textBlock.boundingBox.width} ${textBlock.boundingBox.width} + ${imageSize.width} ${imageSize.height} + ${size.width} + ${size.height}");
+      final textPainter = TextPainter(
+        text: TextSpan(text: textBlock.text, style: textStyle),
+        textDirection: TextDirection.ltr,
+      );
+      var padding = 10;
+      textPainter.layout(
+        minWidth: 0,
+        maxWidth: rect.width ,
+      );
+      debugPrint("${textBlock.boundingBox.width} ${textBlock.boundingBox.height} + ${imageSize.width} ${imageSize.height} + ${size.width} + ${size.height}");
       canvas.drawRect(rect, p);
-//      textPainter.paint(canvas, Offset(rect.left, rect.top));
+      textPainter.paint(canvas, Offset(rect.left, rect.top));
     }
-    canvas.drawRect(Offset.zero & size, p);
+//    canvas.drawRect(Offset.zero & size, p);
   }
 
   @override
