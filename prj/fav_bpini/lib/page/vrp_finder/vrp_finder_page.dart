@@ -3,6 +3,8 @@ import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:favbpini/bloc/vrp_finder/bloc.dart';
+import 'package:favbpini/widget/vrp_highligter_painter.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -37,21 +39,25 @@ class VrpFinderPageState extends State<VrpFinderPage> {
         } else if (state is CameraLoadingState) {
           return Center(child: CircularProgressIndicator());
         } else if (state is CameraLoadedState) {
-          return _buildCameraPreviewStack(state);
+          return _buildCameraPreviewStack(state.controller, List<TextBlock>(), null);
+        } else if (state is CameraFoundText) {
+          debugPrint("new cft state");
+          return _buildCameraPreviewStack(state.controller, state.textBlocks, state.imageSize);
         }
         return Center(child: Text("No state found"));
       }),
     ));
   }
 
-  Widget _buildCameraPreviewStack(CameraLoadedState state) {
+  Widget _buildCameraPreviewStack(CameraController controller, List<TextBlock> foundBlocks, Size size) {
+    debugPrint("foundblocks size " + foundBlocks.length.toString());
     return Builder(
       builder: (context) {
         return Stack(
             alignment: AlignmentDirectional.topCenter,
             children: <Widget>[
               // fullscreen camera preview
-              CameraPreview(state.controller),
+              CameraPreview(controller),
 
               // blur previous layer
               BackdropFilter(
@@ -76,13 +82,13 @@ class VrpFinderPageState extends State<VrpFinderPage> {
               // center another camera preview with correct aspect ratio
               Center(
                 child: AspectRatio(
-                  aspectRatio: state.controller.value.aspectRatio,
+                  aspectRatio: controller.value.aspectRatio,
                   child: Stack(children: <Widget>[
-                    CameraPreview(state.controller),
-                    Center(child: Text("\$" + state.ocrText, style: TextStyle(color: Colors.white,fontSize: 16))),
+                    CameraPreview(controller)
                   ]),
                 ),
               ),
+              Center(child: AspectRatio(aspectRatio: controller.value.aspectRatio, child: CustomPaint(painter: VrpHighlighterPainter(foundBlocks, size),),)),
             ]);
       },
     );

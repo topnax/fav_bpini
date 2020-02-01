@@ -1,5 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:meta/meta.dart';
 
 @immutable
@@ -15,7 +17,7 @@ class CameraLoadingState extends VrpFinderState {
 
 @immutable
 class CameraInitialState extends VrpFinderState {
-   CameraInitialState();
+  CameraInitialState();
 
   @override
   List<Object> get props => [];
@@ -24,13 +26,23 @@ class CameraInitialState extends VrpFinderState {
 @immutable
 class CameraLoadedState extends VrpFinderState {
   final CameraController controller;
-  final bool textFound;
-  final String ocrText;
 
-  CameraLoadedState(this.controller, this.textFound, this.ocrText);
+  CameraLoadedState(this.controller);
 
   @override
-  List<Object> get props => [controller, textFound, ocrText];
+  List<Object> get props => [controller];
+}
+
+@immutable
+class CameraFoundText extends VrpFinderState {
+  final CameraController controller;
+  final List<TextBlock> textBlocks;
+  final Size imageSize;
+
+  CameraFoundText(this.controller, this.textBlocks, this.imageSize);
+
+  @override
+  List<Object> get props => [controller, textBlocks,imageSize];
 }
 
 @immutable
@@ -42,4 +54,3 @@ class CameraErrorState extends VrpFinderState {
   @override
   List<Object> get props => [errorDescription];
 }
-
