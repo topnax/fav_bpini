@@ -1,5 +1,7 @@
 import 'package:favbpini/page/main/main_page.dart';
 import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
+import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
+import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:flutter/material.dart';
 
 class Router {
@@ -12,6 +14,11 @@ class Router {
         return MaterialPageRoute(builder: (_) => MainPage());
       case '/finder':
         return MaterialPageRoute(builder: (_) => VrpFinderPage());
+      case '/found':
+        if (settings.arguments is VrpFinderResult){
+          return MaterialPageRoute(builder: (_) => VrpPreviewPage(settings.arguments));
+        }
+        return _errorRoute();
 //      case '/camera':
 //        return MaterialPageRoute(builder: (_) => TakePictureScreen(args));
 

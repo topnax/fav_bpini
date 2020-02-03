@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
-import 'package:favbpini/ocr/ocr.dart';
-import 'package:favbpini/utils/camera.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:favbpini/vrp_locator/vrp_locator.dart';
+import 'package:favbpini/vrp_locator/vrp_locator_impl.dart';
 import 'package:flutter/widgets.dart';
 
 import './bloc.dart';
@@ -16,17 +14,19 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
 
   bool _streamStarted = false;
 
+  VrpFinder _finder = VrpFinderImpl();
+
   VrpFinderBloc();
 
-  factory VrpFinderBloc.dispatch() =>
-      VrpFinderBloc()
-        ..add(LoadCamera());
+  factory VrpFinderBloc.dispatch() => VrpFinderBloc()..add(LoadCamera());
 
   @override
   VrpFinderState get initialState => CameraInitialState();
 
   @override
-  Stream<VrpFinderState> mapEventToState(VrpFinderEvent event,) async* {
+  Stream<VrpFinderState> mapEventToState(
+    VrpFinderEvent event,
+  ) async* {
     if (event is LoadCamera) {
       List<CameraDescription> cameras = await availableCameras();
       if (cameras.length < 1) {
@@ -38,48 +38,20 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
           await controller.startImageStream((CameraImage availableImage) async {
             _streamStarted = true;
             if (_isScanBusy) {
-              debugPrint("is busy");
+              debugPrint("scanner is busy");
               return;
             }
 
             _isScanBusy = true;
 
             debugPrint("Started scanning...");
-            List<TextBlock> detectedBlocks =
-            await OcrManager.scanText(availableImage);
-            debugPrint("Done...");
-            if (detectedBlocks.length > 0) {
-              var img = convertCameraImage(availableImage);
 
-              for (var textBlock in detectedBlocks) {
-                int total = 0;
-                int white = 0;
-                for (int i = textBlock.boundingBox.top.toInt(); i <
-                    textBlock.boundingBox.bottom.toInt(); i ++) {
-                  for (int j = textBlock.boundingBox.left.toInt(); j <
-                      textBlock.boundingBox.right.toInt(); j++) {
-                    var color = img.getPixel(j, i);
-                    int r = (color & 0xFF);
-                    int g = ((color >> 8) & 0xFF);
-                    int b = ((color >> 16) & 0xFF);
-                    var y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-                    white += y < 128 ? 0: 1;
-                    total++;
-                  }
-                }
-                debugPrint(textBlock.text + " - ratio " + (white.toDouble() / total.toDouble()).toString());
+            var result = await _finder.findVrpInImage(availableImage);
 
-              }
-
+            if (result != null) {
+              add(VrpFound(result));
+              close();
             }
-
-            int color = 0x00AAFFCC;
-
-
-            add(TextFound(
-                detectedBlocks,
-                Size(availableImage.width.toDouble(),
-                    availableImage.height.toDouble())));
 
             _isScanBusy = false;
             debugPrint("Not busy...");
@@ -89,8 +61,9 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
         yield CameraLoadedState(controller);
       }
     } else if (event is TextFound) {
-      yield CameraFoundText(
-          _cameraController, event.textBlocks, event.imageSize);
+      yield CameraFoundText(_cameraController, event.textBlocks, event.imageSize);
+    } else if (event is VrpFound) {
+      yield VrpFoundState(event.result);
     }
   }
 
@@ -106,6 +79,14 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
     }
     await _cameraController.initialize();
     return _cameraController;
+  }
+
+  @override
+  Future<Function> close() {
+    debugPrint("Bloc disposed");
+    _cameraController.stopImageStream();
+    _cameraController.dispose();
+    return super.close();
   }
 
 //  @override

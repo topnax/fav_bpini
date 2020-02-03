@@ -1,5 +1,7 @@
 import 'package:favbpini/app_localizations.dart';
+import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
+import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:flutter/material.dart';
 
 class MainPage extends StatefulWidget {
@@ -7,19 +9,17 @@ class MainPage extends StatefulWidget {
   MainPageState createState() => MainPageState();
 }
 
-class MainPageState extends State<MainPage>
-    with SingleTickerProviderStateMixin {
+class MainPageState extends State<MainPage> with SingleTickerProviderStateMixin {
   TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController =
-        TabController(length: _tabPages.length, vsync: this, initialIndex: 0);
+    _tabController = TabController(length: _tabPages.length, vsync: this, initialIndex: 0);
   }
 
   final _tabPages = <Widget>[
-    VrpPreviewPage(),
+    VrpPreviewPage(VrpFinderResult(VRP("3P8", "6768"))),
     Center(child: Icon(Icons.settings, size: 64.0, color: Colors.blue)),
   ];
   static const _tabs = <Tab>[
@@ -52,5 +52,4 @@ class MainPageState extends State<MainPage>
           ),
         ));
   }
-
 }

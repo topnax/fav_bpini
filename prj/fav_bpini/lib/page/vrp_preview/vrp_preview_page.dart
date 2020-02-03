@@ -1,13 +1,21 @@
+import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:flutter/material.dart';
 
 class VrpPreviewPage extends StatefulWidget {
+  final VrpFinderResult result;
+
   @override
-  VrpPreviewPageState createState() => VrpPreviewPageState();
+  VrpPreviewPageState createState() => VrpPreviewPageState(result);
+
+  VrpPreviewPage(this.result);
 }
 
-class VrpPreviewPageState extends State<VrpPreviewPage>
-    with SingleTickerProviderStateMixin {
-  TextStyle _vrpStyle = TextStyle(fontSize: 60, fontFamily: "SfAtarianSystem");
+class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProviderStateMixin {
+  final VrpFinderResult _result;
+
+  VrpPreviewPageState(this._result);
+
+  static const TextStyle _vrpStyle = TextStyle(fontSize: 60, fontFamily: "SfAtarianSystem");
 
   BoxDecoration myBoxDecoration() {
     return BoxDecoration(
@@ -25,10 +33,11 @@ class VrpPreviewPageState extends State<VrpPreviewPage>
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Center(child: _buildVrp("9H9", "7903")),
+          Center(child: _buildVrp(_result.foundVrp.firstPart, _result.foundVrp.secondPart)),
           RaisedButton(
             shape: new RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(18.0),),
+              borderRadius: new BorderRadius.circular(18.0),
+            ),
             onPressed: () {
               Navigator.of(context).pushNamed(
                 '/finder',
@@ -43,8 +52,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage>
                   padding: const EdgeInsets.only(right: 5.0),
                   child: Icon(Icons.add),
                 ),
-                Text("New VRP".toUpperCase(),
-                    style: TextStyle(fontSize: 20)),
+                Text("New VRP".toUpperCase(), style: TextStyle(fontSize: 20)),
               ],
             ),
           ),
@@ -55,10 +63,8 @@ class VrpPreviewPageState extends State<VrpPreviewPage>
 
   Widget _buildVrp(String firstPart, String secondPart) {
     return Container(
-      decoration: BoxDecoration(color:Colors.black, borderRadius: BorderRadius.circular(6)),
-      child: Padding(
-          padding: EdgeInsets.all(4),
-          child: _buildVrpInner(firstPart, secondPart)),
+      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(6)),
+      child: Padding(padding: EdgeInsets.all(4), child: _buildVrpInner(firstPart, secondPart)),
     );
   }
 
@@ -66,7 +72,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage>
     return Padding(
       padding: EdgeInsets.all(8),
       child: Padding(
-        padding: const EdgeInsets.only(top:10.0),
+        padding: const EdgeInsets.only(top: 10.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -95,9 +101,25 @@ class VrpPreviewPageState extends State<VrpPreviewPage>
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Container(
-            child: Padding(padding: EdgeInsets.symmetric(horizontal: 2),child: Column(children: <Widget>[Icon(Icons.star_border, color: Colors.yellow,),Padding(padding: EdgeInsets.symmetric(vertical: 8),),Text("CZ", style: TextStyle(color: Colors.white),)],),),
-
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 2),
+              child: Column(
+                children: <Widget>[
+                  Icon(
+                    Icons.star_border,
+                    color: Colors.yellow,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  Text(
+                    "CZ",
+                    style: TextStyle(color: Colors.white),
+                  )
+                ],
               ),
+            ),
+          ),
           Container(
               decoration: BoxDecoration(color: Colors.white),
               padding: EdgeInsets.only(top: 0),

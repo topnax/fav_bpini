@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
+import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:meta/meta.dart';
@@ -43,6 +44,16 @@ class CameraFoundText extends VrpFinderState {
 
   @override
   List<Object> get props => [controller, textBlocks,imageSize];
+}
+
+@immutable
+class VrpFoundState extends VrpFinderState {
+  final VrpFinderResult result;
+
+  VrpFoundState(this.result);
+
+  @override
+  List<Object> get props => [result];
 }
 
 @immutable
