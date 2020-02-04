@@ -18,76 +18,76 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
 
   VrpFinderBloc();
 
-  factory VrpFinderBloc.dispatch() => VrpFinderBloc()..add(LoadCamera());
+  factory VrpFinderBloc.dispatch() =>
+      VrpFinderBloc()
+        ..add(LoadCamera());
 
   @override
   VrpFinderState get initialState => CameraInitialState();
 
-  @override
-  Stream<VrpFinderState> mapEventToState(
-    VrpFinderEvent event,
-  ) async* {
-    if (event is LoadCamera) {
-      List<CameraDescription> cameras = await availableCameras();
-      if (cameras.length < 1) {
-        yield CameraErrorState("No camera found");
-      } else {
-        var controller = await _getCameraController();
+@override
+Stream<VrpFinderState> mapEventToState(VrpFinderEvent event,) async* {
+  if (event is LoadCamera) {
+    List<CameraDescription> cameras = await availableCameras();
+    if (cameras.length < 1) {
+      yield CameraErrorState("No camera found");
+    } else {
+      var controller = await _getCameraController();
 
-        if (!_streamStarted && controller.value.isInitialized) {
-          await controller.startImageStream((CameraImage availableImage) async {
-            _streamStarted = true;
-            if (_isScanBusy) {
-              debugPrint("scanner is busy");
-              return;
-            }
+      if (!_streamStarted && controller.value.isInitialized) {
+        await controller.startImageStream((CameraImage availableImage) async {
+          _streamStarted = true;
+          if (_isScanBusy) {
+//            debugPrint("scanner is busy");
+            return;
+          }
 
-            _isScanBusy = true;
+          _isScanBusy = true;
 
-            debugPrint("Started scanning...");
+//          debugPrint("Started scanning...");
 
-            var result = await _finder.findVrpInImage(availableImage);
+          var result = await _finder.findVrpInImage(availableImage);
 
-            if (result != null) {
-              add(VrpFound(result));
-              close();
-            }
+          if (result != null) {
+            add(VrpFound(result));
+            close();
+          }
 
-            _isScanBusy = false;
-            debugPrint("Not busy...");
-          });
-        }
-
-        yield CameraLoadedState(controller);
+          _isScanBusy = false;
+//          debugPrint("Not busy...");
+        });
       }
-    } else if (event is TextFound) {
-      yield CameraFoundText(_cameraController, event.textBlocks, event.imageSize);
-    } else if (event is VrpFound) {
-      yield VrpFoundState(event.result);
-    }
-  }
 
-  Future<CameraController> _getCameraController() async {
-    if (_cameraController == null) {
-      List<CameraDescription> cameras = await availableCameras();
-      _cameraController = CameraController(
-        // Get a specific camera from the list of available cameras
-        cameras[0],
-        // Define the resolution to use
-        ResolutionPreset.high,
-      );
+      yield CameraLoadedState(controller);
     }
-    await _cameraController.initialize();
-    return _cameraController;
+  } else if (event is TextFound) {
+    yield CameraFoundText(_cameraController, event.textBlocks, event.imageSize);
+  } else if (event is VrpFound) {
+    yield VrpFoundState(event.result);
   }
+}
 
-  @override
-  Future<Function> close() {
-    debugPrint("Bloc disposed");
-    _cameraController.stopImageStream();
-    _cameraController.dispose();
-    return super.close();
+Future<CameraController> _getCameraController() async {
+  if (_cameraController == null) {
+    List<CameraDescription> cameras = await availableCameras();
+    _cameraController = CameraController(
+      // Get a specific camera from the list of available cameras
+      cameras[0],
+      // Define the resolution to use
+      ResolutionPreset.high,
+    );
   }
+  await _cameraController.initialize();
+  return _cameraController;
+}
+
+@override
+Future<void> close() {
+  debugPrint("Bloc disposed");
+  _cameraController.stopImageStream();
+  _cameraController.dispose();
+  return super.close();
+}
 
 //  @override
 //  void dispose() {

@@ -1,8 +1,10 @@
 import 'package:favbpini/app_localizations.dart';
 import 'package:favbpini/model/vrp.dart';
+import 'package:favbpini/page/vrp_list/vrp_list_page.dart';
 import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
 import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class MainPage extends StatefulWidget {
   @override
@@ -15,17 +17,10 @@ class MainPageState extends State<MainPage> with SingleTickerProviderStateMixin 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabPages.length, vsync: this, initialIndex: 0);
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.blueAccent.withOpacity(0.5),
+    ));
   }
-
-  final _tabPages = <Widget>[
-    VrpPreviewPage(VrpFinderResult(VRP("3P8", "6768"))),
-    Center(child: Icon(Icons.settings, size: 64.0, color: Colors.blue)),
-  ];
-  static const _tabs = <Tab>[
-    Tab(icon: Icon(Icons.format_list_bulleted)),
-    Tab(icon: Icon(Icons.settings)),
-  ];
 
   @override
   void dispose() {
@@ -36,20 +31,40 @@ class MainPageState extends State<MainPage> with SingleTickerProviderStateMixin 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context).translate("app_title")),
-          centerTitle: true,
+        body: Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: VrpListPage(),
         ),
-        body: TabBarView(
-          controller: _tabController,
-          children: _tabPages,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.of(context).pushNamed(
+              '/finder',
+            );
+          },
+          tooltip: 'New VRP',
+          backgroundColor: Colors.orange,
+          child: Icon(Icons.add),
+          elevation: 2.0,
         ),
-        bottomNavigationBar: Material(
-          color: Colors.blue,
-          child: TabBar(
-            tabs: _tabs,
-            controller: _tabController,
-          ),
-        ));
+        bottomNavigationBar: BottomAppBar(
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.menu),
+                  color: Colors.white,
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: Icon(Icons.search),
+                  color: Colors.white,
+                  onPressed: () {},
+                ),
+              ],
+            ),
+            color: Colors.blueAccent,
+            shape: CircularNotchedRectangle()));
   }
 }

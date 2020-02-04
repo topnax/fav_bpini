@@ -16,22 +16,26 @@ class VrpFinderImpl implements VrpFinder {
 
     if (detectedBlocks.length > 0) {
       var img = convertCameraImage(image);
-      detectedBlocks = detectedBlocks
-          .where(
-              (tb) =>
-          getWhiteToBlackRatio(tb.boundingBox, img) > vrpWTBThreshold)
-          .toList();
+
+      detectedBlocks.forEach((tb) => print("${getWhiteToBlackRatio(tb.boundingBox, img)} - ${tb.text}"));
+      
+      detectedBlocks =
+          detectedBlocks.where((tb) => getWhiteToBlackRatio(tb.boundingBox, img) > vrpWTBThreshold).toList();
+      
+      
+
+      findSuitableTextBlock(detectedBlocks);
+
     }
 
-    var result = VrpFinderResult(VRP("3P6","6768"), rect: Rect.fromLTWH(10,10, 50, 10));
+    var result = VrpFinderResult(VRP("3P6", "6768"), rect: Rect.fromLTWH(10, 10, 50, 10));
 
-    return Future<VrpFinderResult>.value(result);
+    return Future<VrpFinderResult>.value(null);
   }
 
-  TextBlock findSuitableTextBlocks(List<TextBlock> textBlocks) {
+  TextBlock findSuitableTextBlock(List<TextBlock> textBlocks) {
+    textBlocks.where((tb) => tb.text.replaceAll(" ", "").length == 7).forEach((tb) => print("${tb.text}, lines ${tb.lines.length}"));
+
 
   }
-
-
-
 }
