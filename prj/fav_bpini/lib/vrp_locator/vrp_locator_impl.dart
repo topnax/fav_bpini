@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:camera/camera.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/ocr/ocr.dart';
@@ -18,24 +16,21 @@ class VrpFinderImpl implements VrpFinder {
       var img = convertCameraImage(image);
 
       detectedBlocks.forEach((tb) => print("${getWhiteToBlackRatio(tb.boundingBox, img)} - ${tb.text}"));
-      
+
       detectedBlocks =
           detectedBlocks.where((tb) => getWhiteToBlackRatio(tb.boundingBox, img) > vrpWTBThreshold).toList();
-      
-      
 
       findSuitableTextBlock(detectedBlocks);
-
     }
 
     var result = VrpFinderResult(VRP("3P6", "6768"), rect: Rect.fromLTWH(10, 10, 50, 10));
 
-    return Future<VrpFinderResult>.value(null);
+    return Future<VrpFinderResult>.value(result);
   }
 
   TextBlock findSuitableTextBlock(List<TextBlock> textBlocks) {
-    textBlocks.where((tb) => tb.text.replaceAll(" ", "").length == 7).forEach((tb) => print("${tb.text}, lines ${tb.lines.length}"));
-
-
+    textBlocks
+        .where((tb) => tb.text.replaceAll(" ", "").length == 7)
+        .forEach((tb) => print("${tb.text}, lines ${tb.lines.length}"));
   }
 }

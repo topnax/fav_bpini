@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:favbpini/bloc/vrp_finder/bloc.dart';
-import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:favbpini/widget/vrp_highligter_painter.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
