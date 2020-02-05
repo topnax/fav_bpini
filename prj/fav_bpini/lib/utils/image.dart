@@ -51,7 +51,7 @@ double getWhiteToBlackRatio(Rect boundingBox, imglib.Image img) {
       int g = ((color >> 8) & 0xFF);
       int b = ((color >> 16) & 0xFF);
       var y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-      white += y < 128 ? 0 : 1;
+      white += y < 200 ? 0 : 1;
       total++;
     }
   }

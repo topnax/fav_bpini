@@ -44,7 +44,7 @@ Stream<VrpFinderState> mapEventToState(VrpFinderEvent event,) async* {
 
           _isScanBusy = true;
 
-//          debugPrint("Started scanning...");
+          debugPrint("Started scanning...");
 
           var result = await _finder.findVrpInImage(availableImage);
 

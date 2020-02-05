@@ -50,7 +50,7 @@ class VrpFinderPageState extends State<VrpFinderPage> {
             debugPrint("new cft state");
             return _buildCameraPreviewStack(state.controller, state.textBlocks, state.imageSize);
           }
-          return Center(child: Text("No state found"));
+          return Center(child: CircularProgressIndicator());
         }),
       ),
     ));
