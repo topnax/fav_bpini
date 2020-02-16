@@ -4,12 +4,14 @@ import 'package:camera/camera.dart';
 import 'package:favbpini/model/vrp.dart';
 
 abstract class VrpFinder {
-  Future<VrpFinderResult>findVrpInImage(CameraImage image);
+  Future<List<VrpFinderResult>> findVrpInImage(CameraImage image);
 }
 
 class VrpFinderResult {
   final VRP foundVrp;
   final Rect rect;
+  final double wtb;
+  final String meta;
 
-  VrpFinderResult(this.foundVrp, {this.rect});
+  VrpFinderResult(this.foundVrp, this.wtb, this.meta, {this.rect});
 }

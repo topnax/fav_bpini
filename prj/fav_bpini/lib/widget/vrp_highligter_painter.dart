@@ -1,48 +1,52 @@
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 
+import '../vrp_locator/vrp_locator.dart';
+
 class VrpHighlighterPainter extends CustomPainter {
   final Size imageSize;
-  final List<TextBlock> textBlocks;
+  final List<VrpFinderResult> results;
 
-  VrpHighlighterPainter(this.textBlocks, this.imageSize);
+  VrpHighlighterPainter(this.results, this.imageSize);
 
   @override
   void paint(Canvas canvas, Size size) {
     Paint p = Paint();
     p.color = Colors.red;
     p.strokeWidth = 2;
-    p.style = PaintingStyle.fill;
+    p.style = PaintingStyle.stroke;
 
     final textStyle = TextStyle(
       color: Colors.white,
       fontSize: 12,
     );
 
-    for (TextBlock textBlock in textBlocks) {
+    for (VrpFinderResult result in results) {
       var padding = 0.05;
 
-      var horizontalPadding = imageSize.width * padding;
-      var verticalPadding = imageSize.height * padding;
+//      var horizontalPadding = imageSize.width * padding;
+//      var verticalPadding = imageSize.height * padding;
+      var horizontalPadding = 0;
+      var verticalPadding = 0;
 
       var rect = Rect.fromLTWH(
-          (textBlock.boundingBox.left - horizontalPadding) *
+          (result.rect.left - horizontalPadding) *
               size.height /
               imageSize.width,
-          (textBlock.boundingBox.top - verticalPadding) * size.width / imageSize.height,
-          (textBlock.boundingBox.width + horizontalPadding) * size.height / imageSize.width,
-          (textBlock.boundingBox.height + verticalPadding) * size.width / imageSize.height);
+          (result.rect.top - verticalPadding) * size.width / imageSize.height,
+          (result.rect.width + horizontalPadding) * size.height / imageSize.width,
+          (result.rect.height + verticalPadding) * size.width / imageSize.height);
 
       final textPainter = TextPainter(
-        text: TextSpan(text: textBlock.text, style: textStyle),
+        text: TextSpan(text: result.wtb.toString(), style: textStyle),
         textDirection: TextDirection.ltr,
       );
       textPainter.layout(
         minWidth: 0,
         maxWidth: rect.width,
       );
-      debugPrint(
-          "${textBlock.boundingBox.width} ${textBlock.boundingBox.height} + ${imageSize.width} ${imageSize.height} + ${size.width} + ${size.height}");
+//      debugPrint(
+//          "${result.boundingBox.width} ${result.boundingBox.height} + ${imageSize.width} ${imageSize.height} + ${size.width} + ${size.height}");
       canvas.drawRect(rect, p);
       textPainter.paint(canvas, Offset(rect.left, rect.top));
     }
@@ -52,7 +56,7 @@ class VrpHighlighterPainter extends CustomPainter {
   @override
   bool shouldRepaint(VrpHighlighterPainter oldDelegate) {
     debugPrint(
-        "shouldRepaint - " + (oldDelegate.textBlocks != textBlocks).toString());
-    return oldDelegate.textBlocks != textBlocks;
+        "shouldRepaint - " + (oldDelegate.results != results).toString());
+    return oldDelegate.results != results;
   }
 }

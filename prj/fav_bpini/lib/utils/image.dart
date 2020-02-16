@@ -81,3 +81,27 @@ double getWhiteToBlackRatio(Rect boundingBox, imglib.Image img) {
 //        (white.toDouble() / total.toDouble()).toString());
 //  }
 }
+
+
+int getBht(Rect boundingBox, imglib.Image img) {
+
+  int total = 0;
+  int white = 0;
+  for (int i = max(boundingBox.top.toInt(), 0);
+  i < min(boundingBox.bottom.toInt(), img.height);
+  i++) {
+    for (int j = max(boundingBox.left.toInt(), 0);
+    j < min(boundingBox.right.toInt(), img.width);
+    j++) {
+      var color = img.getPixel(j, i);
+      int r = (color & 0xFF);
+      int g = ((color >> 8) & 0xFF);
+      int b = ((color >> 16) & 0xFF);
+      var y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      white += y < 200 ? 0 : 1;
+      total++;
+    }
+  }
+
+  return (white.toDouble() / total.toDouble());
+}

@@ -8,6 +8,8 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../vrp_locator/vrp_locator.dart';
+
 class VrpFinderPage extends StatefulWidget {
   @override
   VrpFinderPageState createState() => VrpFinderPageState();
@@ -45,10 +47,12 @@ class VrpFinderPageState extends State<VrpFinderPage> {
           } else if (state is CameraLoadingState) {
             return Center(child: CircularProgressIndicator());
           } else if (state is CameraLoadedState) {
-            return _buildCameraPreviewStack(state.controller, List<TextBlock>(), null);
+            return _buildCameraPreviewStack(state.controller, List<VrpFinderResult>(), null);
           } else if (state is CameraFoundText) {
             debugPrint("new cft state");
-            return _buildCameraPreviewStack(state.controller, state.textBlocks, state.imageSize);
+            return _buildCameraPreviewStack(state.controller, List<VrpFinderResult>(), state.imageSize);
+          } else if (state is ResultsFoundState) {
+            return _buildCameraPreviewStack(state.controller, state.results, state.imageSize);
           }
           return Center(child: CircularProgressIndicator());
         }),
@@ -56,8 +60,8 @@ class VrpFinderPageState extends State<VrpFinderPage> {
     ));
   }
 
-  Widget _buildCameraPreviewStack(CameraController controller, List<TextBlock> foundBlocks, Size size) {
-    debugPrint("foundblocks size " + foundBlocks.length.toString());
+  Widget _buildCameraPreviewStack(CameraController controller, List<VrpFinderResult> results, Size size) {
+    debugPrint("foundblocks size " + results.length.toString());
     return Builder(
       builder: (context) {
         return Stack(alignment: AlignmentDirectional.topCenter, children: <Widget>[
@@ -95,7 +99,7 @@ class VrpFinderPageState extends State<VrpFinderPage> {
               child: AspectRatio(
             aspectRatio: controller.value.aspectRatio,
             child: CustomPaint(
-              painter: VrpHighlighterPainter(foundBlocks, size),
+              painter: VrpHighlighterPainter(results, size),
             ),
           )),
         ]);

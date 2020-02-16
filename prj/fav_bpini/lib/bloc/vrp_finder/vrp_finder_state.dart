@@ -43,7 +43,7 @@ class CameraFoundText extends VrpFinderState {
   CameraFoundText(this.controller, this.textBlocks, this.imageSize);
 
   @override
-  List<Object> get props => [controller, textBlocks,imageSize];
+  List<Object> get props => [controller, textBlocks, imageSize];
 }
 
 @immutable
@@ -54,6 +54,18 @@ class VrpFoundState extends VrpFinderState {
 
   @override
   List<Object> get props => [result];
+}
+
+@immutable
+class ResultsFoundState extends VrpFinderState {
+  final CameraController controller;
+  final Size imageSize;
+  final List<VrpFinderResult> results;
+
+  ResultsFoundState(this.results, this.imageSize, this.controller);
+
+  @override
+  List<Object> get props => [results];
 }
 
 @immutable

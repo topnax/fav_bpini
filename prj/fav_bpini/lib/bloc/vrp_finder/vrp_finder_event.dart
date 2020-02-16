@@ -36,3 +36,14 @@ class VrpFound extends VrpFinderEvent {
   @override
   List<Object> get props => [result];
 }
+
+@immutable
+class VrpResultsFound extends VrpFinderEvent {
+  final List<VrpFinderResult> results;
+  final Size size;
+
+  VrpResultsFound(this.results, this.size);
+
+  @override
+  List<Object> get props => [results, size];
+}
