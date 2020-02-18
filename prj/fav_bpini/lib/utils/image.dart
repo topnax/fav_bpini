@@ -52,11 +52,14 @@ double getWhiteToBlackRatio(Rect boundingBox, imglib.Image img) {
   return (white.toDouble() / total.toDouble());
 }
 
-imglib.Image convertImageToGrayScale(imglib.Image img) {
-  imglib.Image grayScaleImage = imglib.Image(img.width, img.height);
-  for (int i = 0; i < img.height; i++) {
-    for (int j = 0; j < img.width; j++) {
-      var color = img.getPixel(j, i);
+imglib.Image convertImageToGrayScale(imglib.Image image, {Rect area}) {
+  if (area == null) {
+    area = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+  }
+  imglib.Image grayScaleImage = imglib.Image(image.width, image.height);
+  for (int i = 0; i < image.height; i++) {
+    for (int j = 0; j < image.width; j++) {
+      var color = image.getPixel(j, i);
       int r = (color & 0xFF);
       int g = ((color >> 8) & 0xFF);
       int b = ((color >> 16) & 0xFF);
@@ -79,15 +82,15 @@ imglib.Image getBlackAndWhiteImage(imglib.Image image, {Rect area}) {
     area = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
   }
   debugPrint("Just a grayscale image");
-//  return image;
-  var grayScale = convertImageToGrayScale(image);
-//  return grayScale;
+
+  var grayScale = convertImageToGrayScale(image, area);
+
   var bht = getBht(getGrayScaleHistogram(grayScale));
   debugPrint("bht is ${bht}");
 
-  var bw = imglib.Image(image.width, image.height);
-  for (int i = 0; i < grayScale.height; i++) {
-    for (int j = 0; j < grayScale.width; j++) {
+  var bw = imglib.Image(area.width, area.height);
+  for (int i = area.top.toInt(); i < area.height.toInt(); i++) {
+    for (int j = area.left.toInt(); j < area.width.toInt(); j++) {
       bw.setPixel(j, i, (grayScale.getPixel(j, i) & 0xFF)  > bht ? 0xFFFFFFFF : 0xFF000000);
     }
   }
