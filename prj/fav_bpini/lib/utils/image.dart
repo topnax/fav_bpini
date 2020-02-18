@@ -53,8 +53,7 @@ double getWhiteToBlackRatio(Rect boundingBox, imglib.Image img) {
 }
 
 imglib.Image convertImageToGrayScale(imglib.Image img) {
-  int total = 0;
-  int white = 0;
+  imglib.Image grayScaleImage = imglib.Image(img.width, img.height);
   for (int i = 0; i < img.height; i++) {
     for (int j = 0; j < img.width; j++) {
       var color = img.getPixel(j, i);
@@ -65,16 +64,25 @@ imglib.Image convertImageToGrayScale(imglib.Image img) {
       var newColor = y;
       newColor += (y >> 8);
       newColor += (y >> 16);
-      img.setPixel(j,i, newColor)
+      grayScaleImage.setPixel(j, i, newColor);
     }
   }
 
-  return (white.toDouble() / total.toDouble());
+  return grayScaleImage;
 }
 
-imglib.Image getBlackAndWhiteImage(imglib.Image image ) {
-  var bht = getBht(getGrayScaleHistogram(image));
+imglib.Image getBlackAndWhiteImage(imglib.Image image) {
+  var grayScale = convertImageToGrayScale(image);
+  var bht = getBht(getGrayScaleHistogram(grayScale));
 
+  var bw = imglib.Image(image.width, image.height);
+  for (int i = 0; i < grayScale.height; i++) {
+    for (int j = 0; j < grayScale.width; j++) {
+      bw.setPixel(j, i, grayScale.getPixel(j, i) > bht ? 0xFFFFFF : 0);
+    }
+  }
+
+  return bw;
 }
 
 List<int> getGrayScaleHistogram(imglib.Image image) {
