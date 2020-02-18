@@ -60,10 +60,13 @@ imglib.Image convertImageToGrayScale(imglib.Image img) {
       int r = (color & 0xFF);
       int g = ((color >> 8) & 0xFF);
       int b = ((color >> 16) & 0xFF);
+      int a = ((color >> 24) & 0xFF);
       var y = (0.2126 * r + 0.7152 * g + 0.0722 * b).toInt();
       var newColor = y;
-      newColor += (y >> 8);
-      newColor += (y >> 16);
+      newColor += (y << 8);
+      newColor += (y << 16);
+      newColor += (0xFF << 24);
+
       grayScaleImage.setPixel(j, i, newColor);
     }
   }
@@ -71,14 +74,21 @@ imglib.Image convertImageToGrayScale(imglib.Image img) {
   return grayScaleImage;
 }
 
-imglib.Image getBlackAndWhiteImage(imglib.Image image) {
+imglib.Image getBlackAndWhiteImage(imglib.Image image, {Rect area}) {
+  if (area == null) {
+    area = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+  }
+  debugPrint("Just a grayscale image");
+//  return image;
   var grayScale = convertImageToGrayScale(image);
+//  return grayScale;
   var bht = getBht(getGrayScaleHistogram(grayScale));
+  debugPrint("bht is ${bht}");
 
   var bw = imglib.Image(image.width, image.height);
   for (int i = 0; i < grayScale.height; i++) {
     for (int j = 0; j < grayScale.width; j++) {
-      bw.setPixel(j, i, grayScale.getPixel(j, i) > bht ? 0xFFFFFF : 0);
+      bw.setPixel(j, i, (grayScale.getPixel(j, i) & 0xFF)  > bht ? 0xFFFFFFFF : 0xFF000000);
     }
   }
 
@@ -106,7 +116,7 @@ int getBht(List<int> histogram, {int minCount = 5}) {
     start++;
   }
 
-  var end = histogram[histogram.length - 1];
+  var end = histogram.length - 1;
   while (histogram[end] < minCount) {
     end--;
   }
