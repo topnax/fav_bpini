@@ -14,6 +14,79 @@ const vrpWTBThreshold = 0.55;
 
 class VrpFinderImpl implements VrpFinder {
   Future<List<VrpFinderResult>> findVrpInImage(CameraImage image) async {
+    List<TextBlock> detectedBlocks = await OcrManager.scanText(image);
+
+    var img = convertCameraImage(image);
+
+    var results = detectedBlocks
+        // filter text blocks that are within the image
+        .where((tb) => _isRectangleWithinImage(tb.boundingBox, img.width, img.height))
+//        // map text blocks to results
+        .map((tb) {
+          if (tb.lines.length == 1) {
+            // one line VRP
+            if (tb.lines[0].elements.length == 2 && tb.lines[0].elements[0].text.length == 3) {
+              var el1 = tb.lines[0].elements[0].boundingBox;
+              var el2 = tb.lines[0].elements[1].boundingBox;
+
+              var diff = (el2.left + el2.width) - (el1.left + el1.width);
+
+              var diffRatio = diff / tb.boundingBox.width;
+
+              var diffRatioUpper = 0.0;
+              var diffRatioLower= 20.0;
+
+              if (tb.lines[0].elements[1].text.length == 5) {
+                diffRatioUpper = 0.7;
+                diffRatioLower = 0.55;
+              } else if (tb.lines[0].elements[1].text.length == 4) {
+                diffRatioUpper = 0.65;
+                diffRatioLower = 0.51;
+              }
+
+              if (diffRatio > diffRatioLower && diffRatio < diffRatioUpper) {
+                var bw = getBlackAndWhiteImage(img, area: tb.boundingBox);
+                return VrpFinderResult(VRP(tb.lines[0].elements[0].text, tb.lines[0].elements[1].text),
+                    bw.getWhiteBalance().toDouble(), "diffRatio=${diff / tb.boundingBox.width}",
+                    rect: tb.boundingBox);
+              } else {
+                var bw = getBlackAndWhiteImage(img, area: tb.boundingBox);
+                return VrpFinderResult(null,
+                    bw.getWhiteBalance().toDouble(), "diffRatio=${diff / tb.boundingBox.width}",
+                    rect: tb.boundingBox);
+              }
+            }
+          }
+          return VrpFinderResult(null, 1.0, "whole text{${tb.text}}", rect: tb.boundingBox);
+        })
+        .where((result) => result.wtb > 120)
+        // filter results by white balance
+//        .map((tb)  {
+//      return [getBlackAndWhiteImage(img, area: tb.boundingBox).getWhiteBalance() > 120, tb];
+//    })
+//      .where((item){
+//        return item[0];
+//    })
+//    .where((item){
+//      var tb = item[1];
+//
+//      if (tb is TextBlock) {
+//        if (tb.lines.length == 0) {
+//          // one line only
+//          if
+//        }
+//      } else {
+//        debugPrint("Not a TextBlock");
+//      }
+//      return false;
+//    })
+        .toList();
+    return Future<List<VrpFinderResult>>.value(results);
+  }
+}
+
+class VrpFinderImpl2 implements VrpFinder {
+  Future<List<VrpFinderResult>> findVrpInImage(CameraImage image) async {
     var start = DateTime.now();
     List<TextBlock> detectedBlocks = await OcrManager.scanText(image);
     debugPrint("scanText took:${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch)}ms");
@@ -22,83 +95,29 @@ class VrpFinderImpl implements VrpFinder {
     var img = convertCameraImage(image);
     debugPrint("convert image took:${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch)}ms");
 
-    var results = detectedBlocks.map((tb) {
+    start = DateTime.now();
 
-      var start = DateTime.now();
-      var bw = getBlackAndWhiteImage(img, area: tb.boundingBox);
-      debugPrint("getBlackAndWhite took:${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch)}ms");
+    var bw = getBlackAndWhiteImage(img);
 
-//      var file = await _localFile;
-//      debugPrint("local file is: " + file.path);
-//      file..writeAsBytesSync(imglib.encodePng(bw, level: 1));
-
-      var wtb = getWhiteToBlackRatio(tb.boundingBox, img);
-      return VrpFinderResult(VRP("", ""), bw.getWhiteBalance().toDouble(),
-          "whole text{${tb.text}}, line count: ${tb.lines.length}, 1st line element cound: ${tb.lines[0].elements.length}", rect: tb.boundingBox);
-    }).toList();
+    var results = detectedBlocks
+        .where((tb) => _isRectangleWithinImage(tb.boundingBox, img.width, img.height))
+        .map((tb) {
+          return VrpFinderResult(
+              VRP("", ""), getImageCutout(bw, tb.boundingBox).getWhiteBalance().toDouble(), "whole text{${tb.text}}",
+              rect: tb.boundingBox);
+        })
+        .where((result) => result.wtb > 0)
+        .toList();
     return Future<List<VrpFinderResult>>.value(results);
-//
-//    if (detectedBlocks.length > 0) {
-//      var img = convertCameraImage(image
-//      );
-//
-////      detectedBlocks.forEach((tb) => print("${getWhiteToBlackRatio(tb.boundingBox, img)} - ${tb.text}"));
-//
-//      detectedBlocks = detectedBlocks.where((tb) {
-//        var wtb = getWhiteToBlackRatio(tb.boundingBox, img
-//        );
-//        print("${wtb} - ${tb.text} stop"
-//        );
-//        return wtb > vrpWTBThreshold;
-//      }
-//      ).toList();
-//
-//      var results = findSuitableTextBlock(detectedBlocks
-//      );
-//
-//      return results
   }
-
-//    var result = VrpFinderResult(VRP("3P6", "6768"), rect: Rect.fromLTWH(10, 10, 50, 10));
-//  var result = null;
-//
-//  return
-//
-//  Future<VrpFinderResult>
-//
-//      .
-//
-//  value
-//
-//  (
-//
-//  null
-//
-//  );
 }
 
-//VrpFinderResult findSuitableTextBlock(List<TextBlock> textBlocks) {
-//  var results = textBlocks.where((tb) =>
-//  tb.text
-//      .replaceAll(" ", ""
-//  )
-//      .length == 7
-//  ).map((tb) {
-//    var plateText = tb.text.replaceAll(" ", ""
-//    );
-//    return VrpFinderResult(VRP(plateText.substring(0, 3
-//    ), plateText.substring(2, 6
-//    )
-//    ), rect: tb.boundingBox
-//    );
-//  }
-//  ).toList();
-//  if (results.length > 0) {
-//    return results[0];
-//  } else {
-//    return null;
-//  }
-//}}
+bool _isRectangleWithinImage(Rect rect, int width, int height) {
+  return rect.left >= 0 &&
+      rect.top >= 0 &&
+      rect.left + rect.width.toInt() < width &&
+      rect.top + rect.height.toInt() < height;
+}
 
 Future<String> get _localPath async {
   final directory = await getExternalStorageDirectory();

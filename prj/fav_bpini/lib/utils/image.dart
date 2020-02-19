@@ -82,6 +82,8 @@ imglib.Image getBlackAndWhiteImage(imglib.Image image, {Rect area}) {
     area = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
   }
   debugPrint("Just a grayscale image");
+  debugPrint(
+      "for bb of ${area.top.toString()}, ${area.left.toString()}, ${area.width.toString()},${area.height.toString()}");
 
   var grayScale = convertImageToGrayScale(image, area: area);
 //  return grayScale;
@@ -91,10 +93,19 @@ imglib.Image getBlackAndWhiteImage(imglib.Image image, {Rect area}) {
   var bw = imglib.Image(area.width.toInt(), area.height.toInt());
   for (int i = 0; i < area.height.toInt(); i++) {
     for (int j = 0; j < area.width.toInt(); j++) {
-      bw.setPixel(j, i,
-          (grayScale.getPixel(j, i) & 0xFF) > bht ? 0xFFFFFFFF : 0xFF000000);
+      bw.setPixel(j, i, (grayScale.getPixel(j, i) & 0xFF) > bht ? 0xFFFFFFFF : 0xFF000000);
     }
+  }
 
+  return bw;
+}
+
+imglib.Image getImageCutout(imglib.Image image, Rect area) {
+  var bw = imglib.Image(area.width.toInt(), area.height.toInt());
+  for (int i = area.top.toInt(); i < area.top.toInt() + area.height.toInt(); i++) {
+    for (int j = area.left.toInt(); j < area.left.toInt() + area.width.toInt(); j++) {
+      bw.setPixel(j - area.left.toInt(), i - area.top.toInt(), (image.getPixel(j, i)));
+    }
   }
 
   return bw;
@@ -117,7 +128,7 @@ List<int> getGrayScaleHistogram(imglib.Image image) {
 
 int getBht(List<int> histogram, {int minCount = 5}) {
   var start = 0;
-  while (histogram[start] < minCount && start < histogram.length -1) {
+  while (histogram[start] < minCount && start < histogram.length - 1) {
     start++;
   }
 
@@ -132,7 +143,8 @@ int getBht(List<int> histogram, {int minCount = 5}) {
 
   //     h_c = int(round(np.average(np.linspace(0, 2 ** 8 - 1, n_bins), weights=hist)))
   int center = ((start + end) / 2).floor();
-  debugPrint("start=${start.toString()}, end=${end.toString()}, center=${center.toString()}, h.len=${histogram.length.toString()}");
+  debugPrint(
+      "start=${start.toString()}, end=${end.toString()}, center=${center.toString()}, h.len=${histogram.length.toString()}");
   int weightLeft = start != center ? histogram.getRange(start, center).reduce((a, b) => a + b) : 0;
   int weightRight = center != end + 1 ? histogram.getRange(center, end + 1).reduce((a, b) => a + b) : 0;
 
