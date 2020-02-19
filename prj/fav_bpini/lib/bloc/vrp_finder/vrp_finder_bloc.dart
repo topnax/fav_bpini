@@ -55,7 +55,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
 //            close();
 //          }
 
-            await Future.delayed(Duration(seconds: 5));
+//            await Future.delayed(Duration(seconds: 5));
 
             _isScanBusy = false;
 //          debugPrint("Not busy...");

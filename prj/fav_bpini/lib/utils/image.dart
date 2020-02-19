@@ -56,21 +56,21 @@ imglib.Image convertImageToGrayScale(imglib.Image image, {Rect area}) {
   if (area == null) {
     area = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
   }
-  imglib.Image grayScaleImage = imglib.Image(image.width, image.height);
-  for (int i = 0; i < image.height; i++) {
-    for (int j = 0; j < image.width; j++) {
+
+  imglib.Image grayScaleImage = imglib.Image(area.width.toInt(), area.height.toInt());
+  for (int i = area.top.toInt(); i < area.top.toInt() + area.height.toInt(); i++) {
+    for (int j = area.left.toInt(); j < area.left.toInt() + area.width.toInt(); j++) {
       var color = image.getPixel(j, i);
       int r = (color & 0xFF);
       int g = ((color >> 8) & 0xFF);
       int b = ((color >> 16) & 0xFF);
-      int a = ((color >> 24) & 0xFF);
       var y = (0.2126 * r + 0.7152 * g + 0.0722 * b).toInt();
       var newColor = y;
       newColor += (y << 8);
       newColor += (y << 16);
       newColor += (0xFF << 24);
 
-      grayScaleImage.setPixel(j, i, newColor);
+      grayScaleImage.setPixel(j - area.left.toInt(), i - area.top.toInt(), newColor);
     }
   }
 
@@ -83,16 +83,18 @@ imglib.Image getBlackAndWhiteImage(imglib.Image image, {Rect area}) {
   }
   debugPrint("Just a grayscale image");
 
-  var grayScale = convertImageToGrayScale(image, area);
-
+  var grayScale = convertImageToGrayScale(image, area: area);
+//  return grayScale;
   var bht = getBht(getGrayScaleHistogram(grayScale));
   debugPrint("bht is ${bht}");
 
-  var bw = imglib.Image(area.width, area.height);
-  for (int i = area.top.toInt(); i < area.height.toInt(); i++) {
-    for (int j = area.left.toInt(); j < area.width.toInt(); j++) {
-      bw.setPixel(j, i, (grayScale.getPixel(j, i) & 0xFF)  > bht ? 0xFFFFFFFF : 0xFF000000);
+  var bw = imglib.Image(area.width.toInt(), area.height.toInt());
+  for (int i = 0; i < area.height.toInt(); i++) {
+    for (int j = 0; j < area.width.toInt(); j++) {
+      bw.setPixel(j, i,
+          (grayScale.getPixel(j, i) & 0xFF) > bht ? 0xFFFFFFFF : 0xFF000000);
     }
+
   }
 
   return bw;
@@ -115,20 +117,24 @@ List<int> getGrayScaleHistogram(imglib.Image image) {
 
 int getBht(List<int> histogram, {int minCount = 5}) {
   var start = 0;
-  while (histogram[start] < minCount) {
+  while (histogram[start] < minCount && start < histogram.length -1) {
     start++;
   }
 
   var end = histogram.length - 1;
-  while (histogram[end] < minCount) {
+  while (histogram[end] < minCount && end > 0 && end - 1 > start) {
     end--;
+  }
+
+  if (start == end) {
+    debugPrint(start.toString());
   }
 
   //     h_c = int(round(np.average(np.linspace(0, 2 ** 8 - 1, n_bins), weights=hist)))
   int center = ((start + end) / 2).floor();
-
-  int weightLeft = histogram.getRange(start, center).reduce((a, b) => a + b);
-  int weightRight = histogram.getRange(center, end + 1).reduce((a, b) => a + b);
+  debugPrint("start=${start.toString()}, end=${end.toString()}, center=${center.toString()}, h.len=${histogram.length.toString()}");
+  int weightLeft = start != center ? histogram.getRange(start, center).reduce((a, b) => a + b) : 0;
+  int weightRight = center != end + 1 ? histogram.getRange(center, end + 1).reduce((a, b) => a + b) : 0;
 
   while (start < end) {
     if (weightLeft > weightRight) {

@@ -40,16 +40,16 @@ class CommonScaffold extends StatelessWidget {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            var image = await ImagePicker.pickImage(source: ImageSource.gallery);
-            imglib.Image img = imglib.decodeJpg(File(image.path).readAsBytesSync());
-            var bw = getBlackAndWhiteImage(img);
-            var file = await _localFile;
-            debugPrint("local file is: " + file.path);
-            file..writeAsBytesSync(imglib.encodePng(bw, level: 1));
+//            var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+//            imglib.Image img = imglib.decodeJpg(File(image.path).readAsBytesSync());
+//            var bw = getBlackAndWhiteImage(img, area: Rect.fromLTWH(150, 179, 120,35));
+//            var file = await _localFile;
+//            debugPrint("local file is: " + file.path);
+//            file..writeAsBytesSync(imglib.encodePng(bw, level: 1));
 
-//            Navigator.of(context).pushNamed(
-//              '/finder',
-//            );
+            Navigator.of(context).pushNamed(
+              '/finder',
+            );
           },
           tooltip: 'New VRP',
           backgroundColor: Colors.orange,
@@ -78,15 +78,7 @@ class CommonScaffold extends StatelessWidget {
   }
 }
 
-Future<String> get _localPath async {
-  final directory = await getExternalStorageDirectory();
 
-  return directory.path;
-}
-Future<File> get _localFile async {
-  final path = await _localPath;
-  return File('$path/test_${DateTime.now().millisecondsSinceEpoch}.png');
-}
 
 
 
