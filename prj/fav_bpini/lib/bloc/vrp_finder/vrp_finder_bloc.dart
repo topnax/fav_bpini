@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:image/image.dart' as imglib;
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:favbpini/vrp_locator/vrp_locator_impl.dart';
 import 'package:flutter/widgets.dart';
+import 'package:path_provider/path_provider.dart';
 
 import './bloc.dart';
 
@@ -52,7 +55,14 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
               var result = results.where((res) => res.foundVrp != null).toList();
               if (result.length > 0) {
                 debugPrint("adding vrp found event");
-                add(VrpFound(result[0], took));
+
+                var directory = await _localPath;
+                var path = "$directory/${DateTime.now().millisecondsSinceEpoch.toString()}.jpg";
+
+                File(path)..writeAsBytesSync(imglib.encodeJpg(result[0].image, quality: 40));
+
+                add(VrpFound(result[0], took, path));
+
                 this.close();
                 return;
               }
@@ -70,7 +80,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
     } else if (event is TextFound) {
       yield CameraFoundText(_cameraController, event.textBlocks, event.imageSize);
     } else if (event is VrpFound) {
-      yield VrpFoundState(event.result, event.timeTook);
+      yield VrpFoundState(event.result, event.timeTook, event.pathToImage);
     } else if (event is VrpResultsFound) {
       yield ResultsFoundState(event.results, event.size, _cameraController, event.timeTook);
     }
@@ -102,4 +112,10 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
     }
     return super.close();
   }
+}
+
+Future<String> get _localPath async {
+  final directory = await getExternalStorageDirectory();
+
+  return directory.path;
 }

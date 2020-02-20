@@ -34,3 +34,15 @@ class SubmitVRP extends VrpPreviewEvent {
   List<Object> get props => [];
 
 }
+
+@immutable
+class DiscardVRP extends VrpPreviewEvent {
+
+  final String pathToImage;
+
+  DiscardVRP(this.pathToImage);
+
+  @override
+  List<Object> get props => [pathToImage];
+
+}

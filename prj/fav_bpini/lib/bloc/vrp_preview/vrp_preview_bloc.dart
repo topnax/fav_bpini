@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -8,6 +9,7 @@ import './bloc.dart';
 class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
   final VRP vrp;
   final TextEditingController _addressController;
+
   VrpPreviewBloc(this.vrp, this._addressController);
 
   @override
@@ -34,12 +36,13 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
         print("${address} loaded");
         yield PositionLoaded(position, address);
         _addressController.text = address;
-
       } catch (e) {
         print("${e} error");
         yield PositionFailed();
       }
-
+    } else if (event is DiscardVRP) {
+      File(event.pathToImage).delete();
+      debugPrint("Deleted: ${event.pathToImage}");
     }
   }
 }

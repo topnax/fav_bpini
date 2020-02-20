@@ -50,8 +50,9 @@ class CameraFoundText extends VrpFinderState {
 class VrpFoundState extends VrpFinderState {
   final VrpFinderResult result;
   final int timeTook;
+  final String pathToImage;
 
-  VrpFoundState(this.result, this.timeTook);
+  VrpFoundState(this.result, this.timeTook, this.pathToImage);
 
   @override
   List<Object> get props => [result];

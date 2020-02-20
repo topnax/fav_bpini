@@ -22,7 +22,6 @@ class Prepravka {
 }
 
 class VrpFinderImpl implements VrpFinder {
-
   final executorService = ExecutorService.newSingleExecutor();
 
   Future<List<VrpFinderResult>> findVrpInImage(CameraImage image) async {
@@ -33,10 +32,9 @@ class VrpFinderImpl implements VrpFinder {
 
     var img = executorService.submitCallable(findResults, Prepravka(image, detectedBlocks));
 //    var img = await compute(findResults, Prepravka(image, detectedBlocks));
+
     return Future<List<VrpFinderResult>>.value(img);
   }
-
-
 }
 
 List<VrpFinderResult> findResults(Prepravka prepravka) {
@@ -47,47 +45,48 @@ List<VrpFinderResult> findResults(Prepravka prepravka) {
 //    return Future<List<VrpFinderResult>>.value(results);
 
   var results = detectedBlocks
-  // filter text blocks that are within the image
+      // filter text blocks that are within the image
       .where((tb) => _isRectangleWithinImage(tb.boundingBox, img.width, img.height))
-  // map text blocks to results
+      // map text blocks to results
       .map((tb) {
-    if (tb.lines.length == 1) {
-      // one line VRP
-      if (tb.lines[0].elements.length == 2 && tb.lines[0].elements[0].text.length == 3) {
-        var el1 = tb.lines[0].elements[0].boundingBox;
-        var el2 = tb.lines[0].elements[1].boundingBox;
+        if (tb.lines.length == 1) {
+          // one line VRP
+          if (tb.lines[0].elements.length == 2 && tb.lines[0].elements[0].text.length == 3) {
+            var el1 = tb.lines[0].elements[0].boundingBox;
+            var el2 = tb.lines[0].elements[1].boundingBox;
 
-        var diff = (el2.left + el2.width) - (el1.left + el1.width);
+            var diff = (el2.left + el2.width) - (el1.left + el1.width);
 
-        var diffRatio = diff / tb.boundingBox.width;
+            var diffRatio = diff / tb.boundingBox.width;
 
-        var diffRatioUpper = 0.0;
-        var diffRatioLower = 20.0;
+            var diffRatioUpper = 0.0;
+            var diffRatioLower = 20.0;
 
-        if (tb.lines[0].elements[1].text.length == 5) {
-          diffRatioUpper = 0.7;
-          diffRatioLower = 0.55;
-        } else if (tb.lines[0].elements[1].text.length == 4) {
-          diffRatioUpper = 0.65;
-          diffRatioLower = 0.51;
+            if (tb.lines[0].elements[1].text.length == 5) {
+              diffRatioUpper = 0.7;
+              diffRatioLower = 0.55;
+            } else if (tb.lines[0].elements[1].text.length == 4) {
+              diffRatioUpper = 0.65;
+              diffRatioLower = 0.51;
+            }
+
+            if (diffRatio > diffRatioLower && diffRatio < diffRatioUpper) {
+              var bw = getBlackAndWhiteImage(img, area: tb.boundingBox);
+
+              return VrpFinderResult(VRP(tb.lines[0].elements[0].text, tb.lines[0].elements[1].text),
+                  bw.getWhiteBalance().toDouble(), "diffRatio=${diff / tb.boundingBox.width}",
+                  rect: tb.boundingBox, image: img);
+            } else {
+              return null;
+//          return VrpFinderResult(
+//              null, -1, "diffRatio=${diff / tb.boundingBox.width}",
+//              rect: tb.boundingBox);
+            }
+          }
         }
-
-        if (diffRatio > diffRatioLower && diffRatio < diffRatioUpper) {
-          var bw = getBlackAndWhiteImage(img, area: tb.boundingBox);
-          return VrpFinderResult(VRP(tb.lines[0].elements[0].text, tb.lines[0].elements[1].text),
-              bw.getWhiteBalance().toDouble(), "diffRatio=${diff / tb.boundingBox.width}",
-              rect: tb.boundingBox);
-        } else {
-          var bw = getBlackAndWhiteImage(img, area: tb.boundingBox);
-          return VrpFinderResult(
-              null, bw.getWhiteBalance().toDouble(), "diffRatio=${diff / tb.boundingBox.width}",
-              rect: tb.boundingBox);
-        }
-      }
-    }
-    return VrpFinderResult(null, 1.0, "whole text{${tb.text}}", rect: tb.boundingBox);
-  })
-      .where((result) => result.wtb > 120)
+        return null;
+      })
+      .where((result) => result != null && result.wtb > 120)
       .toList();
 
   return results;
@@ -106,6 +105,8 @@ class VrpFinderImpl2 implements VrpFinder {
     start = DateTime.now();
 
     var bw = getBlackAndWhiteImage(img);
+
+//    file..writeAsBytesSync(imglib.encodePng(bw, level: 1));
 
     var results = detectedBlocks
         .where((tb) => _isRectangleWithinImage(tb.boundingBox, img.width, img.height))

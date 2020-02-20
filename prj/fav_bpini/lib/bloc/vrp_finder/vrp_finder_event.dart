@@ -31,8 +31,9 @@ class TextFound extends VrpFinderEvent {
 class VrpFound extends VrpFinderEvent {
   final VrpFinderResult result;
   final int timeTook;
+  final String pathToImage;
 
-  VrpFound(this.result, this.timeTook);
+  VrpFound(this.result, this.timeTook, this.pathToImage);
 
   @override
   List<Object> get props => [result];

@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:favbpini/bloc/vrp_finder/bloc.dart';
+import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
 import 'package:favbpini/widget/vrp_highligter_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,7 +35,7 @@ class VrpFinderPageState extends State<VrpFinderPage> {
         listener: (context, VrpFinderState state) {
           if (state is VrpFoundState) {
             debugPrint("Pushing named route!");
-            Navigator.of(context).pushNamed("/found", arguments: state.result);
+            Navigator.of(context).pushNamed("/found", arguments: VrpPreviewPageArguments(state.result, state.pathToImage));
           }
         },
         child: BlocBuilder<VrpFinderBloc, VrpFinderState>(builder: (BuildContext context, VrpFinderState state) {
@@ -53,7 +54,16 @@ class VrpFinderPageState extends State<VrpFinderPage> {
           } else if (state is CameraErrorState) {
             return Center(child: Text(state.errorDescription));
           }
-          return Center(child: CircularProgressIndicator());
+          return Center(child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("State not found"),
+              ),
+              CircularProgressIndicator()
+            ],
+          ));
         }),
       ),
     ));
