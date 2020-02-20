@@ -21,7 +21,7 @@ class VrpFinderImpl implements VrpFinder {
     var results = detectedBlocks
         // filter text blocks that are within the image
         .where((tb) => _isRectangleWithinImage(tb.boundingBox, img.width, img.height))
-//        // map text blocks to results
+        // map text blocks to results
         .map((tb) {
           if (tb.lines.length == 1) {
             // one line VRP
@@ -34,7 +34,7 @@ class VrpFinderImpl implements VrpFinder {
               var diffRatio = diff / tb.boundingBox.width;
 
               var diffRatioUpper = 0.0;
-              var diffRatioLower= 20.0;
+              var diffRatioLower = 20.0;
 
               if (tb.lines[0].elements[1].text.length == 5) {
                 diffRatioUpper = 0.7;
@@ -51,8 +51,8 @@ class VrpFinderImpl implements VrpFinder {
                     rect: tb.boundingBox);
               } else {
                 var bw = getBlackAndWhiteImage(img, area: tb.boundingBox);
-                return VrpFinderResult(null,
-                    bw.getWhiteBalance().toDouble(), "diffRatio=${diff / tb.boundingBox.width}",
+                return VrpFinderResult(
+                    null, bw.getWhiteBalance().toDouble(), "diffRatio=${diff / tb.boundingBox.width}",
                     rect: tb.boundingBox);
               }
             }
@@ -60,26 +60,6 @@ class VrpFinderImpl implements VrpFinder {
           return VrpFinderResult(null, 1.0, "whole text{${tb.text}}", rect: tb.boundingBox);
         })
         .where((result) => result.wtb > 120)
-        // filter results by white balance
-//        .map((tb)  {
-//      return [getBlackAndWhiteImage(img, area: tb.boundingBox).getWhiteBalance() > 120, tb];
-//    })
-//      .where((item){
-//        return item[0];
-//    })
-//    .where((item){
-//      var tb = item[1];
-//
-//      if (tb is TextBlock) {
-//        if (tb.lines.length == 0) {
-//          // one line only
-//          if
-//        }
-//      } else {
-//        debugPrint("Not a TextBlock");
-//      }
-//      return false;
-//    })
         .toList();
     return Future<List<VrpFinderResult>>.value(results);
   }

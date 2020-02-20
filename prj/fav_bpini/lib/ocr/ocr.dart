@@ -14,22 +14,16 @@ class OcrManager {
 
     final FirebaseVisionImageMetadata metadata = FirebaseVisionImageMetadata(
         rawFormat: availableImage.format.raw,
-        size: Size(
-            availableImage.width.toDouble(), availableImage.height.toDouble()),
+        size: Size(availableImage.width.toDouble(), availableImage.height.toDouble()),
         planeData: availableImage.planes
             .map((currentPlane) => FirebaseVisionImagePlaneMetadata(
-                bytesPerRow: currentPlane.bytesPerRow,
-                height: currentPlane.height,
-                width: currentPlane.width))
+                bytesPerRow: currentPlane.bytesPerRow, height: currentPlane.height, width: currentPlane.width))
             .toList(),
         rotation: ImageRotation.rotation90);
 
-    final FirebaseVisionImage visionImage =
-        FirebaseVisionImage.fromBytes(availableImage.planes[0].bytes, metadata);
-    final TextRecognizer textRecognizer =
-        FirebaseVision.instance.textRecognizer();
-    final VisionText visionText =
-        await textRecognizer.processImage(visionImage);
+    final FirebaseVisionImage visionImage = FirebaseVisionImage.fromBytes(availableImage.planes[0].bytes, metadata);
+    final TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
+    final VisionText visionText = await textRecognizer.processImage(visionImage);
 
     return visionText?.blocks;
   }

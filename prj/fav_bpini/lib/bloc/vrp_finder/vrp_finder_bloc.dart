@@ -38,36 +38,25 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
           await controller.startImageStream((CameraImage availableImage) async {
             _streamStarted = true;
             if (_isScanBusy) {
-//            debugPrint("scanner is busy");
               return;
             }
 
             _isScanBusy = true;
 
-            debugPrint("Started scanning...");
-
             var results = await _finder.findVrpInImage(availableImage);
 
             if (results.length > 0) {
-              var result =results.where((res) => res.foundVrp != null).toList();
+              var result = results.where((res) => res.foundVrp != null).toList();
               if (result.length > 0) {
-                  add(VrpFound(result[0]));
-                  controller.stopImageStream();
-                  return;
+                add(VrpFound(result[0]));
+                controller.stopImageStream();
+                return;
               }
             }
 
             add(VrpResultsFound(results, Size(availableImage.width.toDouble(), availableImage.height.toDouble())));
 
-//          if (result != null) {
-//            add(VrpFound(result));
-//            close();
-//          }
-
-//            await Future.delayed(Duration(seconds: 5));
-
             _isScanBusy = false;
-//          debugPrint("Not busy...");
           });
         }
 

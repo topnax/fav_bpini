@@ -27,10 +27,7 @@ class VrpHighlighterPainter extends CustomPainter {
     );
 
     for (VrpFinderResult result in results) {
-      var padding = 0.05;
 
-//      var horizontalPadding = imageSize.width * padding;
-//      var verticalPadding = imageSize.height * padding;
       var horizontalPadding = 0;
       var verticalPadding = 0;
 
