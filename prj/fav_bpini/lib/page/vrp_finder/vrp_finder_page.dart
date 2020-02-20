@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:favbpini/bloc/vrp_finder/bloc.dart';
 import 'package:favbpini/widget/vrp_highligter_painter.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -29,14 +28,12 @@ class VrpFinderPageState extends State<VrpFinderPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        // You must wait until the controller is initialized before displaying the
-        // camera preview. Use a FutureBuilder to display a loading spinner until
-        // the controller has finished initializing
         body: BlocProvider(
       create: (BuildContext context) => VrpFinderBloc(),
       child: BlocListener<VrpFinderBloc, VrpFinderState>(
         listener: (context, VrpFinderState state) {
           if (state is VrpFoundState) {
+            debugPrint("Pushing named route!");
             Navigator.of(context).pushNamed("/found", arguments: state.result);
           }
         },
@@ -53,6 +50,8 @@ class VrpFinderPageState extends State<VrpFinderPage> {
             return _buildCameraPreviewStack(state.controller, List<VrpFinderResult>(), state.imageSize, 0);
           } else if (state is ResultsFoundState) {
             return _buildCameraPreviewStack(state.controller, state.results, state.imageSize, state.timeTook);
+          } else if (state is CameraErrorState) {
+            return Center(child: Text(state.errorDescription));
           }
           return Center(child: CircularProgressIndicator());
         }),

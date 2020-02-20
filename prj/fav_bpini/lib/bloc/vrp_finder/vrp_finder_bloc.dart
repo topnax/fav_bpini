@@ -10,6 +10,7 @@ import './bloc.dart';
 
 class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
   CameraController _cameraController;
+
   bool _isScanBusy = false;
 
   bool _streamStarted = false;
@@ -33,7 +34,6 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
         yield CameraErrorState("No camera found");
       } else {
         var controller = await _getCameraController();
-
         if (!_streamStarted && controller.value.isInitialized) {
           await controller.startImageStream((CameraImage availableImage) async {
             _streamStarted = true;
@@ -51,13 +51,15 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
             if (results.length > 0) {
               var result = results.where((res) => res.foundVrp != null).toList();
               if (result.length > 0) {
+                debugPrint("adding vrp found event");
                 add(VrpFound(result[0], took));
-                controller.stopImageStream();
+                this.close();
                 return;
               }
             }
 
-            add(VrpResultsFound(results, Size(availableImage.width.toDouble(), availableImage.height.toDouble()), took));
+            add(VrpResultsFound(
+                results, Size(availableImage.width.toDouble(), availableImage.height.toDouble()), took));
 
             _isScanBusy = false;
           });
@@ -78,30 +80,26 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
     if (_cameraController == null) {
       List<CameraDescription> cameras = await availableCameras();
       _cameraController = CameraController(
-        // Get a specific camera from the list of available cameras
+        // get a specific camera from the list of available cameras
         cameras[0],
-        // Define the resolution to use
+        // define the resolution to use
         ResolutionPreset.high,
       );
     }
-    await _cameraController.initialize();
+    if (!_cameraController.value.isInitialized) {
+      await _cameraController.initialize();
+    }
     return _cameraController;
   }
 
   @override
   Future<void> close() {
-    debugPrint("Bloc disposed");
-    _cameraController.stopImageStream();
-    _cameraController.dispose();
+    debugPrint("disposing a vrp finder bloc");
+    _streamStarted = false;
+    if (_cameraController != null) {
+      _cameraController.dispose();
+      _cameraController = null;
+    }
     return super.close();
   }
-
-//  @override
-//  void dispose() {
-//    super.dispose();
-//    debugPrint("Bloc disposed");
-//    _cameraController.stopImageStream();
-//    _cameraController.dispose();
-//    _timer.cancel();
-//  }
 }
