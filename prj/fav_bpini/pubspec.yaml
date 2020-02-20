@@ -30,6 +30,7 @@ dependencies:
   equatable: ^1.0.3
   geolocator: ^5.2.1
   image_picker: ^0.6.3+1
+  executorservices: ^2.0.3
 
 
   # The following adds the Cupertino Icons font to your application.

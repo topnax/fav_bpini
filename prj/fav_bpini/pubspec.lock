@@ -85,6 +85,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.3"
+  executorservices:
+    dependency: "direct main"
+    description:
+      name: executorservices
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.3"
   firebase_ml_vision:
     dependency: "direct main"
     description:

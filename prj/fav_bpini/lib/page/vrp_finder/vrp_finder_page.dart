@@ -47,12 +47,12 @@ class VrpFinderPageState extends State<VrpFinderPage> {
           } else if (state is CameraLoadingState) {
             return Center(child: CircularProgressIndicator());
           } else if (state is CameraLoadedState) {
-            return _buildCameraPreviewStack(state.controller, List<VrpFinderResult>(), null);
+            return _buildCameraPreviewStack(state.controller, List<VrpFinderResult>(), null, 0);
           } else if (state is CameraFoundText) {
             debugPrint("new cft state");
-            return _buildCameraPreviewStack(state.controller, List<VrpFinderResult>(), state.imageSize);
+            return _buildCameraPreviewStack(state.controller, List<VrpFinderResult>(), state.imageSize, 0);
           } else if (state is ResultsFoundState) {
-            return _buildCameraPreviewStack(state.controller, state.results, state.imageSize);
+            return _buildCameraPreviewStack(state.controller, state.results, state.imageSize, state.timeTook);
           }
           return Center(child: CircularProgressIndicator());
         }),
@@ -60,7 +60,7 @@ class VrpFinderPageState extends State<VrpFinderPage> {
     ));
   }
 
-  Widget _buildCameraPreviewStack(CameraController controller, List<VrpFinderResult> results, Size size) {
+  Widget _buildCameraPreviewStack(CameraController controller, List<VrpFinderResult> results, Size size, int timeTook) {
     debugPrint("foundblocks size " + results.length.toString());
     return Builder(
       builder: (context) {
@@ -99,7 +99,7 @@ class VrpFinderPageState extends State<VrpFinderPage> {
               child: AspectRatio(
             aspectRatio: controller.value.aspectRatio,
             child: CustomPaint(
-              painter: VrpHighlighterPainter(results, size),
+              painter: VrpHighlighterPainter(results, size, timeTook),
             ),
           )),
         ]);

@@ -49,8 +49,9 @@ class CameraFoundText extends VrpFinderState {
 @immutable
 class VrpFoundState extends VrpFinderState {
   final VrpFinderResult result;
+  final int timeTook;
 
-  VrpFoundState(this.result);
+  VrpFoundState(this.result, this.timeTook);
 
   @override
   List<Object> get props => [result];
@@ -61,8 +62,9 @@ class ResultsFoundState extends VrpFinderState {
   final CameraController controller;
   final Size imageSize;
   final List<VrpFinderResult> results;
+  final int timeTook;
 
-  ResultsFoundState(this.results, this.imageSize, this.controller);
+  ResultsFoundState(this.results, this.imageSize, this.controller, this.timeTook);
 
   @override
   List<Object> get props => [results];

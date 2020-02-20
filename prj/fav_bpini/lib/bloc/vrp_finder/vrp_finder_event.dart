@@ -30,8 +30,9 @@ class TextFound extends VrpFinderEvent {
 @immutable
 class VrpFound extends VrpFinderEvent {
   final VrpFinderResult result;
+  final int timeTook;
 
-  VrpFound(this.result);
+  VrpFound(this.result, this.timeTook);
 
   @override
   List<Object> get props => [result];
@@ -41,8 +42,9 @@ class VrpFound extends VrpFinderEvent {
 class VrpResultsFound extends VrpFinderEvent {
   final List<VrpFinderResult> results;
   final Size size;
+  final int timeTook;
 
-  VrpResultsFound(this.results, this.size);
+  VrpResultsFound(this.results, this.size, this.timeTook);
 
   @override
   List<Object> get props => [results, size];

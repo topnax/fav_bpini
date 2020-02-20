@@ -43,18 +43,21 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
 
             _isScanBusy = true;
 
+            var start = DateTime.now().millisecondsSinceEpoch;
             var results = await _finder.findVrpInImage(availableImage);
+            var took = DateTime.now().millisecondsSinceEpoch - start;
+            debugPrint("findVrpInImage took ${took.toString()}ms");
 
             if (results.length > 0) {
               var result = results.where((res) => res.foundVrp != null).toList();
               if (result.length > 0) {
-                add(VrpFound(result[0]));
+                add(VrpFound(result[0], took));
                 controller.stopImageStream();
                 return;
               }
             }
 
-            add(VrpResultsFound(results, Size(availableImage.width.toDouble(), availableImage.height.toDouble())));
+            add(VrpResultsFound(results, Size(availableImage.width.toDouble(), availableImage.height.toDouble()), took));
 
             _isScanBusy = false;
           });
@@ -65,9 +68,9 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
     } else if (event is TextFound) {
       yield CameraFoundText(_cameraController, event.textBlocks, event.imageSize);
     } else if (event is VrpFound) {
-      yield VrpFoundState(event.result);
+      yield VrpFoundState(event.result, event.timeTook);
     } else if (event is VrpResultsFound) {
-      yield ResultsFoundState(event.results, event.size, _cameraController);
+      yield ResultsFoundState(event.results, event.size, _cameraController, event.timeTook);
     }
   }
 

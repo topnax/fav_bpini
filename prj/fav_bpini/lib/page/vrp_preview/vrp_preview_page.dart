@@ -27,7 +27,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     _bloc = VrpPreviewBloc(_result.foundVrp, _addressController);
   }
 
-  static const TextStyle _vrpStyle = TextStyle(fontSize: 60, fontFamily: "SfAtarianSystem");
+  static const TextStyle _vrpStyle = TextStyle(fontSize: 60);
 
   BoxDecoration myBoxDecoration() {
     return BoxDecoration(
