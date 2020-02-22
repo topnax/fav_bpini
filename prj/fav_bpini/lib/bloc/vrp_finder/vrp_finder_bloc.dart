@@ -61,6 +61,8 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
 
                 File(path)..writeAsBytesSync(imglib.encodeJpg(result[0].image, quality: 40));
 
+                debugPrint("Written to $path");
+
                 add(VrpFound(result[0], took, path));
 
                 this.close();
@@ -115,7 +117,8 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
 }
 
 Future<String> get _localPath async {
-  final directory = await getExternalStorageDirectory();
+//  final directory = await getExternalStorageDirectory();
+  final directory = await getTemporaryDirectory();
 
   return directory.path;
 }

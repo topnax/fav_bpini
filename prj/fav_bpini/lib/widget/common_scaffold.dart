@@ -1,11 +1,4 @@
-import 'dart:io';
-
-import 'package:favbpini/utils/image.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:image/image.dart' as imglib;
-import 'package:path_provider/path_provider.dart';
-
 
 class CommonScaffold extends StatelessWidget {
   final Widget child;
@@ -20,14 +13,14 @@ class CommonScaffold extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal:12.0),
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     IconButton(
                       icon: Icon(Icons.menu),
-                      color: Colors.black,
+                      color: Theme.of(context).textTheme.body1.color,
                       onPressed: () {},
                     )
                   ],
@@ -77,8 +70,3 @@ class CommonScaffold extends StatelessWidget {
             shape: CircularNotchedRectangle()));
   }
 }
-
-
-
-
-

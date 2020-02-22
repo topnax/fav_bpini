@@ -15,6 +15,8 @@ class VRPApp extends StatelessWidget {
         Locale('cs', 'CZ'),
       ],
 
+      darkTheme: ThemeData.dark(),
+
       // These delegates make sure that the localization data for the proper language is loaded
       localizationsDelegates: [
         AppLocalizations.delegate,

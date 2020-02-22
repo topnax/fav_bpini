@@ -38,7 +38,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
 
   VrpPreviewPageState(this._result, this._pathToImage) {}
 
-  static const TextStyle _vrpStyle = TextStyle(fontSize: 60, fontWeight: FontWeight.w600);
+  static const TextStyle _vrpStyle = TextStyle(fontSize: 60, fontWeight: FontWeight.w600, color: Colors.black);
 
   BoxDecoration myBoxDecoration() {
     return BoxDecoration(
@@ -67,7 +67,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                   children: <Widget>[
                     IconButton(
                       icon: Icon(Icons.arrow_back_ios),
-                      color: Colors.black,
+                      color: Theme.of(context).textTheme.body1.color,
                       onPressed: () {
                         BlocProvider.of<VrpPreviewBloc>(context).add(DiscardVRP(_pathToImage));
                         Navigator.of(context).pushNamed(
@@ -270,6 +270,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
   }
 
   Widget _buildSourcePreview() {
+    debugPrint("Showing ${_pathToImage}");
     return BlocProvider(
       create: (context) => VrpSourceDetailBloc(),
       child: Builder(
@@ -284,9 +285,9 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                 onTapCancel: () => BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHideHighlight()),
                 child: Stack(
                   children: [
-                    Image.file(
-                      File(_pathToImage),
-                    ),
+
+                    Image.file(File(_pathToImage)),
+
                     if (state is HighlightedDetail)
                       AspectRatio(aspectRatio: state.imageSize.width / state.imageSize.height,child: CustomPaint(painter: VrpSourceDetailPainter(state.highlightedArea, state.imageSize))),
 
