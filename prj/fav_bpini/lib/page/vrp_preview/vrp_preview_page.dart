@@ -1,8 +1,12 @@
 import 'dart:io';
 
 import 'package:favbpini/bloc/vrp_preview/bloc.dart';
+import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_bloc.dart';
+import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_event.dart';
+import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_state.dart';
 import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:favbpini/widget/common_texts.dart';
+import 'package:favbpini/widget/vrp_source_detail_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -159,7 +163,10 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                             return IconButton(
                                                 icon: Icon(Icons.location_on),
                                                 color: Colors.blueAccent,
-                                                onPressed: () => {BlocProvider.of<VrpPreviewBloc>(context).add(GetAddressByPosition())});
+                                                onPressed: () => {
+                                                      BlocProvider.of<VrpPreviewBloc>(context)
+                                                          .add(GetAddressByPosition())
+                                                    });
                                           } else {
                                             return Padding(
                                               padding: const EdgeInsets.only(left: 16.0),
@@ -193,12 +200,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                 "Zdroj",
                                 fontSize: 22,
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(24.0),
-                                child: Image.file(
-                                  File(_pathToImage),
-                                ),
-                              )
+                              _buildSourcePreview()
                             ],
                           ),
                         ),
@@ -265,6 +267,45 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
         ),
       ),
     ));
+  }
+
+  Widget _buildSourcePreview() {
+    return BlocProvider(
+      create: (context) => VrpSourceDetailBloc(),
+      child: Builder(
+        builder: (context) => Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: BlocBuilder(
+            bloc: BlocProvider.of<VrpSourceDetailBloc>(context),
+            builder: (context, state) {
+              return GestureDetector(
+                onTapDown:(_) => BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHighlight(_result.rect, Size(_result.image.width.toDouble(), _result.image.height.toDouble()))),
+                onTapUp: (_) =>  BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHideHighlight()),
+                onTapCancel: () => BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHideHighlight()),
+                child: Stack(
+                  children: [
+                    Image.file(
+                      File(_pathToImage),
+                    ),
+                    if (state is HighlightedDetail)
+                      AspectRatio(aspectRatio: state.imageSize.width / state.imageSize.height,child: CustomPaint(painter: VrpSourceDetailPainter(state.highlightedArea, state.imageSize))),
+
+                    if (state is StaticDetail)
+                      Align(alignment: Alignment.bottomRight, child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Icon(Icons.remove_red_eye, color:Colors.white),
+                      )),
+
+
+                  ],
+                ),
+              );
+
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildVrp(String firstPart, String secondPart) {

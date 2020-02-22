@@ -2,47 +2,38 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-abstract class VrpPreviewEvent extends Equatable {
-}
+abstract class VrpPreviewEvent extends Equatable {}
 
 @immutable
 class GetAddressByPosition extends VrpPreviewEvent {
-
   GetAddressByPosition();
 
   @override
   List<Object> get props => [];
-
 }
 
 @immutable
 class RescanVRP extends VrpPreviewEvent {
-
   RescanVRP();
 
   @override
   List<Object> get props => [];
-
 }
 
 @immutable
 class SubmitVRP extends VrpPreviewEvent {
-
   SubmitVRP();
 
   @override
   List<Object> get props => [];
-
 }
 
 @immutable
 class DiscardVRP extends VrpPreviewEvent {
-
   final String pathToImage;
 
   DiscardVRP(this.pathToImage);
 
   @override
   List<Object> get props => [pathToImage];
-
 }

@@ -81,7 +81,6 @@ imglib.Image getBlackAndWhiteImage(imglib.Image image, {Rect area}) {
   if (area == null) {
     area = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
   }
-  debugPrint("Just a grayscale image");
   debugPrint(
       "for bb of ${area.top.toString()}, ${area.left.toString()}, ${area.width.toString()},${area.height.toString()}");
 
