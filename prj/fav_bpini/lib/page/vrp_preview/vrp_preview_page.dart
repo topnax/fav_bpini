@@ -6,6 +6,7 @@ import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_event.dart';
 import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_state.dart';
 import 'package:favbpini/database/database.dart';
 import 'package:favbpini/model/vrp.dart';
+import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
 import 'package:favbpini/widget/common_texts.dart';
 import 'package:favbpini/widget/vrp_source_detail_painter.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +37,11 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
   final FoundVrpRecord _record;
   final bool _edit;
 
-  VrpPreviewPageState(this._record, this._edit);
+  VrpPreviewPageState(this._record, this._edit) {
+    debugPrint("VrpPreviewPageState constructor");
+    _addressController.text = _record.address;
+    _noteController.text = _record.note;
+  }
 
   static const TextStyle _vrpStyle = TextStyle(fontSize: 60, fontWeight: FontWeight.w600, color: Colors.black);
 
@@ -122,7 +127,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                               BlocProvider.of<VrpPreviewBloc>(context)
                                                   .add(DiscardVRP(_record.sourceImagePath));
                                               Navigator.of(context).pushNamed(
-                                                '/finder',
+                                                '/finder', arguments: VrpFinderPageArguments(edit: _edit, record: _record)
                                               );
                                             },
                                             color: Colors.blue,
@@ -250,7 +255,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                 ),
                                 onPressed: () {
                                   var bloc = BlocProvider.of<VrpPreviewBloc>(context);
-                                  bloc.add(SubmitVRP(_record));
+                                  bloc.add(SubmitVRP(_record, edit: _edit));
                                 },
                                 color: Colors.orange,
                                 textColor: Colors.white,

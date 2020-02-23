@@ -51,32 +51,43 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
         yield PositionFailed();
       }
     } else if (event is DiscardVRP) {
-      File(event.pathToImage).delete();
-      debugPrint("Deleted: ${event.pathToImage}");
+//      File(event.pathToImage).delete();
+//      debugPrint("Deleted: ${event.pathToImage}");
     } else if (event is SubmitVRP) {
-      var tempFile = File(event.record.sourceImagePath);
+      if (!event.edit) {
+        var tempFile = File(event.record.sourceImagePath);
 
-      debugPrint("tempFile@${tempFile.path} exists=${tempFile.existsSync()}");
+        debugPrint("tempFile@${tempFile.path} exists=${tempFile.existsSync()}");
 
-      var dir = await getApplicationDocumentsDirectory();
+        var dir = await getApplicationDocumentsDirectory();
 
-      var t = Directory(dir.path + "/" + sourceImagesFolderName);
-      if (!await t.exists()) {
-        await t.create();
-        debugPrint(t.path + " created");
-      } else {
-        debugPrint(t.path + " already exists");
+        var t = Directory(dir.path + "/" + sourceImagesFolderName);
+        if (!await t.exists()) {
+          await t.create();
+          debugPrint(t.path + " created");
+        } else {
+          debugPrint(t.path + " already exists");
+        }
+
+        var storePath = t.path + "/" + p.basename(tempFile.path);
+
+        debugPrint("Store path is =$storePath");
+
+        try {
+          tempFile.copy(storePath);
+
+          debugPrint("Copied =$storePath");
+          debugPrint("Successfully added a new VrpRecord to the database");
+        } catch (err) {
+          // TODO what to do when copying fails?
+          print("caught error: $err");
+        }
       }
 
-      var storePath = t.path + "/" + p.basename(tempFile.path);
 
-      debugPrint("Store path is =$storePath");
+      var address = _addressController.text.trim().isNotEmpty ? _addressController.text : "Nezadáno";
 
-      try {
-        tempFile.copy(storePath);
-
-        debugPrint("Copied =$storePath");
-
+      if (!event.edit) {
         database.addVrpRecord(FoundVrpRecordsCompanion.insert(
             date: Value(event.record.date),
             top: event.record.top,
@@ -87,16 +98,15 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
             secondPart: event.record.secondPart,
             latitude: event.record.latitude,
             longitude: event.record.longitude,
-            address: _addressController.text.trim().isNotEmpty ? _addressController.text : "Nezadáno",
+            address: address,
             note: _noteController.text,
             sourceImagePath: event.record.sourceImagePath));
-
         debugPrint("Successfully added a new VrpRecord to the database");
-
-        yield VrpSubmitted();
-      } catch (err) {
-        print("caught error: $err");
+      } else {
+        database.updateEntry(event.record.copyWith(address: address, note: _noteController.text));
       }
+
+      yield VrpSubmitted();
     }
   }
 }

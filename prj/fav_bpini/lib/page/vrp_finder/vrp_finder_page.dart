@@ -11,15 +11,28 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../vrp_locator/vrp_locator.dart';
 
+class VrpFinderPageArguments {
+  final bool edit;
+  final FoundVrpRecord record;
+
+  VrpFinderPageArguments({this.edit = false, this.record});
+}
+
 class VrpFinderPage extends StatefulWidget {
+  final VrpFinderPageArguments _arguments;
+
+  VrpFinderPage(this._arguments);
+
   @override
-  VrpFinderPageState createState() => VrpFinderPageState();
+  VrpFinderPageState createState() => VrpFinderPageState(this._arguments.edit, this._arguments.record);
 }
 
 class VrpFinderPageState extends State<VrpFinderPage> {
   var _sigma = 10.0;
+  final bool _edit;
+  final FoundVrpRecord _record;
 
-  VrpFinderPageState();
+  VrpFinderPageState(this._edit, this._record);
 
   @override
   void dispose() {
@@ -36,22 +49,38 @@ class VrpFinderPageState extends State<VrpFinderPage> {
         listener: (context, VrpFinderState state) {
           if (state is VrpFoundState) {
             debugPrint("Pushing named route!");
-            Navigator.of(context).pushNamed("/found",
-                arguments: VrpPreviewPageArguments(FoundVrpRecord(
-                  id:0,
-                  firstPart: state.result.foundVrp.firstPart,
-                  secondPart: state.result.foundVrp.secondPart,
-                  latitude: 0,
-                  longitude: 0,
-                  address: "",
-                  note: "",
-                  date: state.date,
-                  sourceImagePath: state.pathToImage,
-                  top: state.result.rect.top.toInt(),
-                  left: state.result.rect.left.toInt(),
-                  width: state.result.rect.width.toInt(),
-                  height: state.result.rect.height.toInt(),
-                )));
+            if (!_edit) {
+              Navigator.of(context).pushNamed("/found",
+                  arguments: VrpPreviewPageArguments(
+                      FoundVrpRecord(
+                        id: 0,
+                        firstPart: state.result.foundVrp.firstPart,
+                        secondPart: state.result.foundVrp.secondPart,
+                        latitude: 0,
+                        longitude: 0,
+                        address: "",
+                        note: "",
+                        date: state.date,
+                        sourceImagePath: state.pathToImage,
+                        top: state.result.rect.top.toInt(),
+                        left: state.result.rect.left.toInt(),
+                        width: state.result.rect.width.toInt(),
+                        height: state.result.rect.height.toInt(),
+                      ),
+                      edit: _edit));
+            } else {
+              Navigator.of(context).pushNamed("/found",
+                  arguments: VrpPreviewPageArguments(
+                      _record.copyWith(
+                          firstPart: state.result.foundVrp.firstPart,
+                          secondPart: state.result.foundVrp.secondPart,
+                          sourceImagePath: state.pathToImage,
+                          top: state.result.rect.top.toInt(),
+                          left: state.result.rect.left.toInt(),
+                          width: state.result.rect.width.toInt(),
+                          height: state.result.rect.height.toInt()),
+                      edit: _edit));
+            }
           }
         },
         child: BlocBuilder<VrpFinderBloc, VrpFinderState>(builder: (BuildContext context, VrpFinderState state) {

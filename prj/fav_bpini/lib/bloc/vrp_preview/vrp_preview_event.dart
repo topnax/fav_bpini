@@ -25,16 +25,12 @@ class RescanVRP extends VrpPreviewEvent {
 @immutable
 class SubmitVRP extends VrpPreviewEvent {
   final FoundVrpRecord record;
+  final bool edit;
 
-//  final VRP vrp;
-//  final DateTime date;
-//  final String sourceImagePath;
-//  final Rect area;
-
-  SubmitVRP(this.record);
+  SubmitVRP(this.record, {this.edit = false});
 
   @override
-  List<Object> get props => [record];
+  List<Object> get props => [record, edit];
 }
 
 @immutable

@@ -1,3 +1,4 @@
+import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
 import 'package:flutter/material.dart';
 
 class CommonScaffold extends StatelessWidget {
@@ -41,7 +42,7 @@ class CommonScaffold extends StatelessWidget {
 //            file..writeAsBytesSync(imglib.encodePng(bw, level: 1));
 
             Navigator.of(context).pushNamed(
-              '/finder',
+              '/finder', arguments: VrpFinderPageArguments()
             );
           },
           tooltip: 'New VRP',

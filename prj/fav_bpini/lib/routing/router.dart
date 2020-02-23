@@ -12,7 +12,11 @@ class Router {
       case '/':
         return MaterialPageRoute(builder: (_) => MainPage());
       case '/finder':
-        return MaterialPageRoute(builder: (_) => VrpFinderPage());
+        if (settings.arguments is VrpFinderPageArguments) {
+          return MaterialPageRoute(builder: (_) => VrpFinderPage(settings.arguments));
+        }
+        return _errorRoute();
+
       case '/found':
         if (settings.arguments is VrpPreviewPageArguments) {
           return MaterialPageRoute(builder: (_) => VrpPreviewPage(settings.arguments));

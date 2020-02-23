@@ -1,6 +1,7 @@
 import 'package:favbpini/database/database.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/model/vrp_record.dart';
+import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
 import 'package:favbpini/widget/common_texts.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -102,7 +103,9 @@ class VrpListPageState extends State<VrpListPage> {
           borderRadius: BorderRadius.circular(10),
           child: InkWell(
             borderRadius: BorderRadius.circular(10),
-            onTap: () => {debugPrint("printed")},
+            onTap: () => {
+              Navigator.of(context).pushNamed("/found", arguments: VrpPreviewPageArguments(dbItem, edit: true))
+            },
             child: Container(
               padding: EdgeInsets.all(15),
               child: Column(
