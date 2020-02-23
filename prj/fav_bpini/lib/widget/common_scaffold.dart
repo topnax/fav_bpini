@@ -20,9 +20,11 @@ class CommonScaffold extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     IconButton(
-                      icon: Icon(Icons.menu),
+                      icon: Icon(Icons.settings),
                       color: Theme.of(context).textTheme.body1.color,
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).pushNamed("/settings");
+                      },
                     )
                   ],
                 ),

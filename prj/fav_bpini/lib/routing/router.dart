@@ -1,4 +1,5 @@
 import 'package:favbpini/page/main/main_page.dart';
+import 'package:favbpini/page/settings/settings_page.dart';
 import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
 import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,8 @@ class Router {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => MainPage());
+      case '/settings':
+        return MaterialPageRoute(builder: (_) => SettingsPage());
       case '/finder':
         if (settings.arguments is VrpFinderPageArguments) {
           return MaterialPageRoute(builder: (_) => VrpFinderPage(settings.arguments));

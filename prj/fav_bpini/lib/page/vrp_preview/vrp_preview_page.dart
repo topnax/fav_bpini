@@ -102,7 +102,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                               mainAxisSize: MainAxisSize.max,
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                HeadingText("Nová SPZ"),
+                                HeadingText(_edit ? "Upravit SPZ" : "Nová SPZ"),
                                 Padding(
                                   padding: EdgeInsets.only(top: 40),
                                   child: Center(
