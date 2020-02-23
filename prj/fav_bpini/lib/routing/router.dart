@@ -1,7 +1,6 @@
 import 'package:favbpini/page/main/main_page.dart';
 import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
 import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
-import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:flutter/material.dart';
 
 class Router {
@@ -15,7 +14,7 @@ class Router {
       case '/finder':
         return MaterialPageRoute(builder: (_) => VrpFinderPage());
       case '/found':
-        if (settings.arguments is VrpPreviewPageArguments){
+        if (settings.arguments is VrpPreviewPageArguments) {
           return MaterialPageRoute(builder: (_) => VrpPreviewPage(settings.arguments));
         }
         return _errorRoute();
@@ -23,7 +22,7 @@ class Router {
 //        return MaterialPageRoute(builder: (_) => TakePictureScreen(args));
 
       default:
-      // If there is no such named route in the switch statement, e.g. /third
+        // If there is no such named route in the switch statement, e.g. /third
         return _errorRoute();
     }
   }

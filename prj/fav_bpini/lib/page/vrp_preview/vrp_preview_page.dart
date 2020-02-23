@@ -5,7 +5,7 @@ import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_bloc.dart';
 import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_event.dart';
 import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_state.dart';
 import 'package:favbpini/database/database.dart';
-import 'package:favbpini/vrp_locator/vrp_locator.dart';
+import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/widget/common_texts.dart';
 import 'package:favbpini/widget/vrp_source_detail_painter.dart';
 import 'package:flutter/material.dart';
@@ -14,17 +14,17 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class VrpPreviewPageArguments {
-  VrpFinderResult _result;
-  String _pathToImage;
+  FoundVrpRecord _record;
+  final bool edit;
 
-  VrpPreviewPageArguments(this._result, this._pathToImage);
+  VrpPreviewPageArguments(this._record, {this.edit = false});
 }
 
 class VrpPreviewPage extends StatefulWidget {
   final VrpPreviewPageArguments arguments;
 
   @override
-  VrpPreviewPageState createState() => VrpPreviewPageState(arguments._result, arguments._pathToImage);
+  VrpPreviewPageState createState() => VrpPreviewPageState(arguments._record, arguments.edit);
 
   VrpPreviewPage(this.arguments);
 }
@@ -33,13 +33,10 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
 
-  final VrpFinderResult _result;
+  final FoundVrpRecord _record;
+  final bool _edit;
 
-  final String _pathToImage;
-
-  final DateTime _dateTimeScanned = DateTime.now();
-
-  VrpPreviewPageState(this._result, this._pathToImage) {}
+  VrpPreviewPageState(this._record, this._edit);
 
   static const TextStyle _vrpStyle = TextStyle(fontSize: 60, fontWeight: FontWeight.w600, color: Colors.black);
 
@@ -57,7 +54,8 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     var database = Provider.of<Database>(context);
     return Scaffold(
         body: BlocProvider(
-      create: (BuildContext context) => VrpPreviewBloc(_result.foundVrp, _addressController, _noteController, database),
+      create: (BuildContext context) =>
+          VrpPreviewBloc(VRP(_record.firstPart, _record.secondPart), _addressController, _noteController, database),
       child: Builder(
         builder: (context) => BlocListener(
           bloc: BlocProvider.of<VrpPreviewBloc>(context),
@@ -80,7 +78,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                         icon: Icon(Icons.arrow_back_ios),
                         color: Theme.of(context).textTheme.body1.color,
                         onPressed: () {
-                          BlocProvider.of<VrpPreviewBloc>(context).add(DiscardVRP(_pathToImage));
+                          BlocProvider.of<VrpPreviewBloc>(context).add(DiscardVRP(_record.sourceImagePath));
                           Navigator.of(context).pushNamed(
                             '/',
                           );
@@ -110,10 +108,10 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                         Padding(
                                             padding: EdgeInsets.only(bottom: 10),
                                             child: Text(
-                                              "Naskenováno ${DateFormat('dd.MM.yyyy HH:mm').format(_dateTimeScanned)},",
+                                              "Naskenováno ${DateFormat('dd.MM.yyyy HH:mm').format(_record.date)},",
                                               style: TextStyles.monserratStyle,
                                             )),
-                                        Center(child: _buildVrp(_result.foundVrp.firstPart, _result.foundVrp.secondPart)),
+                                        Center(child: _buildVrp(_record.firstPart, _record.secondPart)),
                                         Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: RaisedButton(
@@ -121,7 +119,8 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                               borderRadius: new BorderRadius.circular(18.0),
                                             ),
                                             onPressed: () {
-                                              BlocProvider.of<VrpPreviewBloc>(context).add(DiscardVRP(_pathToImage));
+                                              BlocProvider.of<VrpPreviewBloc>(context)
+                                                  .add(DiscardVRP(_record.sourceImagePath));
                                               Navigator.of(context).pushNamed(
                                                 '/finder',
                                               );
@@ -227,7 +226,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                   borderRadius: new BorderRadius.circular(7.0),
                                 ),
                                 onPressed: () {
-                                  BlocProvider.of<VrpPreviewBloc>(context).add(DiscardVRP(_pathToImage));
+                                  BlocProvider.of<VrpPreviewBloc>(context).add(DiscardVRP(_record.sourceImagePath));
                                   Navigator.of(context).pushNamed(
                                     '/',
                                   );
@@ -251,7 +250,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                 ),
                                 onPressed: () {
                                   var bloc = BlocProvider.of<VrpPreviewBloc>(context);
-                                  bloc.add(SubmitVRP(_result.foundVrp, _dateTimeScanned, _pathToImage, _result.rect));
+                                  bloc.add(SubmitVRP(_record));
                                 },
                                 color: Colors.orange,
                                 textColor: Colors.white,
@@ -282,7 +281,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
   }
 
   Widget _buildSourcePreview() {
-    debugPrint("Showing ${_pathToImage}");
+    debugPrint("Showing ${_record.sourceImagePath}");
     return BlocProvider(
       create: (context) => VrpSourceDetailBloc(),
       child: Builder(
@@ -292,28 +291,33 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
             bloc: BlocProvider.of<VrpSourceDetailBloc>(context),
             builder: (context, state) {
               return GestureDetector(
-                onTapDown:(_) => BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHighlight(_result.rect, Size(_result.image.width.toDouble(), _result.image.height.toDouble()))),
-                onTapUp: (_) =>  BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHideHighlight()),
+                onTapDown: (_) async {
+                  File image = new File(_record.sourceImagePath); // Or any other way to get a File instance.
+                  var decodedImage = await decodeImageFromList(image.readAsBytesSync());
+                  BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHighlight(
+                      Rect.fromLTWH(_record.left.toDouble(), _record.top.toDouble(), _record.width.toDouble(),
+                          _record.height.toDouble()),
+                      Size(decodedImage.width.toDouble(), decodedImage.height.toDouble())));
+                },
+                onTapUp: (_) => BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHideHighlight()),
                 onTapCancel: () => BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHideHighlight()),
                 child: Stack(
                   children: [
-
-                    Image.file(File(_pathToImage)),
-
+                    Image.file(File(_record.sourceImagePath)),
                     if (state is HighlightedDetail)
-                      AspectRatio(aspectRatio: state.imageSize.width / state.imageSize.height,child: CustomPaint(painter: VrpSourceDetailPainter(state.highlightedArea, state.imageSize))),
-
+                      AspectRatio(
+                          aspectRatio: state.imageSize.width / state.imageSize.height,
+                          child: CustomPaint(painter: VrpSourceDetailPainter(state.highlightedArea, state.imageSize))),
                     if (state is StaticDetail)
-                      Align(alignment: Alignment.bottomRight, child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Icon(Icons.remove_red_eye, color:Colors.white),
-                      )),
-
-
+                      Align(
+                          alignment: Alignment.bottomRight,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Icon(Icons.remove_red_eye, color: Colors.white),
+                          )),
                   ],
                 ),
               );
-
             },
           ),
         ),

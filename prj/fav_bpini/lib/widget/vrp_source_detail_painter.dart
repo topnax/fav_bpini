@@ -1,9 +1,6 @@
 import 'dart:ui';
 
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
-
-import '../vrp_locator/vrp_locator.dart';
 
 class VrpSourceDetailPainter extends CustomPainter {
   final Rect _highlightedArea;
@@ -25,8 +22,10 @@ class VrpSourceDetailPainter extends CustomPainter {
     canvas.clipRect(screen, clipOp: ClipOp.intersect);
 
     // exclude highlighted area
-    canvas.clipRect(Rect.fromLTWH(_highlightedArea.left * widthRatio, _highlightedArea.top * heightRatio,
-        _highlightedArea.width * widthRatio, _highlightedArea.height * heightRatio), clipOp: ClipOp.difference);
+    canvas.clipRect(
+        Rect.fromLTWH(_highlightedArea.left * widthRatio, _highlightedArea.top * heightRatio,
+            _highlightedArea.width * widthRatio, _highlightedArea.height * heightRatio),
+        clipOp: ClipOp.difference);
 
     // draw over the whole screen
     canvas.drawRect(screen, p);

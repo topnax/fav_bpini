@@ -43,18 +43,18 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
           address = "${placemarks[0].thoroughfare}, ${placemarks[0].subLocality} ${placemarks[0].postalCode}";
         }
 
-        print("${address} loaded");
+        print("$address loaded");
         yield PositionLoaded(position, address);
         _addressController.text = address;
       } catch (e) {
-        print("${e} error");
+        print("$e error");
         yield PositionFailed();
       }
     } else if (event is DiscardVRP) {
       File(event.pathToImage).delete();
       debugPrint("Deleted: ${event.pathToImage}");
     } else if (event is SubmitVRP) {
-      var tempFile = File(event.sourceImagePath);
+      var tempFile = File(event.record.sourceImagePath);
 
       debugPrint("tempFile@${tempFile.path} exists=${tempFile.existsSync()}");
 
@@ -78,18 +78,18 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
         debugPrint("Copied =$storePath");
 
         database.addVrpRecord(FoundVrpRecordsCompanion.insert(
-            date: Value(event.date),
-            top: event.area.top.toInt(),
-            left: event.area.left.toInt(),
-            width: event.area.width.toInt(),
-            height: event.area.height.toInt(),
-            firstPart: event.vrp.firstPart,
-            secondPart: event.vrp.secondPart,
-            latitude: position.latitude,
-            longitude: position.longitude,
+            date: Value(event.record.date),
+            top: event.record.top,
+            left: event.record.left,
+            width: event.record.width,
+            height: event.record.height,
+            firstPart: event.record.firstPart,
+            secondPart: event.record.secondPart,
+            latitude: event.record.latitude,
+            longitude: event.record.longitude,
             address: _addressController.text.trim().isNotEmpty ? _addressController.text : "Nezadáno",
             note: _noteController.text,
-            sourceImagePath: storePath));
+            sourceImagePath: event.record.sourceImagePath));
 
         debugPrint("Successfully added a new VrpRecord to the database");
 

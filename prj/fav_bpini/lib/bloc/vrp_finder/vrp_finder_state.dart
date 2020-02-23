@@ -51,8 +51,9 @@ class VrpFoundState extends VrpFinderState {
   final VrpFinderResult result;
   final int timeTook;
   final String pathToImage;
+  final DateTime date;
 
-  VrpFoundState(this.result, this.timeTook, this.pathToImage);
+  VrpFoundState(this.result, this.timeTook, this.pathToImage, this.date);
 
   @override
   List<Object> get props => [result];

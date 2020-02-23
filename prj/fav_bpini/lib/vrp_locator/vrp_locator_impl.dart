@@ -1,16 +1,12 @@
-import 'dart:io';
-
 import 'package:camera/camera.dart';
+import "package:executorservices/executorservices.dart";
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/ocr/ocr.dart';
-import 'package:flutter/foundation.dart';
-import 'package:image/image.dart' as imglib;
 import 'package:favbpini/utils/image.dart';
 import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import "package:executorservices/executorservices.dart";
 
 const vrpWTBThreshold = 0.55;
 
@@ -126,15 +122,4 @@ bool _isRectangleWithinImage(Rect rect, int width, int height) {
       rect.top >= 0 &&
       rect.left + rect.width.toInt() < width &&
       rect.top + rect.height.toInt() < height;
-}
-
-Future<String> get _localPath async {
-  final directory = await getExternalStorageDirectory();
-
-  return directory.path;
-}
-
-Future<File> get _localFile async {
-  final path = await _localPath;
-  return File('$path/test_${DateTime.now().millisecondsSinceEpoch}.png');
 }

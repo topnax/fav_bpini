@@ -87,7 +87,7 @@ imglib.Image getBlackAndWhiteImage(imglib.Image image, {Rect area}) {
   var grayScale = convertImageToGrayScale(image, area: area);
 //  return grayScale;
   var bht = getBht(getGrayScaleHistogram(grayScale));
-  debugPrint("bht is ${bht}");
+  debugPrint("bht is $bht");
 
   var bw = imglib.Image(area.width.toInt(), area.height.toInt());
   for (int i = 0; i < area.height.toInt(); i++) {

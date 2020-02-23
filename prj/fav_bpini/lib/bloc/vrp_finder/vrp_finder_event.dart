@@ -16,7 +16,7 @@ class LoadCamera extends VrpFinderEvent {
   List<Object> get props => [];
 }
 
- @immutable
+@immutable
 class TextFound extends VrpFinderEvent {
   final List<TextBlock> textBlocks;
   final Size imageSize;
@@ -32,8 +32,9 @@ class VrpFound extends VrpFinderEvent {
   final VrpFinderResult result;
   final int timeTook;
   final String pathToImage;
+  final DateTime date;
 
-  VrpFound(this.result, this.timeTook, this.pathToImage);
+  VrpFound(this.result, this.timeTook, this.pathToImage, this.date);
 
   @override
   List<Object> get props => [result];
@@ -44,8 +45,9 @@ class VrpResultsFound extends VrpFinderEvent {
   final List<VrpFinderResult> results;
   final Size size;
   final int timeTook;
+  final DateTime date;
 
-  VrpResultsFound(this.results, this.size, this.timeTook);
+  VrpResultsFound(this.results, this.size, this.timeTook, this.date);
 
   @override
   List<Object> get props => [results, size];

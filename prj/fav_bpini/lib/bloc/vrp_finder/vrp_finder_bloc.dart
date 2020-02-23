@@ -63,7 +63,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
 
                 debugPrint("Written to $path");
 
-                add(VrpFound(result[0], took, path));
+                add(VrpFound(result[0], took, path, DateTime.now()));
 
                 this.close();
                 return;
@@ -71,7 +71,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
             }
 
             add(VrpResultsFound(
-                results, Size(availableImage.width.toDouble(), availableImage.height.toDouble()), took));
+                results, Size(availableImage.width.toDouble(), availableImage.height.toDouble()), took, DateTime.now()));
 
             _isScanBusy = false;
           });
@@ -82,7 +82,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
     } else if (event is TextFound) {
       yield CameraFoundText(_cameraController, event.textBlocks, event.imageSize);
     } else if (event is VrpFound) {
-      yield VrpFoundState(event.result, event.timeTook, event.pathToImage);
+      yield VrpFoundState(event.result, event.timeTook, event.pathToImage, event.date);
     } else if (event is VrpResultsFound) {
       yield ResultsFoundState(event.results, event.size, _cameraController, event.timeTook);
     }
