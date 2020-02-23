@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:favbpini/model/vrp.dart';
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 @immutable
@@ -22,10 +24,16 @@ class RescanVRP extends VrpPreviewEvent {
 
 @immutable
 class SubmitVRP extends VrpPreviewEvent {
-  SubmitVRP();
+
+  final VRP vrp;
+  final DateTime date;
+  final String sourceImagePath;
+  final Rect area;
+
+  SubmitVRP(this.vrp, this.date, this.sourceImagePath, this.area);
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [vrp, date, sourceImagePath, area];
 }
 
 @immutable

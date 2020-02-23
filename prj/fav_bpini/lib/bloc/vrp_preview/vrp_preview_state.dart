@@ -41,3 +41,10 @@ class PositionLoaded extends VrpPreviewState {
   @override
   List<Object> get props => [this.position, this.address];
 }
+
+class VrpSubmitted extends VrpPreviewState {
+  VrpSubmitted();
+
+  @override
+  List<Object> get props => [];
+}

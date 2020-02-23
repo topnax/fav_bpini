@@ -1,9 +1,12 @@
+import 'package:favbpini/database/database.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/model/vrp_record.dart';
 import 'package:favbpini/widget/common_texts.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:simple_animations/simple_animations.dart';
 
 class VrpListPage extends StatefulWidget {
   @override
@@ -16,7 +19,7 @@ class VrpListPageState extends State<VrpListPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        child: _buildVRPHistory(_getSampleRecords()),
+      child: _buildVRPHistory(_getSampleRecords()),
     );
   }
 
@@ -47,26 +50,51 @@ class VrpListPageState extends State<VrpListPage> {
 
           HeadingText("Historie"),
 
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top:0),
-            child: ListView(
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 0),
 
-              children: [for (VRPRecord record in vrpRecordList) _buildVRPRecordCard(record)],
-
+              child: StreamBuilder<List<FoundVrpRecord>>(
+                stream: Provider.of<Database>(context).watchAllRecords(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    if (snapshot.data.length > 0) {
+                      return FutureBuilder<String>(
+                        future: Future<String>.delayed(Duration(milliseconds: 1500), () {debugPrint("data loaded"); return "Whatever";}),
+                        builder: (BuildContext context, AsyncSnapshot<String> snapshotz) {
+                          debugPrint("snapshot ${snapshotz.hasData}");
+                          return snapshotz.hasData ? ListView(children: [for (FoundVrpRecord record in snapshot.data) _buildVRPRecordCard(
+                              VRPRecord(
+                                  VRP(record.firstPart, record.secondPart),
+                                  record.date,
+                                  Position(longitude: record.longitude, latitude: record.latitude),
+                                  record.address
+                              ), record, context)
+                          ]): ListView(children: [for (var i = 0; i < 10; i++) _buildVRPRecordCardLoading()]);
+                        },
+                      );
+                    } else {
+                      return Text("None found");
+                    }
+                  } else {
+                    return ListView(children: [for (var i = 0; i < 10; i++) _buildVRPRecordCardLoading()]);
+                  }
+                },
+              ),
             ),
           ),
-        ),
         ],
       ),
     );
   }
 
-  Widget _buildVRPRecordCard(VRPRecord record) {
+  Widget _buildVRPRecordCard(VRPRecord record, FoundVrpRecord dbItem, BuildContext context) {
     return Dismissible(
       key: Key(record.toString() + DateTime.now().toString()),
       background: Container(color: Colors.white30),
-      onDismissed: (direction) {},
+      onDismissed: (direction) {
+        Provider.of<Database>(context, listen: false).deleteEntry(dbItem);
+      },
       child: Padding(
         padding: EdgeInsets.only(top: 10, left: 25, right: 25),
         child: Material(
@@ -82,21 +110,21 @@ class VrpListPageState extends State<VrpListPage> {
                 children: [
                   Container(
                       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Text(
-                        record.vrp.firstPart + " " + record.vrp.secondPart,
-                        style: TextStyles.monserratStyle.copyWith(fontSize: 18, color: Colors.white),
-                      ),
-                    ),
-                    Align(
-                        alignment: Alignment.center,
-                        child: Center(
-                            child: Text(
-                          DateFormat('dd.MM.yyyy').format(record.date),
-                          style: TextStyles.monserratStyle.copyWith(fontSize: 12, color: Colors.white),
-                        )))
-                  ])),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            record.vrp.firstPart + " " + record.vrp.secondPart,
+                            style: TextStyles.monserratStyle.copyWith(fontSize: 18, color: Colors.white),
+                          ),
+                        ),
+                        Align(
+                            alignment: Alignment.center,
+                            child: Center(
+                                child: Text(
+                                  record.date != null ? DateFormat('dd.MM.yyyy HH:mm').format(record.date) : "Nenalezeno",
+                                  style: TextStyles.monserratStyle.copyWith(fontSize: 12, color: Colors.white),
+                                )))
+                      ])),
                   Padding(
                     padding: const EdgeInsets.only(top: 5.0),
                     child: Text(
@@ -110,6 +138,73 @@ class VrpListPageState extends State<VrpListPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildVRPRecordCardLoading() {
+    final tween = MultiTrackTween([
+      Track("color1").add(Duration(milliseconds: 500),
+          ColorTween(begin: Colors.blueAccent, end: Colors.blueAccent[100])),
+      Track("color2").add(Duration(milliseconds: 500),
+          ColorTween(begin: Colors.blueAccent[100], end: Colors.blueAccent))
+    ]);
+//
+
+
+    return ControlledAnimation(
+      playback: Playback.MIRROR,
+      tween: tween,
+      duration: tween.duration,
+      builder: (context, animation) {
+        return Padding(
+          padding: EdgeInsets.only(top: 10, left: 25, right: 25),
+          child: Container(
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [animation["color1"], animation["color2"]])),
+
+            padding: EdgeInsets.all(15),
+            child: Column(
+              children: [
+                Container(
+                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Container(
+                          width: 90,
+                          height: 8,
+                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: Colors.grey[200]),
+                        ),
+                      ),
+                      Align(
+                          alignment: Alignment.center,
+                          child: Center(
+                              child: Container(
+                                width: 70,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5), color: Colors.grey[200]),
+                              )))
+                    ])),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 25.0),
+                    child: Container(
+                      width: 150,
+                      height: 5,
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: Colors.grey[200]),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

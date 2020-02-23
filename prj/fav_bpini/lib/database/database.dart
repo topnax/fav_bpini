@@ -20,9 +20,19 @@ class FoundVrpRecords extends Table {
 
   TextColumn get address => text()();
 
+  TextColumn get note => text()();
+
   DateTimeColumn get date => dateTime().nullable()();
 
   TextColumn get sourceImagePath => text()();
+
+  IntColumn get top => integer()();
+
+  IntColumn get left => integer()();
+
+  IntColumn get width => integer()();
+
+  IntColumn get height => integer()();
 }
 
 LazyDatabase _openConnection() {
@@ -38,11 +48,42 @@ LazyDatabase _openConnection() {
 
 @UseMoor(tables: [FoundVrpRecords])
 class Database extends _$Database {
-  Database()
-      : super(_openConnection());
+  Database() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+      onCreate: (Migrator m) {
+        return m.createAll();
+      },
+      onUpgrade: (Migrator m, int from, int to) async {
+        if (from == 3) {
+          // we added the dueDate property in the change from version 1
+          await m.addColumn(foundVrpRecords, foundVrpRecords.note);
+        }
+      }
+  );
+
+  Future addVrpRecord(FoundVrpRecordsCompanion entry) {
+    return into(foundVrpRecords).insert(entry);
+  }
+
+
+  /// Updates the row in the database represents this entry by writing the
+  /// updated data.
+  Future updateEntry(FoundVrpRecord entry) {
+    return update(foundVrpRecords).replace(entry);
+  }
+
+  Future deleteEntry(FoundVrpRecord entry) {
+    return delete(foundVrpRecords).delete(entry);
+  }
+
+
+
+  Stream<List<FoundVrpRecord>> watchAllRecords() => select(foundVrpRecords).watch();
 
 
 }
