@@ -198,18 +198,25 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(22.0),
-                                  child: TextField(
-                                    controller: _noteController,
-                                    decoration: InputDecoration(
-                                      hintText: "Vlastní poznámka",
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(5.0),
-                                        borderSide: BorderSide(
-                                          color: Colors.amber,
-                                          style: BorderStyle.solid,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _noteController,
+                                          decoration: InputDecoration(
+                                            hintText: "Vlastní poznámka",
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(5.0),
+                                              borderSide: BorderSide(
+                                                color: Colors.amber,
+                                                style: BorderStyle.solid,
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
+                                      IconButton(icon: Icon(Icons.mic),onPressed: (){})
+                                    ],
                                   ),
                                 ),
                                 HeadingText(

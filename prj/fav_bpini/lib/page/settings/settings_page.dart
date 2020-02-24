@@ -1,6 +1,7 @@
 import 'package:favbpini/utils/preferences.dart';
 import 'package:favbpini/widget/common_texts.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -78,6 +79,18 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                         ),
                       ),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: FutureBuilder<PackageInfo>(
+                          future: PackageInfo.fromPlatform(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return Center(child: Text(""));
+                            } else {
+                              return Center(child: Text("${snapshot.data.version}+${snapshot.data.buildNumber}", style: Theme.of(context).textTheme.caption,),);
+                            }
+                          }),
+                    )
                   ],
                 ),
               ),
