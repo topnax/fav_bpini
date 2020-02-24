@@ -66,7 +66,14 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
           bloc: BlocProvider.of<VrpPreviewBloc>(context),
           listener: (context, state) {
             if (state is VrpSubmitted) {
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text("Záznam uložen"),
+              ));
               Navigator.pushNamed(context, "/");
+            } else if (state is PositionFailed) {
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text("Nelze získat pozici"),
+              ));
             }
           },
           child: Padding(

@@ -45,8 +45,8 @@ class VrpListPageState extends State<VrpListPage> {
     return Expanded(
       child: Column(
 
-        crossAxisAlignment: CrossAxisAlignment.start,
-//      crossAxisAlignment: CrossAxisAlignment.stretch,
+//        crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
 
           HeadingText("Historie"),
@@ -75,7 +75,7 @@ class VrpListPageState extends State<VrpListPage> {
                         },
                       );
                     } else {
-                      return Text("None found");
+                      return Center(child: Text("Nenalezen žádný záznam", style: Theme.of(context).textTheme.subhead));
                     }
                   } else {
                     return ListView(children: [for (var i = 0; i < 10; i++) _buildVRPRecordCardLoading()]);

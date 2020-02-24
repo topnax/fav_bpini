@@ -11,6 +11,13 @@
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>This app needs access to location when open and in the background.</string>
 
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app uses the microphone to record your speech and use it as a note.</string>
+    <key>UIBackgroundModes</key>
+    <array>
+    	<string>audio</string>
+    </array>
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>

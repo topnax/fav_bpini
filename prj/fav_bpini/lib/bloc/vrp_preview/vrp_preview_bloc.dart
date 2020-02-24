@@ -107,6 +107,18 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
       }
 
       yield VrpSubmitted();
+    } else if (event is RecordStarted) {
+
+    } else if (event is RecordStopped) {
+
     }
   }
+
+  @override
+  Future<Function> close() {
+
+    return super.close();
+  }
+
+
 }

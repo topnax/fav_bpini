@@ -42,3 +42,20 @@ class DiscardVRP extends VrpPreviewEvent {
   @override
   List<Object> get props => [pathToImage];
 }
+
+@immutable
+class RecordStarted extends VrpPreviewEvent {
+  RecordStarted();
+
+  @override
+  List<Object> get props => [];
+}
+
+@immutable
+class RecordStopped extends VrpPreviewEvent {
+  RecordStopped();
+
+  @override
+  List<Object> get props => [];
+}
+
