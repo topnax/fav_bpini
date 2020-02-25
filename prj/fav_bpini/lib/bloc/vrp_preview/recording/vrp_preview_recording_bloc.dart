@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:favbpini/bloc/vrp_preview/recording/vrp_preview_recording_event.dart';
@@ -98,6 +99,7 @@ class VrpPreviewRecordingBloc extends Bloc<VrpPreviewRecordingEvent, VrpPreviewR
     } else if (event is RecordRemoved) {
       audioNoteEdited = true;
       deletedNote = true;
+      await File(audioPath).delete();
       audioPath = "";
       yield InitialVrpPreviewRecordingState();
     }
