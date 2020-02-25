@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:meta/meta.dart';
 
-import '../../model/vrp.dart';
+import '../../../model/vrp.dart';
 
 @immutable
 abstract class VrpPreviewState extends Equatable {

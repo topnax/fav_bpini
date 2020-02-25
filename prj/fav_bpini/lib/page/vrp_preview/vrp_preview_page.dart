@@ -1,6 +1,9 @@
 import 'dart:io';
 
-import 'package:favbpini/bloc/vrp_preview/bloc.dart';
+import 'package:favbpini/bloc/vrp_preview/main/bloc.dart';
+import 'package:favbpini/bloc/vrp_preview/recording/vrp_preview_recording_bloc.dart';
+import 'package:favbpini/bloc/vrp_preview/recording/vrp_preview_recording_event.dart';
+import 'package:favbpini/bloc/vrp_preview/recording/vrp_preview_recording_state.dart';
 import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_bloc.dart';
 import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_event.dart';
 import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_state.dart';
@@ -58,9 +61,13 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
   Widget build(BuildContext context) {
     var database = Provider.of<Database>(context);
     return Scaffold(
-        body: BlocProvider(
-      create: (BuildContext context) =>
-          VrpPreviewBloc(VRP(_record.firstPart, _record.secondPart), _addressController, _noteController, database),
+        body: MultiBlocProvider(
+      providers: [
+        BlocProvider<VrpPreviewBloc>(
+            create: (context) => VrpPreviewBloc(
+                VRP(_record.firstPart, _record.secondPart), _addressController, _noteController, database)),
+        BlocProvider<VrpPreviewRecordingBloc>(create: (context) => VrpPreviewRecordingBloc())
+      ],
       child: Builder(
         builder: (context) => BlocListener(
           bloc: BlocProvider.of<VrpPreviewBloc>(context),
@@ -133,9 +140,8 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                             onPressed: () {
                                               BlocProvider.of<VrpPreviewBloc>(context)
                                                   .add(DiscardVRP(_record.sourceImagePath));
-                                              Navigator.of(context).pushNamed(
-                                                '/finder', arguments: VrpFinderPageArguments(edit: _edit, record: _record)
-                                              );
+                                              Navigator.of(context).pushNamed('/finder',
+                                                  arguments: VrpFinderPageArguments(edit: _edit, record: _record));
                                             },
                                             color: Colors.blue,
                                             textColor: Colors.white,
@@ -152,6 +158,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                           ),
                                         ),
                                       ],
+
                                     ),
                                   ),
                                 ),
@@ -222,7 +229,59 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                           ),
                                         ),
                                       ),
-                                      IconButton(icon: Icon(Icons.mic),onPressed: (){})
+                                      BlocListener(
+                                        bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
+                                        listener: (context, state) {
+                                          if (state is PlaybackFailed) {
+                                            Scaffold.of(context).showSnackBar(SnackBar(
+                                              content: Text(state.error),
+                                            ));
+                                          } else if (state is RecordingFailed) {
+                                            Scaffold.of(context).showSnackBar(SnackBar(
+                                              content: Text(state.error),
+                                            ));
+                                          }
+                                        },
+                                        child: BlocBuilder(
+                                            bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
+                                            builder: (context, state) {
+                                              if (state is InitialVrpPreviewRecordingState) {
+                                                return IconButton(
+                                                    icon: Icon(Icons.mic),
+                                                    onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                        .add(RecordingStarted()));
+                                              } else if (state is RecordingInProgress) {
+                                                return Row(
+                                                  children: [
+                                                    Text(DateFormat('mm:ss:SS', 'en_US').format(state.currentTime)),
+                                                    IconButton(
+                                                        icon: Icon(Icons.stop),
+                                                        onPressed: () =>
+                                                            BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                                .add(RecordingStopped()))
+                                                  ],
+                                                );
+                                              } else if (state is RecordingSuccess) {
+                                                return IconButton(
+                                                    icon: Icon(Icons.play_arrow),
+                                                    onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                        .add(PlaybackStarted()));
+                                              } else if (state is PlaybackInProgress) {
+                                                return Row(
+                                                  children: [
+                                                    Text(DateFormat('mm:ss:SS', 'en_US').format(state.currentTime)),
+                                                    IconButton(
+                                                        icon: Icon(Icons.stop),
+                                                        onPressed: () =>
+                                                            BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                                .add(PlaybackStopped()))
+                                                  ],
+                                                );
+                                              }
+
+                                              return Text("No state found");
+                                            }),
+                                      )
                                     ],
                                   ),
                                 ),

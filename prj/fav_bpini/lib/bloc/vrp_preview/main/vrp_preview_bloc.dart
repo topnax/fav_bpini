@@ -1,14 +1,16 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:bloc/bloc.dart';
 import 'package:favbpini/database/database.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:path_provider/path_provider.dart';
-import '../../model/vrp.dart';
-import './bloc.dart';
-import 'package:path/path.dart' as p;
 import 'package:moor/src/runtime/data_class.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+
+import '../../../model/vrp.dart';
+import 'bloc.dart';
 
 const sourceImagesFolderName = "source";
 
@@ -84,7 +86,6 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
         }
       }
 
-
       var address = _addressController.text.trim().isNotEmpty ? _addressController.text : "Nezadáno";
 
       if (!event.edit) {
@@ -107,18 +108,11 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
       }
 
       yield VrpSubmitted();
-    } else if (event is RecordStarted) {
-
-    } else if (event is RecordStopped) {
-
     }
   }
 
   @override
   Future<Function> close() {
-
     return super.close();
   }
-
-
 }
