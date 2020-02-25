@@ -66,7 +66,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
         BlocProvider<VrpPreviewBloc>(
             create: (context) => VrpPreviewBloc(
                 VRP(_record.firstPart, _record.secondPart), _addressController, _noteController, database)),
-        BlocProvider<VrpPreviewRecordingBloc>(create: (context) => VrpPreviewRecordingBloc())
+        BlocProvider<VrpPreviewRecordingBloc>(create: (context) => VrpPreviewRecordingBloc(_record.audioNotePath))
       ],
       child: Builder(
         builder: (context) => BlocListener(
@@ -230,6 +230,12 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                       ),
                                       BlocListener(
                                         bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
+                                        condition: (previousState, currentState) {
+                                          if (currentState is RecordingSuccess && !(previousState is RecordingInProgress)) {
+                                              return false;
+                                          }
+                                          return true;
+                                        },
                                         listener: (context, state) {
                                           if (state is PlaybackFailed) {
                                             Scaffold.of(context).showSnackBar(SnackBar(
@@ -354,8 +360,9 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                   borderRadius: new BorderRadius.circular(7.0),
                                 ),
                                 onPressed: () {
-                                  var bloc = BlocProvider.of<VrpPreviewBloc>(context);
-                                  bloc.add(SubmitVRP(_record, edit: _edit));
+                                  var mainBloc = BlocProvider.of<VrpPreviewBloc>(context);
+                                  var recordingBloc = BlocProvider.of<VrpPreviewRecordingBloc>(context);
+                                  mainBloc.add(SubmitVRP(_record, edit: _edit, audioNotePath: recordingBloc.audioPath, audioNoteEdited: recordingBloc.audioNoteEdited, audioNoteDeleted: recordingBloc.deletedNote));
                                 },
                                 color: Colors.orange,
                                 textColor: Colors.white,

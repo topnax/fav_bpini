@@ -1,9 +1,9 @@
 import 'dart:io';
 
+import 'package:moor/moor.dart' ;
 import 'package:moor_ffi/moor_ffi.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
-import 'package:moor/moor.dart';
+import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
 
@@ -25,6 +25,8 @@ class FoundVrpRecords extends Table {
   DateTimeColumn get date => dateTime().nullable()();
 
   TextColumn get sourceImagePath => text()();
+
+  TextColumn get audioNotePath => text()();
 
   IntColumn get top => integer()();
 
@@ -60,8 +62,9 @@ class Database extends _$Database {
       },
       onUpgrade: (Migrator m, int from, int to) async {
         if (from == 3) {
-          // we added the dueDate property in the change from version 1
           await m.addColumn(foundVrpRecords, foundVrpRecords.note);
+        } else if (from == 4) {
+          await m.addColumn(foundVrpRecords, foundVrpRecords.audioNotePath);
         }
       }
   );

@@ -3,16 +3,17 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:favbpini/database/database.dart';
+import 'package:favbpini/model/vrp.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:moor/src/runtime/data_class.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-import '../../../model/vrp.dart';
 import 'bloc.dart';
 
 const sourceImagesFolderName = "source";
+const audioNotesFolderName = "audio_notes";
 
 class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
   final VRP vrp;
@@ -56,35 +57,11 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
 //      File(event.pathToImage).delete();
 //      debugPrint("Deleted: ${event.pathToImage}");
     } else if (event is SubmitVRP) {
-      if (!event.edit) {
-        var tempFile = File(event.record.sourceImagePath);
+      var dir = await getApplicationDocumentsDirectory();
 
-        debugPrint("tempFile@${tempFile.path} exists=${tempFile.existsSync()}");
+      var audioNotePath  = await handleAudioNote(event, dir);
 
-        var dir = await getApplicationDocumentsDirectory();
-
-        var t = Directory(dir.path + "/" + sourceImagesFolderName);
-        if (!await t.exists()) {
-          await t.create();
-          debugPrint(t.path + " created");
-        } else {
-          debugPrint(t.path + " already exists");
-        }
-
-        var storePath = t.path + "/" + p.basename(tempFile.path);
-
-        debugPrint("Store path is =$storePath");
-
-        try {
-          tempFile.copy(storePath);
-
-          debugPrint("Copied =$storePath");
-          debugPrint("Successfully added a new VrpRecord to the database");
-        } catch (err) {
-          // TODO what to do when copying fails?
-          print("caught error: $err");
-        }
-      }
+      await handleSourceImageEvent(dir, event);
 
       var address = _addressController.text.trim().isNotEmpty ? _addressController.text : "Nezadáno";
 
@@ -101,14 +78,80 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
             longitude: event.record.longitude,
             address: address,
             note: _noteController.text,
+            audioNotePath: audioNotePath,
             sourceImagePath: event.record.sourceImagePath));
         debugPrint("Successfully added a new VrpRecord to the database");
       } else {
-        database.updateEntry(event.record.copyWith(address: address, note: _noteController.text));
+        database
+            .updateEntry(event.record.copyWith(address: address, note: _noteController.text, audioNotePath: audioNotePath));
       }
 
       yield VrpSubmitted();
     }
+  }
+
+  Future handleSourceImageEvent(Directory rootDirectory, SubmitVRP event) async {
+    var tempFile = File(event.record.sourceImagePath);
+    var sourceImagesDirectory = Directory(rootDirectory.path + "/" + sourceImagesFolderName);
+    if (!await sourceImagesDirectory.exists()) {
+      await sourceImagesDirectory.create();
+      debugPrint(sourceImagesDirectory.path + " created");
+    } else {
+      debugPrint(sourceImagesDirectory.path + " already exists");
+    }
+
+    var storePath = sourceImagesDirectory.path + "/" + p.basename(tempFile.path);
+
+    debugPrint("Store path is =$storePath");
+
+    try {
+      tempFile.copy(storePath);
+
+      debugPrint("Copied =$storePath");
+      debugPrint("Successfully added a new VrpRecord to the database");
+    } catch (err) {
+      // TODO what to do when copying fails?
+      print("caught error: $err");
+    }
+  }
+
+  Future<String> handleAudioNote(SubmitVRP event, Directory rootDirectory) async {
+    var result = event.audioNotePath;
+    if (event.audioNoteEdited) {
+      if (event.audioNoteDeleted) {
+        result = "";
+      } else {
+        // copy the audio file from the temp directory and move it to the persistent one
+        var audioNotesDirectory = Directory(rootDirectory.path + "/" + audioNotesFolderName);
+
+        if (!await audioNotesDirectory.exists()) {
+          await audioNotesDirectory.create();
+        }
+
+        var audioStorePath = audioNotesDirectory.path + "/" + p.basename(File(event.audioNotePath).path);
+        var tempFile = File(event.audioNotePath);
+
+        try {
+          debugPrint("Copied a new audio note");
+          tempFile.copy(audioStorePath);
+          result = audioStorePath;
+        } catch (err) {
+          print("caught error: $err");
+        }
+      }
+    }
+    if (event.audioNoteEdited) {
+      debugPrint("deleting previous audio note");
+      var previousNoteFile = File(event.record.audioNotePath);
+      if (await previousNoteFile.exists()) {
+        await previousNoteFile.delete();
+        debugPrint("Deleted previous audio note file=${previousNoteFile.path}");
+      } else {
+        debugPrint("Did not delete previous audio note file");
+      }
+    }
+
+    return Future.value(result);
   }
 
   @override

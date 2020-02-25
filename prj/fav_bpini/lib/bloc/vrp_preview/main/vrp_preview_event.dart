@@ -26,8 +26,11 @@ class RescanVRP extends VrpPreviewEvent {
 class SubmitVRP extends VrpPreviewEvent {
   final FoundVrpRecord record;
   final bool edit;
+  final String audioNotePath;
+  final bool audioNoteEdited;
+  final bool audioNoteDeleted;
 
-  SubmitVRP(this.record, {this.edit = false});
+  SubmitVRP(this.record, {this.edit = false, this.audioNotePath = "", this.audioNoteEdited = false, this.audioNoteDeleted = false});
 
   @override
   List<Object> get props => [record, edit];

@@ -17,6 +17,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
   final String note;
   final DateTime date;
   final String sourceImagePath;
+  final String audioNotePath;
   final int top;
   final int left;
   final int width;
@@ -31,6 +32,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
       @required this.note,
       this.date,
       @required this.sourceImagePath,
+      @required this.audioNotePath,
       @required this.top,
       @required this.left,
       @required this.width,
@@ -60,6 +62,8 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
           dateTimeType.mapFromDatabaseResponse(data['${effectivePrefix}date']),
       sourceImagePath: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}source_image_path']),
+      audioNotePath: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}audio_note_path']),
       top: intType.mapFromDatabaseResponse(data['${effectivePrefix}top']),
       left: intType.mapFromDatabaseResponse(data['${effectivePrefix}left']),
       width: intType.mapFromDatabaseResponse(data['${effectivePrefix}width']),
@@ -79,6 +83,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
       note: serializer.fromJson<String>(json['note']),
       date: serializer.fromJson<DateTime>(json['date']),
       sourceImagePath: serializer.fromJson<String>(json['sourceImagePath']),
+      audioNotePath: serializer.fromJson<String>(json['audioNotePath']),
       top: serializer.fromJson<int>(json['top']),
       left: serializer.fromJson<int>(json['left']),
       width: serializer.fromJson<int>(json['width']),
@@ -98,6 +103,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
       'note': serializer.toJson<String>(note),
       'date': serializer.toJson<DateTime>(date),
       'sourceImagePath': serializer.toJson<String>(sourceImagePath),
+      'audioNotePath': serializer.toJson<String>(audioNotePath),
       'top': serializer.toJson<int>(top),
       'left': serializer.toJson<int>(left),
       'width': serializer.toJson<int>(width),
@@ -129,6 +135,9 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
       sourceImagePath: sourceImagePath == null && nullToAbsent
           ? const Value.absent()
           : Value(sourceImagePath),
+      audioNotePath: audioNotePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(audioNotePath),
       top: top == null && nullToAbsent ? const Value.absent() : Value(top),
       left: left == null && nullToAbsent ? const Value.absent() : Value(left),
       width:
@@ -148,6 +157,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
           String note,
           DateTime date,
           String sourceImagePath,
+          String audioNotePath,
           int top,
           int left,
           int width,
@@ -162,6 +172,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
         note: note ?? this.note,
         date: date ?? this.date,
         sourceImagePath: sourceImagePath ?? this.sourceImagePath,
+        audioNotePath: audioNotePath ?? this.audioNotePath,
         top: top ?? this.top,
         left: left ?? this.left,
         width: width ?? this.width,
@@ -179,6 +190,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
           ..write('note: $note, ')
           ..write('date: $date, ')
           ..write('sourceImagePath: $sourceImagePath, ')
+          ..write('audioNotePath: $audioNotePath, ')
           ..write('top: $top, ')
           ..write('left: $left, ')
           ..write('width: $width, ')
@@ -207,11 +219,15 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
                                   $mrjc(
                                       sourceImagePath.hashCode,
                                       $mrjc(
-                                          top.hashCode,
+                                          audioNotePath.hashCode,
                                           $mrjc(
-                                              left.hashCode,
-                                              $mrjc(width.hashCode,
-                                                  height.hashCode)))))))))))));
+                                              top.hashCode,
+                                              $mrjc(
+                                                  left.hashCode,
+                                                  $mrjc(
+                                                      width.hashCode,
+                                                      height
+                                                          .hashCode))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -225,6 +241,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
           other.note == this.note &&
           other.date == this.date &&
           other.sourceImagePath == this.sourceImagePath &&
+          other.audioNotePath == this.audioNotePath &&
           other.top == this.top &&
           other.left == this.left &&
           other.width == this.width &&
@@ -241,6 +258,7 @@ class FoundVrpRecordsCompanion extends UpdateCompanion<FoundVrpRecord> {
   final Value<String> note;
   final Value<DateTime> date;
   final Value<String> sourceImagePath;
+  final Value<String> audioNotePath;
   final Value<int> top;
   final Value<int> left;
   final Value<int> width;
@@ -255,6 +273,7 @@ class FoundVrpRecordsCompanion extends UpdateCompanion<FoundVrpRecord> {
     this.note = const Value.absent(),
     this.date = const Value.absent(),
     this.sourceImagePath = const Value.absent(),
+    this.audioNotePath = const Value.absent(),
     this.top = const Value.absent(),
     this.left = const Value.absent(),
     this.width = const Value.absent(),
@@ -270,6 +289,7 @@ class FoundVrpRecordsCompanion extends UpdateCompanion<FoundVrpRecord> {
     @required String note,
     this.date = const Value.absent(),
     @required String sourceImagePath,
+    @required String audioNotePath,
     @required int top,
     @required int left,
     @required int width,
@@ -281,6 +301,7 @@ class FoundVrpRecordsCompanion extends UpdateCompanion<FoundVrpRecord> {
         address = Value(address),
         note = Value(note),
         sourceImagePath = Value(sourceImagePath),
+        audioNotePath = Value(audioNotePath),
         top = Value(top),
         left = Value(left),
         width = Value(width),
@@ -295,6 +316,7 @@ class FoundVrpRecordsCompanion extends UpdateCompanion<FoundVrpRecord> {
       Value<String> note,
       Value<DateTime> date,
       Value<String> sourceImagePath,
+      Value<String> audioNotePath,
       Value<int> top,
       Value<int> left,
       Value<int> width,
@@ -309,6 +331,7 @@ class FoundVrpRecordsCompanion extends UpdateCompanion<FoundVrpRecord> {
       note: note ?? this.note,
       date: date ?? this.date,
       sourceImagePath: sourceImagePath ?? this.sourceImagePath,
+      audioNotePath: audioNotePath ?? this.audioNotePath,
       top: top ?? this.top,
       left: left ?? this.left,
       width: width ?? this.width,
@@ -429,6 +452,20 @@ class $FoundVrpRecordsTable extends FoundVrpRecords
     );
   }
 
+  final VerificationMeta _audioNotePathMeta =
+      const VerificationMeta('audioNotePath');
+  GeneratedTextColumn _audioNotePath;
+  @override
+  GeneratedTextColumn get audioNotePath =>
+      _audioNotePath ??= _constructAudioNotePath();
+  GeneratedTextColumn _constructAudioNotePath() {
+    return GeneratedTextColumn(
+      'audio_note_path',
+      $tableName,
+      false,
+    );
+  }
+
   final VerificationMeta _topMeta = const VerificationMeta('top');
   GeneratedIntColumn _top;
   @override
@@ -488,6 +525,7 @@ class $FoundVrpRecordsTable extends FoundVrpRecords
         note,
         date,
         sourceImagePath,
+        audioNotePath,
         top,
         left,
         width,
@@ -554,6 +592,14 @@ class $FoundVrpRecordsTable extends FoundVrpRecords
     } else if (isInserting) {
       context.missing(_sourceImagePathMeta);
     }
+    if (d.audioNotePath.present) {
+      context.handle(
+          _audioNotePathMeta,
+          audioNotePath.isAcceptableValue(
+              d.audioNotePath.value, _audioNotePathMeta));
+    } else if (isInserting) {
+      context.missing(_audioNotePathMeta);
+    }
     if (d.top.present) {
       context.handle(_topMeta, top.isAcceptableValue(d.top.value, _topMeta));
     } else if (isInserting) {
@@ -618,6 +664,10 @@ class $FoundVrpRecordsTable extends FoundVrpRecords
     if (d.sourceImagePath.present) {
       map['source_image_path'] =
           Variable<String, StringType>(d.sourceImagePath.value);
+    }
+    if (d.audioNotePath.present) {
+      map['audio_note_path'] =
+          Variable<String, StringType>(d.audioNotePath.value);
     }
     if (d.top.present) {
       map['top'] = Variable<int, IntType>(d.top.value);

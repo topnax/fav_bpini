@@ -9,30 +9,30 @@ import 'package:path_provider/path_provider.dart';
 
 class VrpPreviewRecordingBloc extends Bloc<VrpPreviewRecordingEvent, VrpPreviewRecordingState> {
   final _sound = FlutterSound();
-  var audioPath;
-  var recorded = false;
+  var audioPath = "";
+  var deletedNote = false;
+  var audioNoteEdited = false;
 
   StreamSubscription _recorderSubscription;
   StreamSubscription _playerSubscription;
 
+  VrpPreviewRecordingBloc(this.audioPath);
+
   @override
-  VrpPreviewRecordingState get initialState => InitialVrpPreviewRecordingState();
+  VrpPreviewRecordingState get initialState {
+    if (audioPath != "") {
+      return RecordingSuccess(audioPath);
+    } else {
+      return InitialVrpPreviewRecordingState();
+    }
+  }
 
   @override
   Stream<VrpPreviewRecordingState> mapEventToState(
     VrpPreviewRecordingEvent event,
   ) async* {
-    debugPrint("event is ");
     if (event is RecordingStarted) {
       debugPrint("Received recording started event");
-//      debugPrint("requesting permission");
-//      Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.microphone]);
-//      debugPrint("requested permission");
-//      PermissionStatus permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.microphone);
-//      debugPrint("got permission status");
-
-//      if (permission == PermissionStatus.granted) {
-      debugPrint("Mic permission granted");
       yield RecordingInProgress(DateTime.fromMillisecondsSinceEpoch(0));
       final dir = await getTemporaryDirectory();
       debugPrint("Starting recording...");
@@ -51,10 +51,6 @@ class VrpPreviewRecordingBloc extends Bloc<VrpPreviewRecordingEvent, VrpPreviewR
         debugPrint("Exception while starting recorder: " + exception);
         yield RecordingFailed("Nepodařilo se spustit nahrávání.");
       }
-//      } else {
-//        debugPrint("No permissions granted");
-//        yield RecordingFailed("Bez povolení nelze nahrávat zvuk z mikrofonu.");
-//      }
     } else if (event is RecordingUpdated) {
       yield RecordingInProgress(DateTime.fromMillisecondsSinceEpoch(event.currentPosition.toInt()));
     } else if (event is RecordingStopped) {
@@ -62,15 +58,16 @@ class VrpPreviewRecordingBloc extends Bloc<VrpPreviewRecordingEvent, VrpPreviewR
       try {
         _recorderSubscription.cancel();
         _sound.stopRecorder();
-        recorded = true;
         yield RecordingSuccess(audioPath);
+        audioNoteEdited = true;
+        deletedNote = false;
       } catch (exception) {
-        recorded = false;
         debugPrint("Exception while stopping recorder: " + exception);
         yield RecordingFailed("Nepodařilo se zastavit nahrávání.");
       }
     } else if (event is PlaybackStarted) {
       try {
+        debugPrint("playing $audioPath");
         await _sound.startPlayer(audioPath);
 
         _playerSubscription = _sound.onPlayerStateChanged.listen((event) {
@@ -90,14 +87,18 @@ class VrpPreviewRecordingBloc extends Bloc<VrpPreviewRecordingEvent, VrpPreviewR
       debugPrint("PlaybackStopped event");
       try {
         _playerSubscription.cancel();
-        _sound.stopPlayer();
+        if (_sound.audioState == t_AUDIO_STATE.IS_PLAYING) {
+          _sound.stopPlayer();
+        }
         yield RecordingSuccess(audioPath);
       } catch (exception) {
         debugPrint("Exception while stopping player: " + exception);
         yield RecordingFailed("Nepodařilo se zastavit nahrávání.");
       }
     } else if (event is RecordRemoved) {
-      recorded = false;
+      audioNoteEdited = true;
+      deletedNote = true;
+      audioPath = "";
       yield InitialVrpPreviewRecordingState();
     }
   }
@@ -106,6 +107,6 @@ class VrpPreviewRecordingBloc extends Bloc<VrpPreviewRecordingEvent, VrpPreviewR
   Future<Function> close() {
     _sound.stopPlayer();
     _sound.stopRecorder();
-    return this.close();
+    return super.close();
   }
 }

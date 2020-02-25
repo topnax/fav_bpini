@@ -60,6 +60,7 @@ class VrpFinderPageState extends State<VrpFinderPage> {
                         longitude: 0,
                         address: "",
                         note: "",
+                        audioNotePath: "",
                         date: state.date,
                         sourceImagePath: state.pathToImage,
                         top: state.result.rect.top.toInt(),
