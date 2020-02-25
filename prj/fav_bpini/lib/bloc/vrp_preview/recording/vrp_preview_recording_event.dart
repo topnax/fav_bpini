@@ -49,7 +49,6 @@ class PlaybackUpdated extends VrpPreviewRecordingEvent {
   List<Object> get props => [currentPosition];
 }
 
-
 @immutable
 class PlaybackStopped extends VrpPreviewRecordingEvent {
   PlaybackStopped();
@@ -57,3 +56,13 @@ class PlaybackStopped extends VrpPreviewRecordingEvent {
   @override
   List<Object> get props => [];
 }
+
+
+@immutable
+class RecordRemoved extends VrpPreviewRecordingEvent {
+  RecordRemoved();
+
+  @override
+  List<Object> get props => [];
+}
+

@@ -158,7 +158,6 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                           ),
                                         ),
                                       ],
-
                                     ),
                                   ),
                                 ),
@@ -240,6 +239,10 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                             Scaffold.of(context).showSnackBar(SnackBar(
                                               content: Text(state.error),
                                             ));
+                                          } else if (state is RecordingSuccess) {
+                                            Scaffold.of(context).showSnackBar(SnackBar(
+                                              content: Text("Poznámka úspěšně nahrána"),
+                                            ));
                                           }
                                         },
                                         child: BlocBuilder(
@@ -248,30 +251,54 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                               if (state is InitialVrpPreviewRecordingState) {
                                                 return IconButton(
                                                     icon: Icon(Icons.mic),
+                                                    color: Colors.blueAccent,
                                                     onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context)
                                                         .add(RecordingStarted()));
                                               } else if (state is RecordingInProgress) {
                                                 return Row(
                                                   children: [
-                                                    Text(DateFormat('mm:ss:SS', 'en_US').format(state.currentTime)),
+                                                    Padding(
+                                                      padding: const EdgeInsets.all(8.0),
+                                                      child: Text(
+                                                        DateFormat('mm:ss:SS', 'en_US').format(state.currentTime), style: Theme.of(context).textTheme.body2),
+                                                    ),
                                                     IconButton(
                                                         icon: Icon(Icons.stop),
+                                                        color: Colors.blueAccent,
                                                         onPressed: () =>
                                                             BlocProvider.of<VrpPreviewRecordingBloc>(context)
                                                                 .add(RecordingStopped()))
                                                   ],
                                                 );
                                               } else if (state is RecordingSuccess) {
-                                                return IconButton(
-                                                    icon: Icon(Icons.play_arrow),
-                                                    onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context)
-                                                        .add(PlaybackStarted()));
+                                                return Row(
+                                                  children: [
+                                                    IconButton(
+                                                        icon: Icon(Icons.delete),
+                                                        color: Colors.redAccent,
+                                                        onPressed: () =>
+                                                            BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                                .add(RecordRemoved())),
+                                                    IconButton(
+                                                        icon: Icon(Icons.play_arrow),
+                                                        color: Colors.blueAccent,
+                                                        onPressed: () =>
+                                                            BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                                .add(PlaybackStarted())),
+                                                  ],
+                                                );
                                               } else if (state is PlaybackInProgress) {
                                                 return Row(
                                                   children: [
-                                                    Text(DateFormat('mm:ss:SS', 'en_US').format(state.currentTime)),
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(left: 8.0),
+                                                      child: Text(
+                                                          DateFormat('mm:ss:SS', 'en_US').format(state.currentTime),
+                                                          style: Theme.of(context).textTheme.body2),
+                                                    ),
                                                     IconButton(
                                                         icon: Icon(Icons.stop),
+                                                        color: Colors.blueAccent,
                                                         onPressed: () =>
                                                             BlocProvider.of<VrpPreviewRecordingBloc>(context)
                                                                 .add(PlaybackStopped()))

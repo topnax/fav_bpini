@@ -96,6 +96,9 @@ class VrpPreviewRecordingBloc extends Bloc<VrpPreviewRecordingEvent, VrpPreviewR
         debugPrint("Exception while stopping player: " + exception);
         yield RecordingFailed("Nepodařilo se zastavit nahrávání.");
       }
+    } else if (event is RecordRemoved) {
+      recorded = false;
+      yield InitialVrpPreviewRecordingState();
     }
   }
 
