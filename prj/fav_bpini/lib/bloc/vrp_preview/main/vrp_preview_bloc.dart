@@ -155,7 +155,7 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
   }
 
   @override
-  Future<Function> close() {
+  Future<void> close() {
     return super.close();
   }
 }

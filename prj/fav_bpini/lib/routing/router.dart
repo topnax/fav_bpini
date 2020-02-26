@@ -11,7 +11,7 @@ class Router {
 
     switch (settings.name) {
       case '/':
-        return MaterialPageRoute(builder: (_) => MainPage());
+        return MaterialPageRoute(builder: (_) => MainPage(), settings: RouteSettings(name: "/"));
       case '/settings':
         return MaterialPageRoute(builder: (_) => SettingsPage());
       case '/finder':

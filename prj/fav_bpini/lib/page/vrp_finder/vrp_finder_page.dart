@@ -12,10 +12,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../vrp_locator/vrp_locator.dart';
 
 class VrpFinderPageArguments {
-  final bool edit;
-  final FoundVrpRecord record;
+  final bool rescan;
 
-  VrpFinderPageArguments({this.edit = false, this.record});
+  VrpFinderPageArguments({this.rescan = false});
 }
 
 class VrpFinderPage extends StatefulWidget {
@@ -24,15 +23,14 @@ class VrpFinderPage extends StatefulWidget {
   VrpFinderPage(this._arguments);
 
   @override
-  VrpFinderPageState createState() => VrpFinderPageState(this._arguments.edit, this._arguments.record);
+  VrpFinderPageState createState() => VrpFinderPageState(this._arguments.rescan);
 }
 
 class VrpFinderPageState extends State<VrpFinderPage> {
   var _sigma = 10.0;
-  final bool _edit;
-  final FoundVrpRecord _record;
+  final bool _rescan;
 
-  VrpFinderPageState(this._edit, this._record);
+  VrpFinderPageState(this._rescan);
 
   @override
   void dispose() {
@@ -49,7 +47,7 @@ class VrpFinderPageState extends State<VrpFinderPage> {
         listener: (context, VrpFinderState state) {
           if (state is VrpFoundState) {
             debugPrint("Pushing named route!");
-            if (!_edit) {
+            if (!_rescan) {
               Navigator.of(context).pushNamed("/found",
                   arguments: VrpPreviewPageArguments(
                       FoundVrpRecord(
@@ -68,19 +66,10 @@ class VrpFinderPageState extends State<VrpFinderPage> {
                         width: state.result.rect.width.toInt(),
                         height: state.result.rect.height.toInt(),
                       ),
-                      edit: _edit));
+                      edit: false));
             } else {
-              Navigator.of(context).pushNamed("/found",
-                  arguments: VrpPreviewPageArguments(
-                      _record.copyWith(
-                          firstPart: state.result.foundVrp.firstPart,
-                          secondPart: state.result.foundVrp.secondPart,
-                          sourceImagePath: state.pathToImage,
-                          top: state.result.rect.top.toInt(),
-                          left: state.result.rect.left.toInt(),
-                          width: state.result.rect.width.toInt(),
-                          height: state.result.rect.height.toInt()),
-                      edit: _edit));
+              state.result.srcPath = state.pathToImage;
+              Navigator.pop(context, state.result);
             }
           }
         },
@@ -100,17 +89,7 @@ class VrpFinderPageState extends State<VrpFinderPage> {
           } else if (state is CameraErrorState) {
             return Center(child: Text(state.errorDescription));
           }
-          return Center(
-              child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text("State not found"),
-              ),
-              CircularProgressIndicator()
-            ],
-          ));
+          return Container();
         }),
       ),
     ));

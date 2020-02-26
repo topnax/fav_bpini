@@ -32,9 +32,7 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                     icon: Icon(Icons.arrow_back_ios),
                     color: Theme.of(context).textTheme.body1.color,
                     onPressed: () {
-                      Navigator.of(context).pushNamed(
-                        '/',
-                      );
+                      Navigator.pop(context);
                     },
                   )
                 ],

@@ -11,13 +11,14 @@ import 'package:path_provider/path_provider.dart';
 class VrpPreviewRecordingBloc extends Bloc<VrpPreviewRecordingEvent, VrpPreviewRecordingState> {
   final _sound = FlutterSound();
   var audioPath = "";
+  final initialAudioPath;
   var deletedNote = false;
   var audioNoteEdited = false;
 
   StreamSubscription _recorderSubscription;
   StreamSubscription _playerSubscription;
 
-  VrpPreviewRecordingBloc(this.audioPath);
+  VrpPreviewRecordingBloc(this.audioPath) : this.initialAudioPath = audioPath;
 
   @override
   VrpPreviewRecordingState get initialState {
@@ -69,6 +70,11 @@ class VrpPreviewRecordingBloc extends Bloc<VrpPreviewRecordingEvent, VrpPreviewR
     } else if (event is PlaybackStarted) {
       try {
         debugPrint("playing $audioPath");
+        if (!(await File(audioPath).exists())) {
+          throw Exception("file does not exist");
+        } else {
+          debugPrint("exists");
+        }
         await _sound.startPlayer(audioPath);
 
         _playerSubscription = _sound.onPlayerStateChanged.listen((event) {
@@ -79,7 +85,7 @@ class VrpPreviewRecordingBloc extends Bloc<VrpPreviewRecordingEvent, VrpPreviewR
           }
         });
       } catch (exception) {
-        debugPrint("Exception while starting player: " + exception);
+        debugPrint("Exception while starting player: " + exception.toString());
         yield PlaybackFailed("Nepodařilo se spustit přehrávání.");
       }
     } else if (event is PlaybackUpdated) {
@@ -99,16 +105,22 @@ class VrpPreviewRecordingBloc extends Bloc<VrpPreviewRecordingEvent, VrpPreviewR
     } else if (event is RecordRemoved) {
       audioNoteEdited = true;
       deletedNote = true;
-      await File(audioPath).delete();
+      if (audioPath != initialAudioPath) {
+        await File(audioPath).delete();
+      }
       audioPath = "";
       yield InitialVrpPreviewRecordingState();
     }
   }
 
   @override
-  Future<Function> close() {
-    _sound.stopPlayer();
-    _sound.stopRecorder();
+  Future<void> close() {
+    if (_sound.audioState == t_AUDIO_STATE.IS_PLAYING) {
+      _sound.stopPlayer();
+    } else if (_sound.audioState == t_AUDIO_STATE.IS_RECORDING) {
+      _sound.stopRecorder();
+    }
+
     return super.close();
   }
 }
