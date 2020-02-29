@@ -23,7 +23,18 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
 
   var position = Position(longitude: 0, latitude: 0);
 
-  VrpPreviewBloc(this.vrp, this._addressController, this._noteController, this.database);
+  var rescanned = false;
+  final bool editing;
+  final String initialSourceImagePath;
+  String _rescannedSourceImagePath;
+
+  VrpPreviewBloc(this.vrp, this._addressController, this._noteController, this.database, this.initialSourceImagePath,
+      this.editing) {
+    if (!editing) {
+      rescanned = true;
+      _rescannedSourceImagePath = initialSourceImagePath;
+    }
+  }
 
   @override
   VrpPreviewState get initialState => InitialVrpPreviewState(vrp);
@@ -54,14 +65,19 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
         yield PositionFailed();
       }
     } else if (event is DiscardVRP) {
-//      File(event.pathToImage).delete();
-//      debugPrint("Deleted: ${event.pathToImage}");
+      if (rescanned) {
+        var rescannedSourceImageFile = File(_rescannedSourceImagePath);
+        if (await rescannedSourceImageFile.exists()) {
+          rescannedSourceImageFile.delete();
+          debugPrint("deleted previous image source file $_rescannedSourceImagePath");
+        }
+      }
     } else if (event is SubmitVRP) {
       var dir = await getApplicationDocumentsDirectory();
 
-      var audioNotePath  = await handleAudioNote(event, dir);
+      var audioNotePath = await handleAudioNote(event, dir);
 
-      await handleSourceImageEvent(dir, event);
+      var imgSourcePath = await handleSourceImageEvent(dir, event);
 
       var address = _addressController.text.trim().isNotEmpty ? _addressController.text : "Nezadáno";
 
@@ -79,18 +95,39 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
             address: address,
             note: _noteController.text,
             audioNotePath: audioNotePath,
-            sourceImagePath: event.record.sourceImagePath));
+            sourceImagePath: imgSourcePath));
         debugPrint("Successfully added a new VrpRecord to the database");
       } else {
-        database
-            .updateEntry(event.record.copyWith(address: address, note: _noteController.text, audioNotePath: audioNotePath));
+        database.updateEntry(event.record.copyWith(
+            address: address,
+            note: _noteController.text,
+            audioNotePath: audioNotePath,
+            sourceImagePath: imgSourcePath));
       }
 
       yield VrpSubmitted();
+    } else if (event is VrpRescanned) {
+      debugPrint("VrRescanned event received");
+      if (rescanned) {
+        var tempFile = File(_rescannedSourceImagePath);
+        if (await tempFile.exists()) {
+          tempFile.delete();
+          debugPrint("deleted temporary image source file $_rescannedSourceImagePath");
+        } else {
+          debugPrint("temporary image source file $_rescannedSourceImagePath does not exist");
+        }
+      } else {
+        rescanned = true;
+      }
+
+      _rescannedSourceImagePath = event.pathToImage;
     }
   }
 
-  Future handleSourceImageEvent(Directory rootDirectory, SubmitVRP event) async {
+  Future<String> handleSourceImageEvent(Directory rootDirectory, SubmitVRP event) async {
+    if (editing && !rescanned) {
+      return Future<String>.value(initialSourceImagePath);
+    }
     var tempFile = File(event.record.sourceImagePath);
     var sourceImagesDirectory = Directory(rootDirectory.path + "/" + sourceImagesFolderName);
     if (!await sourceImagesDirectory.exists()) {
@@ -113,6 +150,16 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
       // TODO what to do when copying fails?
       print("caught error: $err");
     }
+
+    if (editing) {
+      var previousImageSourceFile = File(initialSourceImagePath);
+      if (await previousImageSourceFile.exists()) {
+        previousImageSourceFile.delete();
+        debugPrint("deleted previous image source file $initialSourceImagePath");
+      }
+    }
+
+    return Future<String>.value(storePath);
   }
 
   Future<String> handleAudioNote(SubmitVRP event, Directory rootDirectory) async {

@@ -46,3 +46,13 @@ class DiscardVRP extends VrpPreviewEvent {
   List<Object> get props => [pathToImage];
 }
 
+@immutable
+class VrpRescanned extends VrpPreviewEvent {
+  final String pathToImage;
+
+  VrpRescanned(this.pathToImage);
+
+  @override
+  List<Object> get props => [pathToImage];
+}
+
