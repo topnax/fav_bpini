@@ -50,6 +50,15 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
     if (event is GetAddressByPosition) {
       yield PositionLoading();
       final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
+
+      if (!(await geolocator.checkGeolocationPermissionStatus() == GeolocationStatus.granted)) {
+        debugPrint("enum is" + (await geolocator.checkGeolocationPermissionStatus()).toString());
+        yield PositionFailed(error: "Aplikace nemá právo na získání polohy");
+      }
+
+      if (!(await geolocator.isLocationServiceEnabled())) {
+        yield PositionFailed(error: "GPS služby jsou vypnuté");
+      }
       try {
         print("Started getting current position");
         position = await geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
@@ -58,7 +67,7 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
         List<Placemark> placemarks = await geolocator.placemarkFromCoordinates(position.latitude, position.longitude);
         var address = "nenalezeno";
         if (placemarks.length > 0) {
-          address = "${placemarks[0].thoroughfare}, ${placemarks[0].subLocality} ${placemarks[0].postalCode}";
+          address = "${placemarks[0].thoroughfare} ${placemarks[0].name}, ${placemarks[0].locality} ${placemarks[0].postalCode}";
         }
 
         print("$address loaded");

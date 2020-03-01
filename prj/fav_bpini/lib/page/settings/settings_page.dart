@@ -12,10 +12,11 @@ class SettingsPage extends StatefulWidget {
 }
 
 class SettingsPageState extends State<SettingsPage> with SingleTickerProviderStateMixin {
+
   @override
   Widget build(BuildContext context) {
 
-    var darkTheme = Provider.of<DarkThemeProvider>(context);
+    var preferences = Provider.of<PreferencesProvider>(context);
 
     return Scaffold(
       body: Padding(
@@ -54,9 +55,9 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                               child: CheckboxListTile(
                                 secondary: Icon(Icons.color_lens),
                                 title: Text('Tmavé téma'),
-                                value: darkTheme.darkTheme,
+                                value: preferences.darkTheme,
                                 activeColor: Colors.blueAccent,
-                                onChanged: (checked) => darkTheme.darkTheme = checked,
+                                onChanged: (checked) => preferences.darkTheme = checked,
                               ),
                             ),
                             ListTile(
@@ -71,6 +72,15 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                                   );
                                 }).toList(),
                                 onChanged: (_) {},
+                              ),
+                            ),                            Padding(
+                              padding: EdgeInsets.only(top: 10),
+                              child: CheckboxListTile(
+                                secondary: Icon(Icons.location_on),
+                                title: Text('Automaticky získávat polohu při naskenování SPZ'),
+                                value: preferences.autoPositionLookup,
+                                activeColor: Colors.blueAccent,
+                                onChanged: (checked) => preferences.autoPositionLookup = checked,
                               ),
                             )
                           ],

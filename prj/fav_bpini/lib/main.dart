@@ -10,14 +10,12 @@ import 'package:provider/provider.dart';
 void main() => {runApp(VRPApp())};
 
 class VRPApp extends StatefulWidget {
-
   @override
   VRPAppState createState() => VRPAppState();
 }
 
-class VRPAppState extends State<VRPApp>{
-
-  DarkThemeProvider themeChangeProvider = DarkThemeProvider();
+class VRPAppState extends State<VRPApp> {
+  PreferencesProvider preferencesProvider = PreferencesProvider();
 
   @override
   void initState() {
@@ -26,8 +24,8 @@ class VRPAppState extends State<VRPApp>{
   }
 
   void getCurrentAppTheme() async {
-    themeChangeProvider.darkTheme =
-    await themeChangeProvider.darkThemePreference.getTheme();
+    preferencesProvider.darkTheme = await preferencesProvider.preferences.getDarkTheme();
+    preferencesProvider.autoPositionLookup = await preferencesProvider.preferences.getAutoPositionLookup();
   }
 
   @override
@@ -37,22 +35,25 @@ class VRPAppState extends State<VRPApp>{
     ]);
     return ChangeNotifierProvider(
       create: (_) {
-        return themeChangeProvider;
+        return preferencesProvider;
       },
-      child: Consumer<DarkThemeProvider>(
+      child: Consumer<PreferencesProvider>(
         builder: (context, value, child) => Provider(
           create: (_) => Database(),
           child: MaterialApp(
-
             title: "VRP App",
             supportedLocales: [
               Locale('en', 'US'),
               Locale('cs', 'CZ'),
             ],
 
-            darkTheme: value.darkTheme ? ThemeData.dark().copyWith( bottomSheetTheme: BottomSheetThemeData(
-                backgroundColor: Colors.black.withOpacity(0)),): ThemeData.light().copyWith( bottomSheetTheme: BottomSheetThemeData(
-                backgroundColor: Colors.black.withOpacity(0)),),
+            darkTheme: value.darkTheme
+                ? ThemeData.dark().copyWith(
+                    bottomSheetTheme: BottomSheetThemeData(backgroundColor: Colors.black.withOpacity(0)),
+                  )
+                : ThemeData.light().copyWith(
+                    bottomSheetTheme: BottomSheetThemeData(backgroundColor: Colors.black.withOpacity(0)),
+                  ),
 
             // These delegates make sure that the localization data for the proper language is loaded
             localizationsDelegates: [
@@ -85,4 +86,3 @@ class VRPAppState extends State<VRPApp>{
     );
   }
 }
-

@@ -1,29 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class DarkThemePreference {
-  static const THEME_STATUS = "THEMESTATUS";
+class Preferences {
+  static const THEME_STATUS_KEY = "THEMESTATUS";
 
   setDarkTheme(bool value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool(THEME_STATUS, value);
+    prefs.setBool(THEME_STATUS_KEY, value);
   }
 
-  Future<bool> getTheme() async {
+  Future<bool> getDarkTheme() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(THEME_STATUS) ?? false;
+    return prefs.getBool(THEME_STATUS_KEY) ?? false;
   }
+
+  static const AUTO_POSITION_LOOKUP_KEY = "AUTOPOSITIONLOOKUP";
+
+  setAutoPositionLookup(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool(AUTO_POSITION_LOOKUP_KEY, value);
+  }
+
+  Future<bool> getAutoPositionLookup() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(AUTO_POSITION_LOOKUP_KEY) ?? false;
+  }
+
 }
 
-class DarkThemeProvider with ChangeNotifier {
-  DarkThemePreference darkThemePreference = DarkThemePreference();
+class PreferencesProvider with ChangeNotifier {
+  Preferences preferences = Preferences();
   bool _darkTheme = false;
 
   bool get darkTheme => _darkTheme;
 
   set darkTheme(bool value) {
     _darkTheme = value;
-    darkThemePreference.setDarkTheme(value);
+    preferences.setDarkTheme(value);
+    notifyListeners();
+  }
+
+  bool _autoPositionLookup = false;
+
+  bool get autoPositionLookup => _autoPositionLookup;
+
+  set autoPositionLookup(bool value) {
+    _autoPositionLookup = value;
+    preferences.setAutoPositionLookup(value);
     notifyListeners();
   }
 }

@@ -19,7 +19,10 @@ class InitialVrpPreviewState extends VrpPreviewState {
 }
 
 class PositionFailed extends VrpPreviewState {
-  PositionFailed();
+
+  final String error;
+
+  PositionFailed({this.error = "Nastala neznámá chyba při získávání polohy"});
 
   @override
   List<Object> get props => [];
