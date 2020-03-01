@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:favbpini/database/database.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/model/vrp_record.dart';
@@ -71,7 +73,7 @@ class VrpListPageState extends State<VrpListPage> {
                                             Position(longitude: record.longitude, latitude: record.latitude),
                                             record.address),
                                         record,
-                                        context)
+                                        context, snapshot)
                                 ])
                               : ListView(children: [for (var i = 0; i < 10; i++) _buildVRPRecordCardLoading()]);
                         },
@@ -91,12 +93,20 @@ class VrpListPageState extends State<VrpListPage> {
     );
   }
 
-  Widget _buildVRPRecordCard(VRPRecord record, FoundVrpRecord dbItem, BuildContext context) {
+  Widget _buildVRPRecordCard(VRPRecord record, FoundVrpRecord dbItem, BuildContext context, AsyncSnapshot<List<FoundVrpRecord>> snapshot) {
     return Dismissible(
-      key: Key(record.toString() + DateTime.now().toString()),
+      key: Key(dbItem.toString()),
       background: Container(color: Colors.white30),
-      onDismissed: (direction) {
+      onDismissed: (direction) async {
+        var sourceImage = File(dbItem.sourceImagePath);
+        if (await sourceImage.exists()){
+          sourceImage.delete();
+          debugPrint("Deleted an image: ${sourceImage.path}");
+        }
         Provider.of<Database>(context, listen: false).deleteEntry(dbItem);
+        setState(() {
+          snapshot.data.remove(dbItem);
+        });
       },
       child: Padding(
         padding: EdgeInsets.only(top: 10, left: 25, right: 25),
