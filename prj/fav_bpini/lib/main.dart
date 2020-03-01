@@ -3,10 +3,11 @@ import 'package:favbpini/database/database.dart';
 import 'package:favbpini/routing/router.dart';
 import 'package:favbpini/utils/preferences.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
-void main() => runApp(VRPApp());
+void main() => {runApp(VRPApp())};
 
 class VRPApp extends StatefulWidget {
 
@@ -31,6 +32,9 @@ class VRPAppState extends State<VRPApp>{
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     return ChangeNotifierProvider(
       create: (_) {
         return themeChangeProvider;
@@ -39,13 +43,16 @@ class VRPAppState extends State<VRPApp>{
         builder: (context, value, child) => Provider(
           create: (_) => Database(),
           child: MaterialApp(
+
             title: "VRP App",
             supportedLocales: [
               Locale('en', 'US'),
               Locale('cs', 'CZ'),
             ],
 
-            darkTheme: value.darkTheme ? ThemeData.dark(): ThemeData.light(),
+            darkTheme: value.darkTheme ? ThemeData.dark().copyWith( bottomSheetTheme: BottomSheetThemeData(
+                backgroundColor: Colors.black.withOpacity(0)),): ThemeData.light().copyWith( bottomSheetTheme: BottomSheetThemeData(
+                backgroundColor: Colors.black.withOpacity(0)),),
 
             // These delegates make sure that the localization data for the proper language is loaded
             localizationsDelegates: [

@@ -6,6 +6,7 @@ import 'package:favbpini/database/database.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:moor/src/runtime/data_class.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -20,6 +21,7 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
   final TextEditingController _addressController;
   final TextEditingController _noteController;
   final Database database;
+  Completer<GoogleMapController> mapController = Completer();
 
   var position = Position(longitude: 0, latitude: 0);
 
@@ -29,11 +31,13 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
   String _rescannedSourceImagePath;
 
   VrpPreviewBloc(this.vrp, this._addressController, this._noteController, this.database, this.initialSourceImagePath,
-      this.editing) {
+      this.editing, double latitude, double longitude) {
     if (!editing) {
       rescanned = true;
       _rescannedSourceImagePath = initialSourceImagePath;
     }
+    debugPrint("lat:$latitude, long:$longitude");
+    position = Position(latitude: latitude, longitude: longitude);
   }
 
   @override
@@ -90,8 +94,8 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
             height: event.record.height,
             firstPart: event.record.firstPart,
             secondPart: event.record.secondPart,
-            latitude: event.record.latitude,
-            longitude: event.record.longitude,
+            latitude: position.latitude,
+            longitude: position.longitude,
             address: address,
             note: _noteController.text,
             audioNotePath: audioNotePath,
@@ -101,6 +105,8 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
         database.updateEntry(event.record.copyWith(
             address: address,
             note: _noteController.text,
+            latitude: position.latitude,
+            longitude: position.longitude,
             audioNotePath: audioNotePath,
             sourceImagePath: imgSourcePath));
       }
@@ -204,5 +210,16 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
   @override
   Future<void> close() {
     return super.close();
+  }
+
+  CameraPosition getMapPosition() {
+    return CameraPosition(
+      target: LatLng(position.latitude, position.longitude),
+      zoom: 14.4746,
+    );
+  }
+
+  LatLng getMapMarkerPosition() {
+    return LatLng(position.latitude, position.longitude);
   }
 }
