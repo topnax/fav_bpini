@@ -26,6 +26,7 @@ class VRPAppState extends State<VRPApp> {
   void getCurrentAppTheme() async {
     preferencesProvider.darkTheme = await preferencesProvider.preferences.getDarkTheme();
     preferencesProvider.autoPositionLookup = await preferencesProvider.preferences.getAutoPositionLookup();
+    preferencesProvider.appLanguageCode = await preferencesProvider.preferences.getAppLanguageCode();
   }
 
   @override
@@ -46,6 +47,8 @@ class VRPAppState extends State<VRPApp> {
               Locale('en', 'US'),
               Locale('cs', 'CZ'),
             ],
+
+            locale: Locale(value.appLanguageCode),
 
             darkTheme: value.darkTheme
                 ? ThemeData.dark().copyWith(

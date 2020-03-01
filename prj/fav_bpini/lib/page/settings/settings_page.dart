@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 
+import '../../app_localizations.dart';
+
 class SettingsPage extends StatefulWidget {
   @override
   SettingsPageState createState() => SettingsPageState();
@@ -12,10 +14,8 @@ class SettingsPage extends StatefulWidget {
 }
 
 class SettingsPageState extends State<SettingsPage> with SingleTickerProviderStateMixin {
-
   @override
   Widget build(BuildContext context) {
-
     var preferences = Provider.of<PreferencesProvider>(context);
 
     return Scaffold(
@@ -49,7 +49,7 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            HeadingText("Nastavení"),
+                            HeadingText(AppLocalizations.of(context).translate('settings_page_title')),
                             Padding(
                               padding: EdgeInsets.only(top: 10),
                               child: CheckboxListTile(
@@ -64,16 +64,21 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                               leading: Icon(Icons.language),
                               title: Text('Jazyk'),
                               trailing: DropdownButton<String>(
-                                value: "Čeština",
-                                items: <String>["Čeština", "Angličtina"].map((String value) {
+                                value: preferences.appLanguageCode,
+                                items: <String>["cs", "en"].map((String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,
                                     child: new Text(value),
                                   );
                                 }).toList(),
-                                onChanged: (_) {},
+                                onChanged: (value) {
+                                  debugPrint("lang selected $value");
+                                  preferences.appLanguageCode = value;
+
+                                },
                               ),
-                            ),                            Padding(
+                            ),
+                            Padding(
                               padding: EdgeInsets.only(top: 10),
                               child: CheckboxListTile(
                                 secondary: Icon(Icons.location_on),
@@ -95,7 +100,12 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                             if (!snapshot.hasData) {
                               return Center(child: Text(""));
                             } else {
-                              return Center(child: Text("${snapshot.data.version}+${snapshot.data.buildNumber}", style: Theme.of(context).textTheme.caption,),);
+                              return Center(
+                                child: Text(
+                                  "${snapshot.data.version}+${snapshot.data.buildNumber}",
+                                  style: Theme.of(context).textTheme.caption,
+                                ),
+                              );
                             }
                           }),
                     )

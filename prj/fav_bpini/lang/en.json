@@ -1,5 +1,6 @@
 {
   "app_title": "VRP Helper",
   "vrp_finder_no_camera_found": "No camera found...",
-  "vrp_finder_camera_loading": "Camera is loading..."
+  "vrp_finder_camera_loading": "Camera is loading...",
+  "settings_page_title": "Settings"
 }
