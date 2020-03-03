@@ -79,6 +79,53 @@ List<VrpFinderResult> findResults(Prepravka prepravka) {
 //              rect: tb.boundingBox);
             }
           }
+        } else if (tb.lines.length == 2) {
+          debugPrint("two lines");
+          // check that two lines each contain a one element
+          if (tb.lines[0].elements.length == 1 && tb.lines[1].elements.length == 1) {
+            debugPrint("first condition");
+            if (tb.lines[1].elements[0].text.length == 4) {
+              debugPrint("second condition");
+              if (tb.lines[0].elements[0].text.length == 3) {
+                var el1 = tb.lines[0].elements[0].boundingBox;
+                var el2 = tb.lines[1].elements[0].boundingBox;
+
+                var diff = ((el1.left) - (el2.left)).abs();
+
+                var diffRatio = diff / tb.boundingBox.width;
+
+                debugPrint("truck $diffRatio ${tb.boundingBox.width}");
+                debugPrint("${el1.left} ${el1.width}");
+                debugPrint("${el2.left} ${el2.width}");
+                debugPrint("${diffRatio}");
+                if (diffRatio < .06) {
+                  var bw = getBlackAndWhiteImage(img, area: tb.boundingBox);
+
+                  return VrpFinderResult(VRP(tb.lines[0].elements[0].text, tb.lines[1].elements[0].text),
+                      bw.getWhiteBalance().toDouble(), "diffRatio=${diffRatio}",
+                      rect: tb.boundingBox, image: img);
+                }
+              } else if (tb.lines[0].elements[0].text.length == 2) {
+                var el1 = tb.lines[0].elements[0].boundingBox;
+                var el2 = tb.lines[1].elements[0].boundingBox;
+
+                var diff = (el1.left) - (el2.left);
+
+                var diffRatio = diff / tb.boundingBox.width;
+
+                debugPrint("moto $diffRatio ${tb.boundingBox.width}");
+                debugPrint("${el1.left} ${el1.width}");
+                debugPrint("${el2.left} ${el2.width}");
+                if (diffRatio > 0.10 && diffRatio < .25) {
+                  var bw = getBlackAndWhiteImage(img, area: tb.boundingBox);
+
+                  return VrpFinderResult(VRP(tb.lines[0].elements[0].text, tb.lines[1].elements[0].text),
+                      bw.getWhiteBalance().toDouble(), "diffRatio=${diffRatio}",
+                      rect: tb.boundingBox, image: img);
+                }
+              }
+            }
+          }
         }
         return null;
       })

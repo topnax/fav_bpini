@@ -7,7 +7,7 @@ import 'vrp_source_detail_event.dart';
 
 class VrpSourceDetailBloc extends Bloc<VrpSourceDetailEvent, VrpSourceDetailState> {
 
-  var _eagerHide = false;
+  var _earlyHide = false;
 
   @override
   VrpSourceDetailState get initialState => StaticDetail();
@@ -17,8 +17,8 @@ class VrpSourceDetailBloc extends Bloc<VrpSourceDetailEvent, VrpSourceDetailStat
     VrpSourceDetailEvent event,
   ) async* {
     if (event is OnHighlight) {
-      if (_eagerHide) {
-        _eagerHide = false;
+      if (_earlyHide) {
+        _earlyHide = false;
         yield StaticDetail();
       } else {
         debugPrint("received onh");
@@ -26,7 +26,7 @@ class VrpSourceDetailBloc extends Bloc<VrpSourceDetailEvent, VrpSourceDetailStat
       }
     } else if (event is OnHideHighlight) {
       if (state is StaticDetail) {
-        _eagerHide = true;
+        _earlyHide = true;
       } else {
         debugPrint("received onhide");
         yield StaticDetail();
