@@ -52,7 +52,7 @@ class VrpListPageState extends State<VrpListPage> {
           HeadingText("Historie"),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(top: 0),
+              padding: const EdgeInsets.symmetric(vertical: 15),
               child: StreamBuilder<List<FoundVrpRecord>>(
                 stream: Provider.of<Database>(context).watchAllRecords(),
                 builder: (context, snapshot) {
@@ -64,7 +64,7 @@ class VrpListPageState extends State<VrpListPage> {
                         }),
                         builder: (BuildContext context, AsyncSnapshot<String> snapshotz) {
                           return snapshotz.hasData
-                              ? ListView(children: [
+                              ? ListView(padding: EdgeInsets.all(0),children: [
                                   for (FoundVrpRecord record in snapshot.data)
                                     _buildVRPRecordCard(
                                         VRPRecord(
