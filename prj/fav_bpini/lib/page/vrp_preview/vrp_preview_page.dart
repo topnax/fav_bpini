@@ -57,6 +57,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
   }
 
   static const TextStyle _vrpStyle = TextStyle(fontSize: 60, fontWeight: FontWeight.w600, color: Colors.black);
+  static const TextStyle _vrpStyleSmaller = TextStyle(fontSize: 50, fontWeight: FontWeight.w600, color: Colors.black);
 
   BoxDecoration myBoxDecoration() {
     return BoxDecoration(
@@ -78,8 +79,15 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     return MultiBlocProvider(
       providers: [
         BlocProvider<VrpPreviewBloc>(create: (context) {
-          var bloc = VrpPreviewBloc(VRP(_record.firstPart, _record.secondPart, VRPType.values[_record.type]), _addressController, _noteController,
-              database, _record.sourceImagePath, _edit, _record.latitude, _record.longitude);
+          var bloc = VrpPreviewBloc(
+              VRP(_record.firstPart, _record.secondPart, VRPType.values[_record.type]),
+              _addressController,
+              _noteController,
+              database,
+              _record.sourceImagePath,
+              _edit,
+              _record.latitude,
+              _record.longitude);
           if (!_edit && Provider.of<PreferencesProvider>(context, listen: false).autoPositionLookup) {
             bloc.add(GetAddressByPosition());
           }
@@ -150,7 +158,9 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                                     style: TextStyles.monserratStyle,
                                                   )),
                                             ),
-                                            Center(child: _buildVrp(_record.firstPart, _record.secondPart)),
+                                            Center(
+                                                child: _buildVrp(VRP(_record.firstPart, _record.secondPart,
+                                                    VRPType.values[_record.type]))),
                                             Center(
                                               child: Padding(
                                                 padding: const EdgeInsets.all(8.0),
@@ -616,69 +626,144 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     );
   }
 
-  Widget _buildVrp(String firstPart, String secondPart) {
-    return Container(
-      decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(6)),
-      child: Padding(padding: EdgeInsets.all(4), child: _buildVrpInner(firstPart, secondPart)),
-    );
+  Widget _buildVrp(VRP vrp) {
+    if (vrp.type == VRPType.ONE_LINE_CLASSIC) {
+      return Container(
+        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(6)),
+        child: Padding(padding: EdgeInsets.all(4), child: _buildVrpInner(vrp.firstPart, vrp.secondPart)),
+      );
+    } else if (vrp.type == VRPType.ONE_LINE_VIP) {
+      return Container(
+        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(6)),
+        child: Padding(padding: EdgeInsets.all(4), child: _buildVrpInner(vrp.firstPart, vrp.secondPart, vip: true)),
+      );
+    } else if (vrp.type == VRPType.ONE_LINE_OLD) {
+      return Container(
+        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(6)),
+        child: Padding(padding: EdgeInsets.all(4), child: _buildVrpInner(vrp.firstPart, vrp.secondPart, old: true)),
+      );
+    } else if (vrp.type == VRPType.TWO_LINE_BIKE || vrp.type == VRPType.TWO_LINE_OTHER) {
+      return Container(
+        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(6)),
+        child: Padding(
+            padding: EdgeInsets.all(4), child: _buildVrpInnerTwoRows(vrp.firstPart, vrp.secondPart, bike: true)),
+      );
+    }
   }
 
-  Widget _buildVrpContentRow(String firstPart, String secondPart) {
+  Widget _buildVrpContentRow(String firstPart, String secondPart, {vip = false, twoRows = false}) {
     return Padding(
       padding: EdgeInsets.all(8),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 5.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              firstPart,
-              style: _vrpStyle,
+      child: Column(
+        crossAxisAlignment: !twoRows ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(top: 5.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  firstPart,
+                  style: vip ? _vrpStyleSmaller : _vrpStyle,
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                ),
+                if (!twoRows)
+                  Text(
+                    secondPart,
+                    style: vip ? _vrpStyleSmaller : _vrpStyle,
+                  )
+              ],
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-            ),
+          ),
+          if (twoRows)
             Text(
               secondPart,
-              style: _vrpStyle,
-            )
-          ],
-        ),
+              style: vip ? _vrpStyleSmaller : _vrpStyle,
+            ),
+        ],
       ),
     );
   }
 
-  Widget _buildVrpInner(String firstPart, String secondPart) {
+  Widget _buildVrpInner(String firstPart, String secondPart, {bool vip = false, old = false}) {
     return Container(
       decoration: BoxDecoration(color: Colors.blue[900]),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Container(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 2),
-              child: Column(
-                children: <Widget>[
-                  Icon(
-                    Icons.star_border,
-                    color: Colors.yellow,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                  ),
-                  Text(
-                    "CZ",
-                    style: TextStyle(color: Colors.white),
-                  )
-                ],
+          if (!old)
+            Container(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 2),
+                child: Column(
+                  children: <Widget>[
+                    if (vip)
+                      Icon(
+                        Icons.star,
+                        color: Colors.yellow,
+                      )
+                    else
+                      Icon(
+                        Icons.blur_circular,
+                        color: Colors.yellow,
+                      ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                    ),
+                    Text(
+                      vip ? "VIP" : "CZ",
+                      style: TextStyle(color: Colors.white),
+                    )
+                  ],
+                ),
               ),
             ),
-          ),
           Container(
               decoration: BoxDecoration(color: Colors.white),
               padding: EdgeInsets.only(top: 0),
-              child: _buildVrpContentRow(firstPart, secondPart))
+              child: _buildVrpContentRow(firstPart, secondPart, vip: vip))
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVrpInnerTwoRows(String firstPart, String secondPart, {bool bike = false}) {
+    return Container(
+      decoration: BoxDecoration(color: Colors.blue[900]),
+      child: Column(
+        children: <Widget>[
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 2),
+                  child: Column(
+                    children: <Widget>[
+                      Icon(
+                        Icons.blur_circular,
+                        color: Colors.yellow,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                      ),
+                      Text(
+                        "CZ",
+                        style: TextStyle(color: Colors.white),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                  decoration: BoxDecoration(color: Colors.white),
+                  padding: EdgeInsets.only(top: 0),
+                  child: _buildVrpContentRow(firstPart, secondPart, twoRows: true))
+            ],
+          ),
         ],
       ),
     );
@@ -749,7 +834,10 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     );
     if (result != null) {
       setState(() {
-        _record = _record.copyWith(firstPart: result.firstPart.toUpperCase(), secondPart: result.secondPart.toUpperCase(), type: result.type.index);
+        _record = _record.copyWith(
+            firstPart: result.firstPart.toUpperCase(),
+            secondPart: result.secondPart.toUpperCase(),
+            type: result.type.index);
       });
     }
   }
@@ -770,12 +858,12 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
   String _secondPart;
   int _type;
 
-
   _EditVrpDialogState(this.vrp) {
     _type = vrp.type.index;
   }
 
   var _formState = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -787,7 +875,6 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
         ],
       ),
       content: Form(
-
         autovalidate: true,
         key: _formState,
         child: Column(
@@ -830,29 +917,28 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
                 children: [
                   Expanded(
                     child: TextFormField(
-                      maxLength: 5,
-                      validator: (value) {
-                        if (value.trim().isEmpty) {
-                          return "Tato část nesmí být prázdná";
-                        }
-                        if (value.length > 5) {
-                          return "Tato část musí mít maximálně 5 znaků";
-                        }
-                        return null;
-                      },
-                      initialValue: vrp.secondPart,
-                      decoration: InputDecoration(
-                        hintText: "Druhá část SPZ",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0),
-                          borderSide: BorderSide(
-                            color: Colors.amber,
-                            style: BorderStyle.solid,
+                        maxLength: 5,
+                        validator: (value) {
+                          if (value.trim().isEmpty) {
+                            return "Tato část nesmí být prázdná";
+                          }
+                          if (value.length > 5) {
+                            return "Tato část musí mít maximálně 5 znaků";
+                          }
+                          return null;
+                        },
+                        initialValue: vrp.secondPart,
+                        decoration: InputDecoration(
+                          hintText: "Druhá část SPZ",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                            borderSide: BorderSide(
+                              color: Colors.amber,
+                              style: BorderStyle.solid,
+                            ),
                           ),
                         ),
-                      ),
-                        onSaved: (newValue ) => _secondPart = newValue
-                    ),
+                        onSaved: (newValue) => _secondPart = newValue),
                   )
                 ],
               ),
@@ -863,7 +949,7 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
                   child: DropdownButton<int>(
-                  value: _type,
+                    value: _type,
 //                        value: _record.type,
                     items: VRPType.values.map((VRPType type) {
                       return DropdownMenuItem<int>(
@@ -872,9 +958,9 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
                       );
                     }).toList(),
                     onChanged: (value) {
-                    setState((){
-                      _type = value;
-                    });
+                      setState(() {
+                        _type = value;
+                      });
 
                       debugPrint("val selected ${value.toString()}");
                     },
@@ -902,7 +988,8 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
                   }
                 },
               ),
-            )],
+            )
+          ],
         ),
       ),
     );
