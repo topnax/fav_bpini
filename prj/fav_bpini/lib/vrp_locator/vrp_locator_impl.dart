@@ -75,15 +75,15 @@ List<VrpFinderResult> findResults(Prepravka prepravka) {
               type = VRPType.ONE_LINE_VIP;
               diffRatioUpper = 0.7;
               diffRatioLower = 0.55;
-              if (!isDigit(tb.text, 0)) {
-                return null;
-              }
             } else if (tb.lines[0].elements[1].text.length == 4) {
               diffRatioUpper = 0.65;
               diffRatioLower = 0.51;
               type = VRPType.ONE_LINE_CLASSIC;
               if (tb.text.contains("-")) {
                 type = VRPType.ONE_LINE_OLD;
+              }
+              if (!isDigit(tb.text, 0)) {
+                return null;
               }
             }
 
