@@ -14,6 +14,8 @@ class FoundVrpRecords extends Table {
 
   TextColumn get secondPart => text()();
 
+  IntColumn get type => integer().withDefault(const Constant(0))();
+
   RealColumn get latitude => real()();
 
   RealColumn get longitude => real()();
@@ -53,7 +55,7 @@ class Database extends _$Database {
   Database() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -61,10 +63,14 @@ class Database extends _$Database {
         return m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        if (from == 3) {
-          await m.addColumn(foundVrpRecords, foundVrpRecords.note);
-        } else if (from == 4) {
-          await m.addColumn(foundVrpRecords, foundVrpRecords.audioNotePath);
+        if (to == 6) {
+          await m.addColumn(foundVrpRecords, foundVrpRecords.type);
+        } else {
+          if (from == 3) {
+            await m.addColumn(foundVrpRecords, foundVrpRecords.note);
+          } else if (from == 4) {
+            await m.addColumn(foundVrpRecords, foundVrpRecords.audioNotePath);
+          }
         }
       }
   );

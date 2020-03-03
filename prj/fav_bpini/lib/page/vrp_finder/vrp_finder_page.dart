@@ -5,7 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:favbpini/bloc/vrp_finder/bloc.dart';
 import 'package:favbpini/database/database.dart';
 import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
-import 'package:favbpini/widget/vrp_highligter_painter.dart';
+import 'package:favbpini/widget/vrp_highlighter_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -52,6 +52,7 @@ class VrpFinderPageState extends State<VrpFinderPage> {
                   arguments: VrpPreviewPageArguments(
                       FoundVrpRecord(
                         id: 0,
+                        type: state.result.foundVrp.type.index,
                         firstPart: state.result.foundVrp.firstPart,
                         secondPart: state.result.foundVrp.secondPart,
                         latitude: 0,

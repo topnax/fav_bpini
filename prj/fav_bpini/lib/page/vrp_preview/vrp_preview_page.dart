@@ -78,7 +78,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     return MultiBlocProvider(
       providers: [
         BlocProvider<VrpPreviewBloc>(create: (context) {
-          var bloc = VrpPreviewBloc(VRP(_record.firstPart, _record.secondPart), _addressController, _noteController,
+          var bloc = VrpPreviewBloc(VRP(_record.firstPart, _record.secondPart, VRPType.values[_record.type]), _addressController, _noteController,
               database, _record.sourceImagePath, _edit, _record.latitude, _record.longitude);
           if (!_edit && Provider.of<PreferencesProvider>(context, listen: false).autoPositionLookup) {
             bloc.add(GetAddressByPosition());
@@ -179,6 +179,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                                           setState(() {
                                                             debugPrint("is vrpfinderresult");
                                                             _record = _record.copyWith(
+                                                                type: result.foundVrp.type.index,
                                                                 firstPart: result.foundVrp.firstPart,
                                                                 secondPart: result.foundVrp.secondPart,
                                                                 sourceImagePath: result.srcPath,
@@ -739,114 +740,171 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
   }
 
   Future<String> _asyncInputDialog(BuildContext context) async {
-    String firstPart = _record.firstPart;
-    String secondPart = _record.secondPart;
-    final formState = GlobalKey<FormState>();
-    return showDialog<String>(
+    var result = await showDialog<VRP>(
       context: context,
       barrierDismissible: false, // dialog is dismissible with a tap on the barrier
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Expanded(child: HeadingText('Ručně upravit SPZ', fontSize: 18, noPadding: true)),
-              IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
-            ],
-          ),
-          content: Form(
-            autovalidate: true,
-            key: formState,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        maxLength: 3,
-                        validator: (value) {
-                          if (value.trim().isEmpty) {
-                            return "Tato část nesmí být prázdná";
-                          }
+        return EditVrpDialog(VRP(_record.firstPart, _record.secondPart, VRPType.values[_record.type]));
+      },
+    );
+    if (result != null) {
+      setState(() {
+        _record = _record.copyWith(firstPart: result.firstPart.toUpperCase(), secondPart: result.secondPart.toUpperCase(), type: result.type.index);
+      });
+    }
+  }
+}
 
-                          if (value.length > 3) {
-                            return "Tato část musí mít maximálně 3 znaky";
-                          }
-                          return null;
-                        },
-                        initialValue: firstPart,
-                        decoration: InputDecoration(
-                          hintText: "První část SPZ",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                            borderSide: BorderSide(
-                              color: Colors.amber,
-                              style: BorderStyle.solid,
-                            ),
-                          ),
+class EditVrpDialog extends StatefulWidget {
+  final VRP vrp;
+
+  EditVrpDialog(this.vrp);
+
+  @override
+  _EditVrpDialogState createState() => new _EditVrpDialogState(vrp);
+}
+
+class _EditVrpDialogState extends State<EditVrpDialog> {
+  final VRP vrp;
+  String _firstPart;
+  String _secondPart;
+  int _type;
+
+
+  _EditVrpDialogState(this.vrp) {
+    _type = vrp.type.index;
+  }
+
+  var _formState = GlobalKey<FormState>();
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
+      title: Row(
+        children: [
+          Expanded(child: HeadingText('Ručně upravit SPZ', fontSize: 18, noPadding: true)),
+          IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
+        ],
+      ),
+      content: Form(
+
+        autovalidate: true,
+        key: _formState,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    maxLength: 3,
+                    validator: (value) {
+                      if (value.trim().isEmpty) {
+                        return "Tato část nesmí být prázdná";
+                      }
+
+                      if (value.length > 3) {
+                        return "Tato část musí mít maximálně 3 znaky";
+                      }
+                      return null;
+                    },
+                    initialValue: vrp.firstPart,
+                    decoration: InputDecoration(
+                      hintText: "První část SPZ",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                        borderSide: BorderSide(
+                          color: Colors.amber,
+                          style: BorderStyle.solid,
                         ),
-                        onChanged: (newValue) {
-                          firstPart = newValue;
-                          formState.currentState.validate();
-                        },
                       ),
-                    )
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          maxLength: 5,
-                          validator: (value) {
-                            if (value.trim().isEmpty) {
-                              return "Tato část nesmí být prázdná";
-                            }
-                            if (value.length > 5) {
-                              return "Tato část musí mít maximálně 5 znaků";
-                            }
-                            return null;
-                          },
-                          initialValue: secondPart,
-                          decoration: InputDecoration(
-                            hintText: "Druhá část SPZ",
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                              borderSide: BorderSide(
-                                color: Colors.amber,
-                                style: BorderStyle.solid,
-                              ),
-                            ),
-                          ),
-                          onChanged: (newValue) {
-                            secondPart = newValue;
-                            formState.currentState.validate();
-                          },
-                        ),
-                      )
-                    ],
+                    ),
+                    onSaved: (newValue) => _firstPart = newValue,
                   ),
                 )
               ],
             ),
-          ),
-          actions: [
-            FlatButton(
-              child: Text('OK'),
-              onPressed: () {
-                if (formState.currentState.validate()) {
-                  setState(() {
-                    _record = _record.copyWith(firstPart: firstPart.toUpperCase(), secondPart: secondPart.toUpperCase());
-                  });
-                  Navigator.of(context).pop();
-                }
-              },
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      maxLength: 5,
+                      validator: (value) {
+                        if (value.trim().isEmpty) {
+                          return "Tato část nesmí být prázdná";
+                        }
+                        if (value.length > 5) {
+                          return "Tato část musí mít maximálně 5 znaků";
+                        }
+                        return null;
+                      },
+                      initialValue: vrp.secondPart,
+                      decoration: InputDecoration(
+                        hintText: "Druhá část SPZ",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: BorderSide(
+                            color: Colors.amber,
+                            style: BorderStyle.solid,
+                          ),
+                        ),
+                      ),
+                        onSaved: (newValue ) => _secondPart = newValue
+                    ),
+                  )
+                ],
+              ),
             ),
-          ],
-        );
-      },
+            Row(
+              children: [
+                Text("Typ SPZ:"),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: DropdownButton<int>(
+                  value: _type,
+//                        value: _record.type,
+                    items: VRPType.values.map((VRPType type) {
+                      return DropdownMenuItem<int>(
+                        value: type.index,
+                        child: Text(type.getName()),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                    setState((){
+                      _type = value;
+                    });
+
+                      debugPrint("val selected ${value.toString()}");
+                    },
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 10.0),
+              child: RaisedButton(
+                child: Text('OK'),
+                color: Colors.orange,
+                textColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                ),
+                onPressed: () {
+                  if (_formState.currentState.validate()) {
+                    _formState.currentState.save();
+                    debugPrint("form done");
+                    debugPrint(_firstPart);
+                    debugPrint(_secondPart);
+                    debugPrint(VRPType.values[_type].getName());
+                    Navigator.of(context).pop(VRP(_firstPart, _secondPart, VRPType.values[_type]));
+                  }
+                },
+              ),
+            )],
+        ),
+      ),
     );
   }
 }

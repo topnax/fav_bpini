@@ -22,28 +22,11 @@ class VrpListPageState extends State<VrpListPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: _buildVRPHistory(_getSampleRecords()),
+      child: _buildVRPHistory(),
     );
   }
 
-  List<VRPRecord> _getSampleRecords() {
-    return [
-      VRPRecord(VRP("3P8", "6768"), DateTime.now(), Position(), "Basarykova 1997, Ostrov"),
-      VRPRecord(VRP("4A1", "8648"), DateTime.now().add(Duration(days: -50)), Position(), "Družstevní 1442, Plzeň"),
-      VRPRecord(VRP("4S3", "3368"), DateTime.now().add(Duration(days: -90)), Position(), "Hlavní 10, Ostrov"),
-      VRPRecord(VRP("6P4", "9778"), DateTime.now().add(Duration(days: -90)), Position(), "Technická 3, Plzeň"),
-      VRPRecord(VRP("3K3", "3654"), DateTime.now().add(Duration(days: -44)), Position(), "Krátká 13, Karlovy Vary"),
-      VRPRecord(VRP("3A1", "2214"), DateTime.now().add(Duration(days: -11)), Position(), "Náměstí Míru 10, Plzeň"),
-      VRPRecord(VRP("6T1", "7454"), DateTime.now().add(Duration(days: -5)), Position(), "Dělnická 22, Teplice"),
-      VRPRecord(VRP("1L4", "9631"), DateTime.now().add(Duration(days: -600)), Position(), "Družební 1997, Ostrov"),
-      VRPRecord(VRP("1L4", "9631"), DateTime.now().add(Duration(days: -600)), Position(), "Družební 1997, Ostrov"),
-      VRPRecord(VRP("1L4", "9631"), DateTime.now().add(Duration(days: -600)), Position(), "Družební 1997, Ostrov"),
-      VRPRecord(VRP("1L4", "9631"), DateTime.now().add(Duration(days: -600)), Position(), "Družební 1997, Ostrov"),
-      VRPRecord(VRP("1L4", "9631"), DateTime.now().add(Duration(days: -600)), Position(), "Družební 1997, Ostrov"),
-    ];
-  }
-
-  Widget _buildVRPHistory(List<VRPRecord> vrpRecordList) {
+  Widget _buildVRPHistory() {
     return Expanded(
       child: Column(
 //        crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +51,7 @@ class VrpListPageState extends State<VrpListPage> {
                                   for (FoundVrpRecord record in snapshot.data)
                                     _buildVRPRecordCard(
                                         VRPRecord(
-                                            VRP(record.firstPart, record.secondPart),
+                                            VRP(record.firstPart, record.secondPart, VRPType.values[record.type]),
                                             record.date,
                                             Position(longitude: record.longitude, latitude: record.latitude),
                                             record.address),
@@ -116,7 +99,9 @@ class VrpListPageState extends State<VrpListPage> {
           child: InkWell(
             borderRadius: BorderRadius.circular(10),
             onTap: () =>
-                {Navigator.of(context).pushNamed("/found", arguments: VrpPreviewPageArguments(dbItem, edit: true))},
+                {
+                  Navigator.of(context).pushNamed("/found", arguments: VrpPreviewPageArguments(dbItem, edit: true))
+                },
             child: Container(
               padding: EdgeInsets.all(15),
               child: Column(

@@ -3,6 +3,7 @@ import "package:executorservices/executorservices.dart";
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/ocr/ocr.dart';
 import 'package:favbpini/utils/image.dart';
+import 'package:favbpini/utils/numbers.dart';
 import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
@@ -49,7 +50,7 @@ List<VrpFinderResult> findResults(Prepravka prepravka) {
       .where((tb) => _isRectangleWithinImage(tb.boundingBox, img.width, img.height))
       // map text blocks to results
       .map((tb) {
-        for (var ch in VrpFinderImpl.INVALID_CHAR_SET){
+        for (var ch in VrpFinderImpl.INVALID_CHAR_SET) {
           if (tb.text.contains(ch)) {
             return null;
           }
@@ -68,18 +69,28 @@ List<VrpFinderResult> findResults(Prepravka prepravka) {
             var diffRatioUpper = 0.0;
             var diffRatioLower = 20.0;
 
+            var type;
+
             if (tb.lines[0].elements[1].text.length == 5) {
+              type = VRPType.ONE_LINE_VIP;
               diffRatioUpper = 0.7;
               diffRatioLower = 0.55;
+              if (!isDigit(tb.text, 0)) {
+                return null;
+              }
             } else if (tb.lines[0].elements[1].text.length == 4) {
               diffRatioUpper = 0.65;
               diffRatioLower = 0.51;
+              type = VRPType.ONE_LINE_CLASSIC;
+              if (tb.text.contains("-")) {
+                type = VRPType.ONE_LINE_OLD;
+              }
             }
 
             if (diffRatio > diffRatioLower && diffRatio < diffRatioUpper) {
               var bw = getBlackAndWhiteImage(img, area: tb.boundingBox);
 
-              return VrpFinderResult(VRP(tb.lines[0].elements[0].text, tb.lines[0].elements[1].text),
+              return VrpFinderResult(VRP(tb.lines[0].elements[0].text, tb.lines[0].elements[1].text, type),
                   bw.getWhiteBalance().toDouble(), "diffRatio=${diff / tb.boundingBox.width}",
                   rect: tb.boundingBox, image: img);
             } else {
@@ -111,9 +122,12 @@ List<VrpFinderResult> findResults(Prepravka prepravka) {
                 if (diffRatio < .06) {
                   var bw = getBlackAndWhiteImage(img, area: tb.boundingBox);
 
-                  return VrpFinderResult(VRP(tb.lines[0].elements[0].text, tb.lines[1].elements[0].text),
-                      bw.getWhiteBalance().toDouble(), "diffRatio=${diffRatio}",
-                      rect: tb.boundingBox, image: img);
+                  return VrpFinderResult(
+                      VRP(tb.lines[0].elements[0].text, tb.lines[1].elements[0].text, VRPType.TWO_LINE_OTHER),
+                      bw.getWhiteBalance().toDouble(),
+                      "diffRatio=${diffRatio}",
+                      rect: tb.boundingBox,
+                      image: img);
                 }
               } else if (tb.lines[0].elements[0].text.length == 2) {
                 var el1 = tb.lines[0].elements[0].boundingBox;
@@ -129,9 +143,12 @@ List<VrpFinderResult> findResults(Prepravka prepravka) {
                 if (diffRatio > 0.10 && diffRatio < .25) {
                   var bw = getBlackAndWhiteImage(img, area: tb.boundingBox);
 
-                  return VrpFinderResult(VRP(tb.lines[0].elements[0].text, tb.lines[1].elements[0].text),
-                      bw.getWhiteBalance().toDouble(), "diffRatio=${diffRatio}",
-                      rect: tb.boundingBox, image: img);
+                  return VrpFinderResult(
+                      VRP(tb.lines[0].elements[0].text, tb.lines[1].elements[0].text, VRPType.TWO_LINE_BIKE),
+                      bw.getWhiteBalance().toDouble(),
+                      "diffRatio=${diffRatio}",
+                      rect: tb.boundingBox,
+                      image: img);
                 }
               }
             }
@@ -140,48 +157,49 @@ List<VrpFinderResult> findResults(Prepravka prepravka) {
         return null;
       })
       .where((result) => result != null && result.wtb > 120)
-  .map((result) {
-    var firstPart = result.foundVrp.firstPart;
-    var secondPart = result.foundVrp.secondPart;
-    VrpFinderImpl.INVALID_TO_VALID_CHAR_MAP.forEach((invalidChar, replacementChar) {
-      firstPart = firstPart.replaceAll(invalidChar, replacementChar);
-      secondPart = secondPart.replaceAll(invalidChar, replacementChar);
-    });
-    return VrpFinderResult(VRP(firstPart, secondPart), result.wtb, result.meta,rect: result.rect, image: result.image);
-  })
+      .map((result) {
+        var firstPart = result.foundVrp.firstPart;
+        var secondPart = result.foundVrp.secondPart;
+        VrpFinderImpl.INVALID_TO_VALID_CHAR_MAP.forEach((invalidChar, replacementChar) {
+          firstPart = firstPart.replaceAll(invalidChar, replacementChar);
+          secondPart = secondPart.replaceAll(invalidChar, replacementChar);
+        });
+        return VrpFinderResult(VRP(firstPart, secondPart, result.foundVrp.type), result.wtb, result.meta,
+            rect: result.rect, image: result.image);
+      })
       .toList();
 
   return results;
 }
-
-class VrpFinderImpl2 implements VrpFinder {
-  Future<List<VrpFinderResult>> findVrpInImage(CameraImage image) async {
-    var start = DateTime.now();
-    List<TextBlock> detectedBlocks = await OcrManager.scanText(image);
-    debugPrint("scanText took:${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch)}ms");
-    print("about to find blocks");
-    start = DateTime.now();
-    var img = convertCameraImage(image);
-    debugPrint("convert image took:${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch)}ms");
-
-    start = DateTime.now();
-
-    var bw = getBlackAndWhiteImage(img);
-
-//    file..writeAsBytesSync(imglib.encodePng(bw, level: 1));
-
-    var results = detectedBlocks
-        .where((tb) => _isRectangleWithinImage(tb.boundingBox, img.width, img.height))
-        .map((tb) {
-          return VrpFinderResult(
-              VRP("", ""), getImageCutout(bw, tb.boundingBox).getWhiteBalance().toDouble(), "whole text{${tb.text}}",
-              rect: tb.boundingBox);
-        })
-        .where((result) => result.wtb > 0)
-        .toList();
-    return Future<List<VrpFinderResult>>.value(results);
-  }
-}
+//
+//class VrpFinderImpl2 implements VrpFinder {
+//  Future<List<VrpFinderResult>> findVrpInImage(CameraImage image) async {
+//    var start = DateTime.now();
+//    List<TextBlock> detectedBlocks = await OcrManager.scanText(image);
+//    debugPrint("scanText took:${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch)}ms");
+//    print("about to find blocks");
+//    start = DateTime.now();
+//    var img = convertCameraImage(image);
+//    debugPrint("convert image took:${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch)}ms");
+//
+//    start = DateTime.now();
+//
+//    var bw = getBlackAndWhiteImage(img);
+//
+////    file..writeAsBytesSync(imglib.encodePng(bw, level: 1));
+//
+//    var results = detectedBlocks
+//        .where((tb) => _isRectangleWithinImage(tb.boundingBox, img.width, img.height))
+//        .map((tb) {
+//          return VrpFinderResult(
+//              VRP("", ""), getImageCutout(bw, tb.boundingBox).getWhiteBalance().toDouble(), "whole text{${tb.text}}",
+//              rect: tb.boundingBox);
+//        })
+//        .where((result) => result.wtb > 0)
+//        .toList();
+//    return Future<List<VrpFinderResult>>.value(results);
+//  }
+//}
 
 bool _isRectangleWithinImage(Rect rect, int width, int height) {
   return rect.left >= 0 &&

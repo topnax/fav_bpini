@@ -47,7 +47,6 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
   Stream<VrpPreviewState> mapEventToState(
     VrpPreviewEvent event,
   ) async* {
-
     if (event is GetAddressByPosition) {
       yield PositionLoading();
       final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
@@ -68,8 +67,8 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
           List<Placemark> placemarks = await geolocator.placemarkFromCoordinates(position.latitude, position.longitude);
           var address = "nenalezeno";
           if (placemarks.length > 0) {
-            address = "${placemarks[0].thoroughfare} ${placemarks[0].name}, ${placemarks[0].locality} ${placemarks[0]
-                .postalCode}";
+            address =
+                "${placemarks[0].thoroughfare} ${placemarks[0].name}, ${placemarks[0].locality} ${placemarks[0].postalCode}";
           }
 
           print("$address loaded");
@@ -99,6 +98,7 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
 
       if (!event.edit) {
         database.addVrpRecord(FoundVrpRecordsCompanion.insert(
+            type: Value(event.record.type),
             date: Value(event.record.date),
             top: event.record.top,
             left: event.record.left,

@@ -11,6 +11,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
   final int id;
   final String firstPart;
   final String secondPart;
+  final int type;
   final double latitude;
   final double longitude;
   final String address;
@@ -26,6 +27,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
       {@required this.id,
       @required this.firstPart,
       @required this.secondPart,
+      @required this.type,
       @required this.latitude,
       @required this.longitude,
       @required this.address,
@@ -51,6 +53,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
           .mapFromDatabaseResponse(data['${effectivePrefix}first_part']),
       secondPart: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}second_part']),
+      type: intType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
       latitude: doubleType
           .mapFromDatabaseResponse(data['${effectivePrefix}latitude']),
       longitude: doubleType
@@ -77,6 +80,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
       id: serializer.fromJson<int>(json['id']),
       firstPart: serializer.fromJson<String>(json['firstPart']),
       secondPart: serializer.fromJson<String>(json['secondPart']),
+      type: serializer.fromJson<int>(json['type']),
       latitude: serializer.fromJson<double>(json['latitude']),
       longitude: serializer.fromJson<double>(json['longitude']),
       address: serializer.fromJson<String>(json['address']),
@@ -97,6 +101,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
       'id': serializer.toJson<int>(id),
       'firstPart': serializer.toJson<String>(firstPart),
       'secondPart': serializer.toJson<String>(secondPart),
+      'type': serializer.toJson<int>(type),
       'latitude': serializer.toJson<double>(latitude),
       'longitude': serializer.toJson<double>(longitude),
       'address': serializer.toJson<String>(address),
@@ -121,6 +126,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
       secondPart: secondPart == null && nullToAbsent
           ? const Value.absent()
           : Value(secondPart),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
       latitude: latitude == null && nullToAbsent
           ? const Value.absent()
           : Value(latitude),
@@ -151,6 +157,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
           {int id,
           String firstPart,
           String secondPart,
+          int type,
           double latitude,
           double longitude,
           String address,
@@ -166,6 +173,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
         id: id ?? this.id,
         firstPart: firstPart ?? this.firstPart,
         secondPart: secondPart ?? this.secondPart,
+        type: type ?? this.type,
         latitude: latitude ?? this.latitude,
         longitude: longitude ?? this.longitude,
         address: address ?? this.address,
@@ -184,6 +192,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
           ..write('id: $id, ')
           ..write('firstPart: $firstPart, ')
           ..write('secondPart: $secondPart, ')
+          ..write('type: $type, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
           ..write('address: $address, ')
@@ -207,27 +216,29 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
           $mrjc(
               secondPart.hashCode,
               $mrjc(
-                  latitude.hashCode,
+                  type.hashCode,
                   $mrjc(
-                      longitude.hashCode,
+                      latitude.hashCode,
                       $mrjc(
-                          address.hashCode,
+                          longitude.hashCode,
                           $mrjc(
-                              note.hashCode,
+                              address.hashCode,
                               $mrjc(
-                                  date.hashCode,
+                                  note.hashCode,
                                   $mrjc(
-                                      sourceImagePath.hashCode,
+                                      date.hashCode,
                                       $mrjc(
-                                          audioNotePath.hashCode,
+                                          sourceImagePath.hashCode,
                                           $mrjc(
-                                              top.hashCode,
+                                              audioNotePath.hashCode,
                                               $mrjc(
-                                                  left.hashCode,
+                                                  top.hashCode,
                                                   $mrjc(
-                                                      width.hashCode,
-                                                      height
-                                                          .hashCode))))))))))))));
+                                                      left.hashCode,
+                                                      $mrjc(
+                                                          width.hashCode,
+                                                          height
+                                                              .hashCode)))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -235,6 +246,7 @@ class FoundVrpRecord extends DataClass implements Insertable<FoundVrpRecord> {
           other.id == this.id &&
           other.firstPart == this.firstPart &&
           other.secondPart == this.secondPart &&
+          other.type == this.type &&
           other.latitude == this.latitude &&
           other.longitude == this.longitude &&
           other.address == this.address &&
@@ -252,6 +264,7 @@ class FoundVrpRecordsCompanion extends UpdateCompanion<FoundVrpRecord> {
   final Value<int> id;
   final Value<String> firstPart;
   final Value<String> secondPart;
+  final Value<int> type;
   final Value<double> latitude;
   final Value<double> longitude;
   final Value<String> address;
@@ -267,6 +280,7 @@ class FoundVrpRecordsCompanion extends UpdateCompanion<FoundVrpRecord> {
     this.id = const Value.absent(),
     this.firstPart = const Value.absent(),
     this.secondPart = const Value.absent(),
+    this.type = const Value.absent(),
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
     this.address = const Value.absent(),
@@ -283,6 +297,7 @@ class FoundVrpRecordsCompanion extends UpdateCompanion<FoundVrpRecord> {
     this.id = const Value.absent(),
     @required String firstPart,
     @required String secondPart,
+    this.type = const Value.absent(),
     @required double latitude,
     @required double longitude,
     @required String address,
@@ -310,6 +325,7 @@ class FoundVrpRecordsCompanion extends UpdateCompanion<FoundVrpRecord> {
       {Value<int> id,
       Value<String> firstPart,
       Value<String> secondPart,
+      Value<int> type,
       Value<double> latitude,
       Value<double> longitude,
       Value<String> address,
@@ -325,6 +341,7 @@ class FoundVrpRecordsCompanion extends UpdateCompanion<FoundVrpRecord> {
       id: id ?? this.id,
       firstPart: firstPart ?? this.firstPart,
       secondPart: secondPart ?? this.secondPart,
+      type: type ?? this.type,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       address: address ?? this.address,
@@ -376,6 +393,15 @@ class $FoundVrpRecordsTable extends FoundVrpRecords
       $tableName,
       false,
     );
+  }
+
+  final VerificationMeta _typeMeta = const VerificationMeta('type');
+  GeneratedIntColumn _type;
+  @override
+  GeneratedIntColumn get type => _type ??= _constructType();
+  GeneratedIntColumn _constructType() {
+    return GeneratedIntColumn('type', $tableName, false,
+        defaultValue: const Constant(0));
   }
 
   final VerificationMeta _latitudeMeta = const VerificationMeta('latitude');
@@ -519,6 +545,7 @@ class $FoundVrpRecordsTable extends FoundVrpRecords
         id,
         firstPart,
         secondPart,
+        type,
         latitude,
         longitude,
         address,
@@ -555,6 +582,10 @@ class $FoundVrpRecordsTable extends FoundVrpRecords
           secondPart.isAcceptableValue(d.secondPart.value, _secondPartMeta));
     } else if (isInserting) {
       context.missing(_secondPartMeta);
+    }
+    if (d.type.present) {
+      context.handle(
+          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
     }
     if (d.latitude.present) {
       context.handle(_latitudeMeta,
@@ -645,6 +676,9 @@ class $FoundVrpRecordsTable extends FoundVrpRecords
     }
     if (d.secondPart.present) {
       map['second_part'] = Variable<String, StringType>(d.secondPart.value);
+    }
+    if (d.type.present) {
+      map['type'] = Variable<int, IntType>(d.type.value);
     }
     if (d.latitude.present) {
       map['latitude'] = Variable<double, RealType>(d.latitude.value);
