@@ -47,6 +47,7 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
   Stream<VrpPreviewState> mapEventToState(
     VrpPreviewEvent event,
   ) async* {
+
     if (event is GetAddressByPosition) {
       yield PositionLoading();
       final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
@@ -58,24 +59,26 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
 
       if (!(await geolocator.isLocationServiceEnabled())) {
         yield PositionFailed(error: "GPS služby jsou vypnuté");
-      }
-      try {
-        print("Started getting current position");
-        position = await geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
-        print("Got position");
+      } else {
+        try {
+          print("Started getting current position");
+          position = await geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+          print("Got position");
 
-        List<Placemark> placemarks = await geolocator.placemarkFromCoordinates(position.latitude, position.longitude);
-        var address = "nenalezeno";
-        if (placemarks.length > 0) {
-          address = "${placemarks[0].thoroughfare} ${placemarks[0].name}, ${placemarks[0].locality} ${placemarks[0].postalCode}";
+          List<Placemark> placemarks = await geolocator.placemarkFromCoordinates(position.latitude, position.longitude);
+          var address = "nenalezeno";
+          if (placemarks.length > 0) {
+            address = "${placemarks[0].thoroughfare} ${placemarks[0].name}, ${placemarks[0].locality} ${placemarks[0]
+                .postalCode}";
+          }
+
+          print("$address loaded");
+          yield PositionLoaded(position, address);
+          _addressController.text = address;
+        } catch (e) {
+          print("$e error");
+          yield PositionFailed();
         }
-
-        print("$address loaded");
-        yield PositionLoaded(position, address);
-        _addressController.text = address;
-      } catch (e) {
-        print("$e error");
-        yield PositionFailed();
       }
     } else if (event is DiscardVRP) {
       if (rescanned) {

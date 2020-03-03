@@ -18,6 +18,10 @@ class Prepravka {
 }
 
 class VrpFinderImpl implements VrpFinder {
+  static const INVALID_TO_VALID_CHAR_MAP = {"Q": "0", "O": "0"};
+
+  static const INVALID_CHAR_SET = {"CH", "G", "W"};
+
   final executorService = ExecutorService.newSingleExecutor();
 
   Future<List<VrpFinderResult>> findVrpInImage(CameraImage image) async {
@@ -45,6 +49,12 @@ List<VrpFinderResult> findResults(Prepravka prepravka) {
       .where((tb) => _isRectangleWithinImage(tb.boundingBox, img.width, img.height))
       // map text blocks to results
       .map((tb) {
+        for (var ch in VrpFinderImpl.INVALID_CHAR_SET){
+          if (tb.text.contains(ch)) {
+            return null;
+          }
+        }
+
         if (tb.lines.length == 1) {
           // one line VRP
           if (tb.lines[0].elements.length == 2 && tb.lines[0].elements[0].text.length == 3) {
@@ -130,6 +140,15 @@ List<VrpFinderResult> findResults(Prepravka prepravka) {
         return null;
       })
       .where((result) => result != null && result.wtb > 120)
+  .map((result) {
+    var firstPart = result.foundVrp.firstPart;
+    var secondPart = result.foundVrp.secondPart;
+    VrpFinderImpl.INVALID_TO_VALID_CHAR_MAP.forEach((invalidChar, replacementChar) {
+      firstPart = firstPart.replaceAll(invalidChar, replacementChar);
+      secondPart = secondPart.replaceAll(invalidChar, replacementChar);
+    });
+    return VrpFinderResult(VRP(firstPart, secondPart), result.wtb, result.meta,rect: result.rect, image: result.image);
+  })
       .toList();
 
   return results;

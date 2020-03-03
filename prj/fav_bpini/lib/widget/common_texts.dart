@@ -7,12 +7,17 @@ class TextStyles {
 class HeadingText extends StatelessWidget {
   final String text;
   final double fontSize;
+  final bool noPadding;
 
-  HeadingText(this.text, {this.fontSize = 28});
+  HeadingText(this.text, {this.fontSize = 28, this.noPadding = false});
 
   @override
   Widget build(BuildContext context) {
-    return HeaderPadding(child: Text(text, style: TextStyles.monserratStyle.copyWith(fontSize: fontSize)));
+    return !noPadding ? HeaderPadding(child: _buildText()) : _buildText();
+  }
+
+  Widget _buildText() {
+    return Text(text, style: TextStyles.monserratStyle.copyWith(fontSize: fontSize));
   }
 }
 

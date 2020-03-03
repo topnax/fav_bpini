@@ -78,18 +78,9 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     return MultiBlocProvider(
       providers: [
         BlocProvider<VrpPreviewBloc>(create: (context) {
-          var bloc = VrpPreviewBloc(
-              VRP(_record.firstPart, _record.secondPart),
-              _addressController,
-              _noteController,
-              database,
-              _record.sourceImagePath,
-              _edit,
-              _record.latitude,
-              _record.longitude);
-          if (!_edit && Provider
-              .of<PreferencesProvider>(context, listen: false)
-              .autoPositionLookup) {
+          var bloc = VrpPreviewBloc(VRP(_record.firstPart, _record.secondPart), _addressController, _noteController,
+              database, _record.sourceImagePath, _edit, _record.latitude, _record.longitude);
+          if (!_edit && Provider.of<PreferencesProvider>(context, listen: false).autoPositionLookup) {
             bloc.add(GetAddressByPosition());
           }
           return bloc;
@@ -97,351 +88,339 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
         BlocProvider<VrpPreviewRecordingBloc>(create: (context) => VrpPreviewRecordingBloc(_record.audioNotePath))
       ],
       child: Builder(
-        builder: (context) =>
-            WillPopScope(
-              onWillPop: () => onPop(context),
-              child: Scaffold(
-                  body: Builder(
-                    builder: (context) =>
-                        BlocListener(
-                          bloc: BlocProvider.of<VrpPreviewBloc>(context),
-                          listener: (context, state) {
-                            if (state is VrpSubmitted) {
+        builder: (context) => WillPopScope(
+          onWillPop: () => onPop(context),
+          child: Scaffold(
+              body: Builder(
+            builder: (context) => BlocListener(
+              bloc: BlocProvider.of<VrpPreviewBloc>(context),
+              listener: (context, state) {
+                if (state is VrpSubmitted) {
+                  onPop(context);
+                } else if (state is PositionFailed) {
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: Text("Chyba při získávání polohy: ${state.error}"),
+                  ));
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(top: 36.0),
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          IconButton(
+                            icon: Icon(Icons.arrow_back_ios),
+                            color: Theme.of(context).textTheme.body1.color,
+                            onPressed: () {
                               onPop(context);
-                            } else if (state is PositionFailed) {
-                              Scaffold.of(context).showSnackBar(SnackBar(
-                                content: Text("Chyba při získávání polohy: ${state.error}"),
-                              ));
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 36.0),
-                            child: Column(
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      IconButton(
-                                        icon: Icon(Icons.arrow_back_ios),
-                                        color: Theme
-                                            .of(context)
-                                            .textTheme
-                                            .body1
-                                            .color,
-                                        onPressed: () {
-                                          onPop(context);
-                                        },
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  child: Expanded(
-                                    child: Column(
-                                      children: <Widget>[
-                                        Expanded(
-                                          child: SingleChildScrollView(
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.max,
-                                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                                              children: [
-                                                HeadingText(_edit ? "Upravit SPZ" : "Nová SPZ"),
-                                                Padding(
-                                                  padding: EdgeInsets.only(top: 40),
-                                                  child: Center(
-                                                    child: Column(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      mainAxisSize: MainAxisSize.max,
-                                                      children: [
-                                                        Padding(
-                                                            padding: EdgeInsets.only(bottom: 10),
-                                                            child: Text(
-                                                              "Naskenováno ${DateFormat('dd.MM.yyyy HH:mm').format(
-                                                                  _record.date)},",
-                                                              style: TextStyles.monserratStyle,
-                                                            )),
-                                                        Center(child: _buildVrp(_record.firstPart, _record.secondPart)),
-                                                        Padding(
-                                                          padding: const EdgeInsets.all(8.0),
-                                                          child: RaisedButton(
-                                                            shape: new RoundedRectangleBorder(
-                                                              borderRadius: new BorderRadius.circular(18.0),
-                                                            ),
-                                                            onPressed: () async {
-                                                              final result = await Navigator.of(context).pushNamed(
-                                                                  '/finder',
-                                                                  arguments: VrpFinderPageArguments(rescan: true));
-                                                              if (result is VrpFinderResult) {
-                                                                setState(() {
-                                                                  debugPrint("is vrpfinderresult");
-                                                                  _record = _record.copyWith(
-                                                                      firstPart: result.foundVrp.firstPart,
-                                                                      secondPart: result.foundVrp.secondPart,
-                                                                      sourceImagePath: result.srcPath,
-                                                                      top: result.rect.top.toInt(),
-                                                                      left: result.rect.left.toInt(),
-                                                                      width: result.rect.width.toInt(),
-                                                                      height: result.rect.height.toInt());
-                                                                });
-                                                                var bloc = BlocProvider.of<VrpPreviewBloc>(context);
-                                                                if (Provider
-                                                                    .of<PreferencesProvider>(context, listen: false)
-                                                                    .autoPositionLookup) {
-                                                                  bloc.add(GetAddressByPosition());
-                                                                }
-                                                                bloc.add(VrpRescanned(result.srcPath));
-                                                              } else {
-                                                                debugPrint("not vrpfinderesult");
-                                                              }
-                                                            },
-                                                            color: Colors.blue,
-                                                            textColor: Colors.white,
-                                                            child: Row(
-                                                              mainAxisSize: MainAxisSize.min,
-                                                              children: <Widget>[
-                                                                Padding(
-                                                                  padding: const EdgeInsets.only(right: 5.0),
-                                                                  child: Icon(Icons.replay),
-                                                                ),
-                                                                Text("Znovu".toUpperCase(),
-                                                                    style: TextStyle(fontSize: 16)),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                                Row(
-                                                  children: <Widget>[
-                                                    Expanded(
-                                                      child: HeadingText(
-                                                        "Adresa",
-                                                        fontSize: 22,
+                            },
+                          )
+                        ],
+                      ),
+                    ),
+                    Container(
+                      child: Expanded(
+                        child: Column(
+                          children: <Widget>[
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    HeadingText(_edit ? "Upravit SPZ" : "Nová SPZ"),
+                                    Padding(
+                                      padding: EdgeInsets.only(top: 40),
+                                      child: Center(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.max,
+                                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                                          children: [
+                                            Center(
+                                              child: Padding(
+                                                  padding: EdgeInsets.only(bottom: 10),
+                                                  child: Text(
+                                                    "Naskenováno ${DateFormat('dd.MM.yyyy HH:mm').format(_record.date)},",
+                                                    style: TextStyles.monserratStyle,
+                                                  )),
+                                            ),
+                                            Center(child: _buildVrp(_record.firstPart, _record.secondPart)),
+                                            Center(
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                                  children: [
+                                                    Padding(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                      child: FlatButton(
+                                                        child: Text("UPRAVIT"),
+                                                        onPressed: () async {
+                                                          String s = await _asyncInputDialog(context);
+                                                          debugPrint(s);
+                                                        },
                                                       ),
                                                     ),
-                                                    BlocBuilder(
-                                                        bloc: BlocProvider.of<VrpPreviewBloc>(context),
-                                                        builder: (context, state) {
-                                                          if ((BlocProvider
-                                                              .of<VrpPreviewBloc>(context)
-                                                              .position
-                                                              .latitude != 0 &&
-                                                              BlocProvider
-                                                                  .of<VrpPreviewBloc>(context)
-                                                                  .position
-                                                                  .longitude != 0)) {
-                                                            return Padding(
-                                                              padding: const EdgeInsets.only(right: 22.0),
-                                                              child: IconButton(
-                                                                icon: Icon(Icons.map),
-                                                                onPressed: () {
-                                                                  if (!bottomSheetShown) {
-                                                                    BlocProvider
-                                                                        .of<VrpPreviewBloc>(context)
-                                                                        .mapController =
-                                                                        Completer();
-                                                                    bottomSheetShown = true;
-                                                                    showBottomSheet(
-                                                                        context: context,
-                                                                        builder: (context) =>
-                                                                            _buildMapBottomSheetContent())
-                                                                        .closed
-                                                                        .whenComplete(() {
-                                                                      bottomSheetShown = false;
-                                                                    });
-                                                                  }
-                                                                },
-                                                              ),
-                                                            );
-                                                          } else {
-                                                            return Container();
+                                                    RaisedButton(
+                                                      shape: new RoundedRectangleBorder(
+                                                        borderRadius: new BorderRadius.circular(18.0),
+                                                      ),
+                                                      onPressed: () async {
+                                                        final result = await Navigator.of(context).pushNamed('/finder',
+                                                            arguments: VrpFinderPageArguments(rescan: true));
+                                                        if (result is VrpFinderResult) {
+                                                          setState(() {
+                                                            debugPrint("is vrpfinderresult");
+                                                            _record = _record.copyWith(
+                                                                firstPart: result.foundVrp.firstPart,
+                                                                secondPart: result.foundVrp.secondPart,
+                                                                sourceImagePath: result.srcPath,
+                                                                top: result.rect.top.toInt(),
+                                                                left: result.rect.left.toInt(),
+                                                                width: result.rect.width.toInt(),
+                                                                height: result.rect.height.toInt());
+                                                          });
+                                                          var bloc = BlocProvider.of<VrpPreviewBloc>(context);
+                                                          if (Provider.of<PreferencesProvider>(context, listen: false)
+                                                              .autoPositionLookup) {
+                                                            bloc.add(GetAddressByPosition());
                                                           }
-                                                        })
+                                                          bloc.add(VrpRescanned(result.srcPath));
+                                                        } else {
+                                                          debugPrint("not vrpfinderesult");
+                                                        }
+                                                      },
+                                                      color: Colors.blue,
+                                                      textColor: Colors.white,
+                                                      child: Row(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        children: <Widget>[
+                                                          Padding(
+                                                            padding: const EdgeInsets.only(right: 5.0),
+                                                            child: Icon(Icons.replay),
+                                                          ),
+                                                          Text("Znovu".toUpperCase(), style: TextStyle(fontSize: 16)),
+                                                        ],
+                                                      ),
+                                                    ),
                                                   ],
                                                 ),
-                                                Padding(
-                                                  padding: const EdgeInsets.all(22.0),
-                                                  child: Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: TextField(
-                                                          controller: _addressController,
-                                                          decoration: InputDecoration(
-                                                            hintText: "Adresa, kde byla SPZ naskenována",
-                                                            border: OutlineInputBorder(
-                                                              borderRadius: BorderRadius.circular(5.0),
-                                                              borderSide: BorderSide(
-                                                                color: Colors.amber,
-                                                                style: BorderStyle.solid,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      BlocBuilder<VrpPreviewBloc, VrpPreviewState>(
-                                                          bloc: BlocProvider.of<VrpPreviewBloc>(context),
-                                                          builder: (BuildContext context, VrpPreviewState state) {
-                                                            if (!(state is PositionLoading)) {
-                                                              return IconButton(
-                                                                  icon: Icon(Icons.location_on),
-                                                                  color: Colors.blueAccent,
-                                                                  onPressed: () =>
-                                                                  {
-                                                                    BlocProvider.of<VrpPreviewBloc>(context)
-                                                                        .add(GetAddressByPosition())
-                                                                  });
-                                                            } else {
-                                                              return Padding(
-                                                                padding: const EdgeInsets.only(left: 16.0),
-                                                                child: CircularProgressIndicator(),
-                                                              );
-                                                            }
-                                                          })
-                                                    ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    Row(
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: HeadingText(
+                                            "Adresa",
+                                            fontSize: 22,
+                                          ),
+                                        ),
+                                        BlocBuilder(
+                                            bloc: BlocProvider.of<VrpPreviewBloc>(context),
+                                            builder: (context, state) {
+                                              if ((BlocProvider.of<VrpPreviewBloc>(context).position.latitude != 0 &&
+                                                  BlocProvider.of<VrpPreviewBloc>(context).position.longitude != 0)) {
+                                                return Padding(
+                                                  padding: const EdgeInsets.only(right: 22.0),
+                                                  child: IconButton(
+                                                    icon: Icon(Icons.map),
+                                                    onPressed: () {
+                                                      if (!bottomSheetShown) {
+                                                        BlocProvider.of<VrpPreviewBloc>(context).mapController =
+                                                            Completer();
+                                                        bottomSheetShown = true;
+                                                        showBottomSheet(
+                                                                context: context,
+                                                                builder: (context) => _buildMapBottomSheetContent())
+                                                            .closed
+                                                            .whenComplete(() {
+                                                          bottomSheetShown = false;
+                                                        });
+                                                      }
+                                                    },
+                                                  ),
+                                                );
+                                              } else {
+                                                return Container();
+                                              }
+                                            })
+                                      ],
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(22.0),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextField(
+                                              controller: _addressController,
+                                              decoration: InputDecoration(
+                                                hintText: "Adresa, kde byla SPZ naskenována",
+                                                border: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(5.0),
+                                                  borderSide: BorderSide(
+                                                    color: Colors.amber,
+                                                    style: BorderStyle.solid,
                                                   ),
                                                 ),
-                                                HeadingText(
-                                                  "Poznámka",
-                                                  fontSize: 22,
+                                              ),
+                                            ),
+                                          ),
+                                          BlocBuilder<VrpPreviewBloc, VrpPreviewState>(
+                                              bloc: BlocProvider.of<VrpPreviewBloc>(context),
+                                              builder: (BuildContext context, VrpPreviewState state) {
+                                                if (!(state is PositionLoading)) {
+                                                  return IconButton(
+                                                      icon: Icon(Icons.location_on),
+                                                      color: Colors.blueAccent,
+                                                      onPressed: () => {
+                                                            BlocProvider.of<VrpPreviewBloc>(context)
+                                                                .add(GetAddressByPosition())
+                                                          });
+                                                } else {
+                                                  return Padding(
+                                                    padding: const EdgeInsets.only(left: 16.0),
+                                                    child: CircularProgressIndicator(),
+                                                  );
+                                                }
+                                              })
+                                        ],
+                                      ),
+                                    ),
+                                    HeadingText(
+                                      "Poznámka",
+                                      fontSize: 22,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(22.0),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextField(
+                                              controller: _noteController,
+                                              decoration: InputDecoration(
+                                                hintText: "Vlastní poznámka",
+                                                border: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(5.0),
+                                                  borderSide: BorderSide(
+                                                    color: Colors.amber,
+                                                    style: BorderStyle.solid,
+                                                  ),
                                                 ),
-                                                Padding(
-                                                  padding: const EdgeInsets.all(22.0),
-                                                  child: Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: TextField(
-                                                          controller: _noteController,
-                                                          decoration: InputDecoration(
-                                                            hintText: "Vlastní poznámka",
-                                                            border: OutlineInputBorder(
-                                                              borderRadius: BorderRadius.circular(5.0),
-                                                              borderSide: BorderSide(
-                                                                color: Colors.amber,
-                                                                style: BorderStyle.solid,
-                                                              ),
-                                                            ),
-                                                          ),
+                                              ),
+                                            ),
+                                          ),
+                                          BlocListener(
+                                            bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
+                                            condition: (previousState, currentState) {
+                                              if (currentState is RecordingSuccess &&
+                                                  !(previousState is RecordingInProgress)) {
+                                                return false;
+                                              }
+                                              return true;
+                                            },
+                                            listener: (context, state) {
+                                              if (state is PlaybackFailed) {
+                                                Scaffold.of(context).showSnackBar(SnackBar(
+                                                  content: Text(state.error),
+                                                ));
+                                              } else if (state is RecordingFailed) {
+                                                Scaffold.of(context).showSnackBar(SnackBar(
+                                                  content: Text(state.error),
+                                                ));
+                                              } else if (state is RecordingSuccess) {
+                                                Scaffold.of(context).showSnackBar(SnackBar(
+                                                  content: Text("Poznámka úspěšně nahrána"),
+                                                ));
+                                              }
+                                            },
+                                            child: BlocBuilder(
+                                                bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
+                                                builder: (context, state) {
+                                                  if (state is InitialVrpPreviewRecordingState) {
+                                                    return IconButton(
+                                                        icon: Icon(Icons.mic),
+                                                        color: Colors.blueAccent,
+                                                        onPressed: () =>
+                                                            BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                                .add(RecordingStarted()));
+                                                  } else if (state is RecordingInProgress) {
+                                                    return Row(
+                                                      children: [
+                                                        Padding(
+                                                          padding: const EdgeInsets.all(8.0),
+                                                          child: Text(
+                                                              DateFormat('mm:ss:SS', 'en_US').format(state.currentTime),
+                                                              style: Theme.of(context).textTheme.body2),
                                                         ),
-                                                      ),
-                                                      BlocListener(
-                                                        bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
-                                                        condition: (previousState, currentState) {
-                                                          if (currentState is RecordingSuccess &&
-                                                              !(previousState is RecordingInProgress)) {
-                                                            return false;
-                                                          }
-                                                          return true;
-                                                        },
-                                                        listener: (context, state) {
-                                                          if (state is PlaybackFailed) {
-                                                            Scaffold.of(context).showSnackBar(SnackBar(
-                                                              content: Text(state.error),
-                                                            ));
-                                                          } else if (state is RecordingFailed) {
-                                                            Scaffold.of(context).showSnackBar(SnackBar(
-                                                              content: Text(state.error),
-                                                            ));
-                                                          } else if (state is RecordingSuccess) {
-                                                            Scaffold.of(context).showSnackBar(SnackBar(
-                                                              content: Text("Poznámka úspěšně nahrána"),
-                                                            ));
-                                                          }
-                                                        },
-                                                        child: BlocBuilder(
-                                                            bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
-                                                            builder: (context, state) {
-                                                              if (state is InitialVrpPreviewRecordingState) {
-                                                                return IconButton(
-                                                                    icon: Icon(Icons.mic),
-                                                                    color: Colors.blueAccent,
-                                                                    onPressed: () =>
-                                                                        BlocProvider.of<VrpPreviewRecordingBloc>(
-                                                                            context)
-                                                                            .add(RecordingStarted()));
-                                                              } else if (state is RecordingInProgress) {
-                                                                return Row(
-                                                                  children: [
-                                                                    Padding(
-                                                                      padding: const EdgeInsets.all(8.0),
-                                                                      child: Text(
-                                                                          DateFormat('mm:ss:SS', 'en_US').format(
-                                                                              state.currentTime),
-                                                                          style: Theme
-                                                                              .of(context)
-                                                                              .textTheme
-                                                                              .body2),
-                                                                    ),
-                                                                    IconButton(
-                                                                        icon: Icon(Icons.stop),
-                                                                        color: Colors.blueAccent,
-                                                                        onPressed: () =>
-                                                                            BlocProvider.of<VrpPreviewRecordingBloc>(
-                                                                                context)
-                                                                                .add(RecordingStopped()))
-                                                                  ],
-                                                                );
-                                                              } else if (state is RecordingSuccess) {
-                                                                return Row(
-                                                                  children: [
-                                                                    IconButton(
-                                                                        icon: Icon(Icons.delete),
-                                                                        color: Colors.redAccent,
-                                                                        onPressed: () =>
-                                                                            BlocProvider.of<VrpPreviewRecordingBloc>(
-                                                                                context)
-                                                                                .add(RecordRemoved())),
-                                                                    IconButton(
-                                                                        icon: Icon(Icons.play_arrow),
-                                                                        color: Colors.blueAccent,
-                                                                        onPressed: () =>
-                                                                            BlocProvider.of<VrpPreviewRecordingBloc>(
-                                                                                context)
-                                                                                .add(PlaybackStarted())),
-                                                                  ],
-                                                                );
-                                                              } else if (state is PlaybackInProgress) {
-                                                                return Row(
-                                                                  children: [
-                                                                    Padding(
-                                                                      padding: const EdgeInsets.only(left: 8.0),
-                                                                      child: Text(
-                                                                          DateFormat('mm:ss:SS', 'en_US').format(
-                                                                              state.currentTime),
-                                                                          style: Theme
-                                                                              .of(context)
-                                                                              .textTheme
-                                                                              .body2),
-                                                                    ),
-                                                                    IconButton(
-                                                                        icon: Icon(Icons.stop),
-                                                                        color: Colors.blueAccent,
-                                                                        onPressed: () =>
-                                                                            BlocProvider.of<VrpPreviewRecordingBloc>(
-                                                                                context)
-                                                                                .add(PlaybackStopped()))
-                                                                  ],
-                                                                );
-                                                              }
+                                                        IconButton(
+                                                            icon: Icon(Icons.stop),
+                                                            color: Colors.blueAccent,
+                                                            onPressed: () =>
+                                                                BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                                    .add(RecordingStopped()))
+                                                      ],
+                                                    );
+                                                  } else if (state is RecordingSuccess) {
+                                                    return Row(
+                                                      children: [
+                                                        IconButton(
+                                                            icon: Icon(Icons.delete),
+                                                            color: Colors.redAccent,
+                                                            onPressed: () =>
+                                                                BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                                    .add(RecordRemoved())),
+                                                        IconButton(
+                                                            icon: Icon(Icons.play_arrow),
+                                                            color: Colors.blueAccent,
+                                                            onPressed: () =>
+                                                                BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                                    .add(PlaybackStarted())),
+                                                      ],
+                                                    );
+                                                  } else if (state is PlaybackInProgress) {
+                                                    return Row(
+                                                      children: [
+                                                        Padding(
+                                                          padding: const EdgeInsets.only(left: 8.0),
+                                                          child: Text(
+                                                              DateFormat('mm:ss:SS', 'en_US').format(state.currentTime),
+                                                              style: Theme.of(context).textTheme.body2),
+                                                        ),
+                                                        IconButton(
+                                                            icon: Icon(Icons.stop),
+                                                            color: Colors.blueAccent,
+                                                            onPressed: () =>
+                                                                BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                                    .add(PlaybackStopped()))
+                                                      ],
+                                                    );
+                                                  }
 
-                                                              return Padding(
-                                                                padding: const EdgeInsets.all(8.0),
-                                                                child: Text("Chyba"),
-                                                              );
-                                                            }),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                                HeadingText(
-                                                  "Zdroj",
-                                                  fontSize: 22,
-                                                ),
-                                                _buildSourcePreview(),
+                                                  return Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: Text("Chyba"),
+                                                  );
+                                                }),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    HeadingText(
+                                      "Zdroj",
+                                      fontSize: 22,
+                                    ),
+                                    _buildSourcePreview(),
 //                                        if (BlocProvider.of<VrpPreviewBloc>(context).position.latitude != 0 && BlocProvider.of<VrpPreviewBloc>(context).position.longitude != 0)
 //                                        AspectRatio(
 //                                          aspectRatio: 16.toDouble()/9.toDouble(),
@@ -464,74 +443,78 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
 //                                            },
 //                                          ),
 //                                        ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 24.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: <Widget>[
+                                  RaisedButton(
+                                    shape: new RoundedRectangleBorder(
+                                      borderRadius: new BorderRadius.circular(7.0),
+                                    ),
+                                    onPressed: () {
+                                      onPop(context);
+                                    },
+                                    color: Colors.blue,
+                                    textColor: Colors.white,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
                                         Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 24.0),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                            children: <Widget>[
-                                              RaisedButton(
-                                                shape: new RoundedRectangleBorder(
-                                                  borderRadius: new BorderRadius.circular(7.0),
-                                                ),
-                                                onPressed: () {
-                                                  onPop(context);
-                                                },
-                                                color: Colors.blue,
-                                                textColor: Colors.white,
-                                                child: Row(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: <Widget>[
-                                                    Padding(
-                                                      padding: const EdgeInsets.only(right: 5.0),
-                                                      child: Icon(Icons.close),
-                                                    ),
-                                                    Text("Zrušit", style: TextStyle(fontSize: 18)),
-                                                  ],
-                                                ),
-                                              ),
-                                              RaisedButton(
-                                                shape: new RoundedRectangleBorder(
-                                                  borderRadius: new BorderRadius.circular(7.0),
-                                                ),
-                                                onPressed: () {
-                                                  var mainBloc = BlocProvider.of<VrpPreviewBloc>(context);
-                                                  var recordingBloc = BlocProvider.of<VrpPreviewRecordingBloc>(context);
-                                                  mainBloc.add(SubmitVRP(_record,
-                                                      edit: _edit,
-                                                      audioNotePath: recordingBloc.audioPath,
-                                                      audioNoteEdited: recordingBloc.audioNoteEdited,
-                                                      audioNoteDeleted: recordingBloc.deletedNote));
-                                                },
-                                                color: Colors.orange,
-                                                textColor: Colors.white,
-                                                child: Row(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: <Widget>[
-                                                    Padding(
-                                                      padding: const EdgeInsets.only(right: 5.0),
-                                                      child: Icon(Icons.done),
-                                                    ),
-                                                    Text("Uložit", style: TextStyle(fontSize: 18)),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        )
+                                          padding: const EdgeInsets.only(right: 5.0),
+                                          child: Icon(Icons.close),
+                                        ),
+                                        Text("Zrušit", style: TextStyle(fontSize: 18)),
                                       ],
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
+                                  RaisedButton(
+                                    shape: new RoundedRectangleBorder(
+                                      borderRadius: new BorderRadius.circular(7.0),
+                                    ),
+                                    onPressed: () {
+                                      var recordingBloc = BlocProvider.of<VrpPreviewRecordingBloc>(context);
+                                      debugPrint("onPressed3.1");
+
+                                      var mainBloc = BlocProvider.of<VrpPreviewBloc>(context);
+                                      debugPrint("onPressed4");
+
+                                      mainBloc.add(SubmitVRP(_record,
+                                          edit: _edit,
+                                          audioNotePath: recordingBloc.audioPath,
+                                          audioNoteEdited: recordingBloc.audioNoteEdited,
+                                          audioNoteDeleted: recordingBloc.deletedNote));
+                                    },
+                                    color: Colors.orange,
+                                    textColor: Colors.white,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: const EdgeInsets.only(right: 5.0),
+                                          child: Icon(Icons.done),
+                                        ),
+                                        Text("Uložit", style: TextStyle(fontSize: 18)),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          ],
                         ),
-                  )),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
+          )),
+        ),
       ),
     );
   }
@@ -540,7 +523,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     return GoogleMap(
       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
         new Factory<OneSequenceGestureRecognizer>(
-              () => new EagerGestureRecognizer(),
+          () => new EagerGestureRecognizer(),
         ),
       ].toSet(),
       mapToolbarEnabled: false,
@@ -559,10 +542,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
         )
       },
       onMapCreated: (GoogleMapController controller) {
-        BlocProvider
-            .of<VrpPreviewBloc>(context)
-            .mapController
-            .complete(controller);
+        BlocProvider.of<VrpPreviewBloc>(context).mapController.complete(controller);
       },
     );
   }
@@ -588,51 +568,49 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     return BlocProvider(
       create: (context) => VrpSourceDetailBloc(),
       child: Builder(
-        builder: (context) =>
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: BlocBuilder(
-                bloc: BlocProvider.of<VrpSourceDetailBloc>(context),
-                builder: (context, state) {
-                  return GestureDetector(
-                      onTapDown: (_) async {
-                        debugPrint("onTapDown");
-                        File image = new File(_record.sourceImagePath); // Or any other way to get a File instance.
-                        var decodedImage = await decodeImageFromList(image.readAsBytesSync());
-                        BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHighlight(
-                            Rect.fromLTWH(_record.left.toDouble(), _record.top.toDouble(), _record.width.toDouble(),
-                                _record.height.toDouble()),
-                            Size(decodedImage.width.toDouble(), decodedImage.height.toDouble())));
-                      },
-                      onTapUp: (_) {
-                        debugPrint("onTapUp");
-                        BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHideHighlight());
-                      },
-                      onTapCancel: () {
-                        debugPrint("onTapCancel");
-                        BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHideHighlight());
-                      },
-                      child: Stack(
-                  children: [
-                  Image.file(File(_record.sourceImagePath)),
-                  if (state is HighlightedDetail)
-                  AspectRatio(
-                  aspectRatio: state.imageSize.width / state.imageSize.height,
-                  child: CustomPaint(painter: VrpSourceDetailPainter(state.highlightedArea, state.imageSize))),
-                  if (state is StaticDetail)
-                  Align(
-                  alignment: Alignment.bottomRight,
-                  child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Icon(Icons.remove_red_eye, color: Colors.white),
-                  )),
-                  ],
-                  )
-                  ,
-                  );
+        builder: (context) => Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: BlocBuilder(
+            bloc: BlocProvider.of<VrpSourceDetailBloc>(context),
+            builder: (context, state) {
+              return GestureDetector(
+                onTapDown: (_) async {
+                  debugPrint("onTapDown");
+                  File image = new File(_record.sourceImagePath); // Or any other way to get a File instance.
+                  var decodedImage = await decodeImageFromList(image.readAsBytesSync());
+                  BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHighlight(
+                      Rect.fromLTWH(_record.left.toDouble(), _record.top.toDouble(), _record.width.toDouble(),
+                          _record.height.toDouble()),
+                      Size(decodedImage.width.toDouble(), decodedImage.height.toDouble())));
                 },
-              ),
-            ),
+                onTapUp: (_) {
+                  debugPrint("onTapUp");
+                  BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHideHighlight());
+                },
+                onTapCancel: () {
+                  debugPrint("onTapCancel");
+                  BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHideHighlight());
+                },
+                child: Stack(
+                  children: [
+                    Image.file(File(_record.sourceImagePath)),
+                    if (state is HighlightedDetail)
+                      AspectRatio(
+                          aspectRatio: state.imageSize.width / state.imageSize.height,
+                          child: CustomPaint(painter: VrpSourceDetailPainter(state.highlightedArea, state.imageSize))),
+                    if (state is StaticDetail)
+                      Align(
+                          alignment: Alignment.bottomRight,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Icon(Icons.remove_red_eye, color: Colors.white),
+                          )),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -742,22 +720,133 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                 ),
                 Container(
                     child: AspectRatio(
-                      aspectRatio: 16.toDouble() / 10.toDouble(),
-                      child: FutureBuilder(
-                        future: Future<double>.delayed(Duration(milliseconds: 500), () => 1.0),
-                        builder: (context, snapshot) =>
-                            AnimatedOpacity(
-                              opacity: snapshot.hasData ? snapshot.data : 0.0,
-                              duration: Duration(seconds: 1),
-                              child: _buildGoogleMap(context),
-                            ),
-                      ),
-                    )),
+                  aspectRatio: 16.toDouble() / 10.toDouble(),
+                  child: FutureBuilder(
+                    future: Future<double>.delayed(Duration(milliseconds: 500), () => 1.0),
+                    builder: (context, snapshot) => AnimatedOpacity(
+                      opacity: snapshot.hasData ? snapshot.data : 0.0,
+                      duration: Duration(seconds: 1),
+                      child: _buildGoogleMap(context),
+                    ),
+                  ),
+                )),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Future<String> _asyncInputDialog(BuildContext context) async {
+    String firstPart = _record.firstPart;
+    String secondPart = _record.secondPart;
+    final formState = GlobalKey<FormState>();
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false, // dialog is dismissible with a tap on the barrier
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Expanded(child: HeadingText('Ručně upravit SPZ', fontSize: 18, noPadding: true)),
+              IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
+            ],
+          ),
+          content: Form(
+            autovalidate: true,
+            key: formState,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        maxLength: 3,
+                        validator: (value) {
+                          if (value.trim().isEmpty) {
+                            return "Tato část nesmí být prázdná";
+                          }
+
+                          if (value.length > 3) {
+                            return "Tato část musí mít maximálně 3 znaky";
+                          }
+                          return null;
+                        },
+                        initialValue: firstPart,
+                        decoration: InputDecoration(
+                          hintText: "První část SPZ",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                            borderSide: BorderSide(
+                              color: Colors.amber,
+                              style: BorderStyle.solid,
+                            ),
+                          ),
+                        ),
+                        onChanged: (newValue) {
+                          firstPart = newValue;
+                          formState.currentState.validate();
+                        },
+                      ),
+                    )
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          maxLength: 5,
+                          validator: (value) {
+                            if (value.trim().isEmpty) {
+                              return "Tato část nesmí být prázdná";
+                            }
+                            if (value.length > 5) {
+                              return "Tato část musí mít maximálně 5 znaků";
+                            }
+                            return null;
+                          },
+                          initialValue: secondPart,
+                          decoration: InputDecoration(
+                            hintText: "Druhá část SPZ",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                              borderSide: BorderSide(
+                                color: Colors.amber,
+                                style: BorderStyle.solid,
+                              ),
+                            ),
+                          ),
+                          onChanged: (newValue) {
+                            secondPart = newValue;
+                            formState.currentState.validate();
+                          },
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+          actions: [
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                if (formState.currentState.validate()) {
+                  setState(() {
+                    _record = _record.copyWith(firstPart: firstPart.toUpperCase(), secondPart: secondPart.toUpperCase());
+                  });
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
