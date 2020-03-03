@@ -1,6 +1,8 @@
 import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
 import 'package:flutter/material.dart';
 
+import 'common_texts.dart';
+
 class CommonScaffold extends StatelessWidget {
   final Widget child;
 
@@ -58,14 +60,33 @@ class CommonScaffold extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 IconButton(
-                  icon: Icon(Icons.sort),
+                  icon: Icon(Icons.filter_list),
                   color: Colors.white,
-                  onPressed: () {},
+                  onPressed: () async {
+                    var result = await showDialog<int>(
+                      context: context,
+                      barrierDismissible: false, // dialog is dismissible with a tap on the barrier
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
+                            title: Row(
+                              children: [
+                                Expanded(child: HeadingText('Filtrovat SPZ dle typu', fontSize: 18, noPadding: true)),
+                                IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
+                              ],
+                            ),
+                            content: Text("Content")
+                        );
+                      },
+                    );
+                  },
                 ),
                 IconButton(
                   icon: Icon(Icons.search),
                   color: Colors.white,
-                  onPressed: () {},
+                  onPressed: ()  {
+
+                  },
                 ),
               ],
             ),
