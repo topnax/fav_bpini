@@ -50,7 +50,7 @@ class VRPAppState extends State<VRPApp> {
 
             locale: Locale(value.appLanguageCode),
 
-            darkTheme: value.darkTheme
+            theme: value.darkTheme
                 ? ThemeData.dark().copyWith(
                     bottomSheetTheme: BottomSheetThemeData(backgroundColor: Colors.black.withOpacity(0)),
                   )
