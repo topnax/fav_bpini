@@ -79,9 +79,6 @@ class Database extends _$Database {
     return into(foundVrpRecords).insert(entry);
   }
 
-
-  /// Updates the row in the database represents this entry by writing the
-  /// updated data.
   Future updateEntry(FoundVrpRecord entry) {
     return update(foundVrpRecords).replace(entry);
   }
@@ -90,9 +87,6 @@ class Database extends _$Database {
     return delete(foundVrpRecords).delete(entry);
   }
 
-
-
-  Stream<List<FoundVrpRecord>> watchAllRecords() => select(foundVrpRecords).watch();
-
+  Stream<List<FoundVrpRecord>> watchAllRecords() => (select(foundVrpRecords)..orderBy([(t) => OrderingTerm(expression: t.date, mode: OrderingMode.desc)])).watch();
 
 }

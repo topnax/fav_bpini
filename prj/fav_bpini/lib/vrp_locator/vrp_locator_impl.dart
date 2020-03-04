@@ -23,6 +23,8 @@ class VrpFinderImpl implements VrpFinder {
 
   static const INVALID_CHAR_SET = {"CH", "G", "W"};
 
+  static const ONE_LINE_OLD_SEPARATOR = "-";
+
   final executorService = ExecutorService.newSingleExecutor();
 
   Future<List<VrpFinderResult>> findVrpInImage(CameraImage image) async {
@@ -75,13 +77,13 @@ List<VrpFinderResult> findResults(Prepravka prepravka) {
               type = VRPType.ONE_LINE_VIP;
               diffRatioUpper = 0.7;
               diffRatioLower = 0.55;
+              if (tb.text.contains(VrpFinderImpl.ONE_LINE_OLD_SEPARATOR)) {
+                type = VRPType.ONE_LINE_OLD;
+              }
             } else if (tb.lines[0].elements[1].text.length == 4) {
               diffRatioUpper = 0.65;
               diffRatioLower = 0.51;
               type = VRPType.ONE_LINE_CLASSIC;
-              if (tb.text.contains("-")) {
-                type = VRPType.ONE_LINE_OLD;
-              }
               if (!isDigit(tb.text, 0)) {
                 return null;
               }
