@@ -1,5 +1,4 @@
 import 'package:favbpini/page/vrp_list/vrp_list_page.dart';
-import 'package:favbpini/widget/common_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -27,6 +26,6 @@ class MainPageState extends State<MainPage> with SingleTickerProviderStateMixin 
 
   @override
   Widget build(BuildContext context) {
-    return CommonScaffold(child: VrpListPage());
+    return VrpListPage();
   }
 }

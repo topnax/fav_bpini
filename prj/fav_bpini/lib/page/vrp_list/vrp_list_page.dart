@@ -4,6 +4,7 @@ import 'package:favbpini/database/database.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/model/vrp_record.dart';
 import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
+import 'package:favbpini/widget/common_scaffold.dart';
 import 'package:favbpini/widget/common_texts.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -19,10 +20,73 @@ class VrpListPage extends StatefulWidget {
 }
 
 class VrpListPageState extends State<VrpListPage> {
+  VRPType _typeFilter;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: _buildVRPHistory(),
+    return CommonScaffold(
+      onPressed: () async {
+        var result = await showDialog<VRPType>(
+          context: context,
+          barrierDismissible: false, // dialog is dismissible with a tap on the barrier
+          builder: (BuildContext context) {
+            return AlertDialog(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
+                title: Row(
+                  children: [
+                    Expanded(child: HeadingText('Filtrovat SPZ dle typu', fontSize: 18, noPadding: true)),
+                    IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
+                  ],
+                ),
+                content: Padding(
+                  padding: EdgeInsets.only(left: 25, right: 25),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildFilterDialogRow(context, null, label: "Všechny záznamy"),
+                      for (var type in VRPType.values) _buildFilterDialogRow(context, type),
+                    ],
+                  ),
+                ));
+          },
+        );
+
+        debugPrint("settings staet");
+        setState(() {
+          _typeFilter = result;
+        });
+      },
+      child: Container(
+        child: _buildVRPHistory(),
+      ),
+    );
+  }
+
+  Padding _buildFilterDialogRow(BuildContext context, VRPType type, {String label}) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Material(
+        color: type != null ? Colors.blueAccent : Colors.orange,
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: () => Navigator.of(context).pop(type),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                  child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Text(
+                  type != null ? type.getName() : label,
+                  style: TextStyles.monserratStyle.copyWith(color: Colors.white),
+                ),
+              )),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -33,11 +97,13 @@ class VrpListPageState extends State<VrpListPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           HeadingText("Historie"),
+          if (_typeFilter != null)
+            HeadingText(_typeFilter.getName(), fontSize: 18,),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 15),
               child: StreamBuilder<List<FoundVrpRecord>>(
-                stream: Provider.of<Database>(context).watchAllRecords(),
+                stream: Provider.of<Database>(context).watchAllRecords(type: _typeFilter),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     if (snapshot.data.length > 0) {
@@ -47,7 +113,7 @@ class VrpListPageState extends State<VrpListPage> {
                         }),
                         builder: (BuildContext context, AsyncSnapshot<String> snapshotz) {
                           return snapshotz.hasData
-                              ? ListView(padding: EdgeInsets.all(0),children: [
+                              ? ListView(padding: EdgeInsets.all(0), children: [
                                   for (FoundVrpRecord record in snapshot.data)
                                     _buildVRPRecordCard(
                                         VRPRecord(
@@ -56,16 +122,17 @@ class VrpListPageState extends State<VrpListPage> {
                                             Position(longitude: record.longitude, latitude: record.latitude),
                                             record.address),
                                         record,
-                                        context, snapshot)
+                                        context,
+                                        snapshot)
                                 ])
-                              : ListView(children: [for (var i = 0; i < 10; i++) _buildVRPRecordCardLoading()]);
+                              : ListView(padding: EdgeInsets.all(0), children: [for (var i = 0; i < 10; i++) _buildVRPRecordCardLoading()]);
                         },
                       );
                     } else {
                       return Center(child: Text("Nenalezen žádný záznam", style: Theme.of(context).textTheme.subhead));
                     }
                   } else {
-                    return ListView(children: [for (var i = 0; i < 10; i++) _buildVRPRecordCardLoading()]);
+                    return ListView(padding: EdgeInsets.all(0), children: [for (var i = 0; i < 10; i++) _buildVRPRecordCardLoading()]);
                   }
                 },
               ),
@@ -76,13 +143,14 @@ class VrpListPageState extends State<VrpListPage> {
     );
   }
 
-  Widget _buildVRPRecordCard(VRPRecord record, FoundVrpRecord dbItem, BuildContext context, AsyncSnapshot<List<FoundVrpRecord>> snapshot) {
+  Widget _buildVRPRecordCard(
+      VRPRecord record, FoundVrpRecord dbItem, BuildContext context, AsyncSnapshot<List<FoundVrpRecord>> snapshot) {
     return Dismissible(
       key: Key(dbItem.toString()),
       background: Container(color: Colors.white30),
       onDismissed: (direction) async {
         var sourceImage = File(dbItem.sourceImagePath);
-        if (await sourceImage.exists()){
+        if (await sourceImage.exists()) {
           sourceImage.delete();
           debugPrint("Deleted an image: ${sourceImage.path}");
         }
@@ -99,9 +167,7 @@ class VrpListPageState extends State<VrpListPage> {
           child: InkWell(
             borderRadius: BorderRadius.circular(10),
             onTap: () =>
-                {
-                  Navigator.of(context).pushNamed("/found", arguments: VrpPreviewPageArguments(dbItem, edit: true))
-                },
+                {Navigator.of(context).pushNamed("/found", arguments: VrpPreviewPageArguments(dbItem, edit: true))},
             child: Container(
               padding: EdgeInsets.all(15),
               child: Column(

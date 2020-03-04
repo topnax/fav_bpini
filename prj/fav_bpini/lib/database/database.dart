@@ -1,6 +1,8 @@
 import 'dart:io';
 
-import 'package:moor/moor.dart' ;
+import 'package:favbpini/model/vrp.dart';
+import 'package:flutter/foundation.dart';
+import 'package:moor/moor.dart';
 import 'package:moor_ffi/moor_ffi.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -58,11 +60,9 @@ class Database extends _$Database {
   int get schemaVersion => 6;
 
   @override
-  MigrationStrategy get migration => MigrationStrategy(
-      onCreate: (Migrator m) {
+  MigrationStrategy get migration => MigrationStrategy(onCreate: (Migrator m) {
         return m.createAll();
-      },
-      onUpgrade: (Migrator m, int from, int to) async {
+      }, onUpgrade: (Migrator m, int from, int to) async {
         if (to == 6) {
           await m.addColumn(foundVrpRecords, foundVrpRecords.type);
         } else {
@@ -72,8 +72,7 @@ class Database extends _$Database {
             await m.addColumn(foundVrpRecords, foundVrpRecords.audioNotePath);
           }
         }
-      }
-  );
+      });
 
   Future addVrpRecord(FoundVrpRecordsCompanion entry) {
     return into(foundVrpRecords).insert(entry);
@@ -87,6 +86,13 @@ class Database extends _$Database {
     return delete(foundVrpRecords).delete(entry);
   }
 
-  Stream<List<FoundVrpRecord>> watchAllRecords() => (select(foundVrpRecords)..orderBy([(t) => OrderingTerm(expression: t.date, mode: OrderingMode.desc)])).watch();
-
+  Stream<List<FoundVrpRecord>> watchAllRecords({VRPType type}) {
+    if (type != null) {
+      return (select(foundVrpRecords)..where((t) => t.type.equals(type.index))..orderBy([(t) => OrderingTerm(expression: t.date, mode: OrderingMode.desc)]))
+          .watch();
+    } else {
+      return (select(foundVrpRecords)..orderBy([(t) => OrderingTerm(expression: t.date, mode: OrderingMode.desc)]))
+          .watch();
+    }
+  }
 }

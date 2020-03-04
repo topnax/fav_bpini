@@ -1,12 +1,11 @@
 import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
 import 'package:flutter/material.dart';
 
-import 'common_texts.dart';
-
 class CommonScaffold extends StatelessWidget {
   final Widget child;
+  final Function onPressed;
 
-  CommonScaffold({@required this.child});
+  CommonScaffold({@required this.child, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +44,7 @@ class CommonScaffold extends StatelessWidget {
 //            debugPrint("local file is: " + file.path);
 //            file..writeAsBytesSync(imglib.encodePng(bw, level: 1));
 
-            Navigator.of(context).pushNamed(
-              '/finder', arguments: VrpFinderPageArguments()
-            );
+            Navigator.of(context).pushNamed('/finder', arguments: VrpFinderPageArguments());
           },
           tooltip: 'New VRP',
           backgroundColor: Colors.orange,
@@ -62,31 +59,12 @@ class CommonScaffold extends StatelessWidget {
                 IconButton(
                   icon: Icon(Icons.filter_list),
                   color: Colors.white,
-                  onPressed: () async {
-                    var result = await showDialog<int>(
-                      context: context,
-                      barrierDismissible: false, // dialog is dismissible with a tap on the barrier
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
-                            title: Row(
-                              children: [
-                                Expanded(child: HeadingText('Filtrovat SPZ dle typu', fontSize: 18, noPadding: true)),
-                                IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
-                              ],
-                            ),
-                            content: Text("Content")
-                        );
-                      },
-                    );
-                  },
+                  onPressed: onPressed,
                 ),
                 IconButton(
                   icon: Icon(Icons.search),
                   color: Colors.white,
-                  onPressed: ()  {
-
-                  },
+                  onPressed: () {},
                 ),
               ],
             ),
