@@ -86,12 +86,12 @@ class Database extends _$Database {
     return delete(foundVrpRecords).delete(entry);
   }
 
-  Stream<List<FoundVrpRecord>> watchAllRecords({VRPType type}) {
+  Stream<List<FoundVrpRecord>> watchAllRecords({VRPType type, bool sortByNewest}) {
     if (type != null) {
-      return (select(foundVrpRecords)..where((t) => t.type.equals(type.index))..orderBy([(t) => OrderingTerm(expression: t.date, mode: OrderingMode.desc)]))
+      return (select(foundVrpRecords)..where((t) => t.type.equals(type.index))..orderBy([(t) => OrderingTerm(expression: t.date, mode: sortByNewest ? OrderingMode.desc : OrderingMode.asc)]))
           .watch();
     } else {
-      return (select(foundVrpRecords)..orderBy([(t) => OrderingTerm(expression: t.date, mode: OrderingMode.desc)]))
+      return (select(foundVrpRecords)..orderBy([(t) => OrderingTerm(expression: t.date, mode: sortByNewest ? OrderingMode.desc : OrderingMode.asc)]))
           .watch();
     }
   }

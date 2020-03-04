@@ -21,11 +21,13 @@ class VrpListPage extends StatefulWidget {
 
 class VrpListPageState extends State<VrpListPage> {
   VRPType _typeFilter;
+  var _sortByNewest = true;
 
   @override
   Widget build(BuildContext context) {
     return CommonScaffold(
-      onPressed: () async {
+      rightButtonHint: Icon(_sortByNewest ? Icons.arrow_downward : Icons.arrow_upward, size: 20),
+      onLeftButtonPressed: () async {
         var result = await showDialog<VRPType>(
           context: context,
           barrierDismissible: false, // dialog is dismissible with a tap on the barrier
@@ -55,6 +57,11 @@ class VrpListPageState extends State<VrpListPage> {
         debugPrint("settings staet");
         setState(() {
           _typeFilter = result;
+        });
+      },
+      onRightButtonPressed: () {
+        setState(() {
+          _sortByNewest = !_sortByNewest;
         });
       },
       child: Container(
@@ -98,12 +105,15 @@ class VrpListPageState extends State<VrpListPage> {
         children: [
           HeadingText("Historie"),
           if (_typeFilter != null)
-            HeadingText(_typeFilter.getName(), fontSize: 18,),
+            HeadingText(
+              _typeFilter.getName(),
+              fontSize: 18,
+            ),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 15),
               child: StreamBuilder<List<FoundVrpRecord>>(
-                stream: Provider.of<Database>(context).watchAllRecords(type: _typeFilter),
+                stream: Provider.of<Database>(context).watchAllRecords(type: _typeFilter, sortByNewest: _sortByNewest),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     if (snapshot.data.length > 0) {
@@ -125,14 +135,18 @@ class VrpListPageState extends State<VrpListPage> {
                                         context,
                                         snapshot)
                                 ])
-                              : ListView(padding: EdgeInsets.all(0), children: [for (var i = 0; i < 10; i++) _buildVRPRecordCardLoading()]);
+                              : ListView(
+                                  padding: EdgeInsets.all(0),
+                                  children: [for (var i = 0; i < 10; i++) _buildVRPRecordCardLoading()]);
                         },
                       );
                     } else {
                       return Center(child: Text("Nenalezen žádný záznam", style: Theme.of(context).textTheme.subhead));
                     }
                   } else {
-                    return ListView(padding: EdgeInsets.all(0), children: [for (var i = 0; i < 10; i++) _buildVRPRecordCardLoading()]);
+                    return ListView(
+                        padding: EdgeInsets.all(0),
+                        children: [for (var i = 0; i < 10; i++) _buildVRPRecordCardLoading()]);
                   }
                 },
               ),

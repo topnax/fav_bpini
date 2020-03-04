@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 
 class CommonScaffold extends StatelessWidget {
   final Widget child;
-  final Function onPressed;
+  final Function onLeftButtonPressed;
+  final Function onRightButtonPressed;
+  final Widget rightButtonHint;
 
-  CommonScaffold({@required this.child, this.onPressed});
+
+  CommonScaffold({@required this.child, this.onLeftButtonPressed, this.onRightButtonPressed, this.rightButtonHint});
 
   @override
   Widget build(BuildContext context) {
@@ -59,12 +62,21 @@ class CommonScaffold extends StatelessWidget {
                 IconButton(
                   icon: Icon(Icons.filter_list),
                   color: Colors.white,
-                  onPressed: onPressed,
+                  onPressed: onLeftButtonPressed,
                 ),
-                IconButton(
-                  icon: Icon(Icons.search),
-                  color: Colors.white,
-                  onPressed: () {},
+                Row(
+                  children: <Widget>[
+                    IconButton(
+                      icon: Icon(Icons.sort),
+                      color: Colors.white,
+                      onPressed: onRightButtonPressed,
+                    ),
+                    if (rightButtonHint != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: rightButtonHint,
+                    ),
+                  ],
                 ),
               ],
             ),
