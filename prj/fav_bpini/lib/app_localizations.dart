@@ -5,9 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AppLocalizations {
-  // Static member to have a simple access to the delegate from the MaterialApp
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-  _AppLocalizationsDelegate();
 
   final Locale locale;
 
@@ -22,6 +19,7 @@ class AppLocalizations {
   Map<String, String> _localizedStrings;
 
   Future<bool> load() async {
+    debugPrint("set in load: " + locale.languageCode);
     // Load the language JSON file from the "lang" folder
     String jsonString =
     await rootBundle.loadString('lang/${locale.languageCode}.json');
@@ -36,32 +34,43 @@ class AppLocalizations {
 
   // This method will be called from every widget which needs a localized text
   String translate(String key) {
+    if (!_localizedStrings.containsKey(key)){
+      return "Untranslated (${locale.languageCode}:$key)";
+    }
     return _localizedStrings[key];
   }
 }
 
 // LocalizationsDelegate is a factory for a set of localized resources
 // In this case, the localized strings will be gotten in an AppLocalizations object
-class _AppLocalizationsDelegate
+class AppLocalizationsDelegate
     extends LocalizationsDelegate<AppLocalizations> {
   // This delegate instance will never change (it doesn't even have fields!)
   // It can provide a constant constructor.
-  const _AppLocalizationsDelegate();
+  final Locale myLocale;
+
+  AppLocalizationsDelegate({this.myLocale});
 
   @override
   bool isSupported(Locale locale) {
+    debugPrint("is supported: " + locale.languageCode);
     // Include all of your supported language codes here
     return ['en', 'cs'].contains(locale.languageCode);
   }
 
   @override
   Future<AppLocalizations> load(Locale locale) async {
+    var localeToBeSet = myLocale ?? locale;
+    if (!isSupported(localeToBeSet)) {
+      localeToBeSet = Locale("en");
+    }
     // AppLocalizations class is where the JSON loading actually runs
-    AppLocalizations localizations = new AppLocalizations(locale);
+    AppLocalizations localizations = new AppLocalizations(myLocale ?? locale);
     await localizations.load();
     return localizations;
   }
 
   @override
-  bool shouldReload(_AppLocalizationsDelegate old) => false;
+  bool shouldReload(AppLocalizationsDelegate old) => true;
+
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:favbpini/app_localizations.dart';
 import 'package:favbpini/bloc/vrp_preview/main/bloc.dart';
 import 'package:favbpini/bloc/vrp_preview/recording/vrp_preview_recording_bloc.dart';
 import 'package:favbpini/bloc/vrp_preview/recording/vrp_preview_recording_event.dart';
@@ -141,7 +142,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                   mainAxisSize: MainAxisSize.max,
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
-                                    HeadingText(_edit ? "Upravit SPZ" : "Nová SPZ"),
+                                    HeadingText(_edit ? AppLocalizations.of(context).translate("vrp_preview_page_title_edit") : AppLocalizations.of(context).translate("vrp_preview_page_title_edit")),
                                     Padding(
                                       padding: EdgeInsets.only(top: 40),
                                       child: Center(
@@ -154,7 +155,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                               child: Padding(
                                                   padding: EdgeInsets.only(bottom: 10),
                                                   child: Text(
-                                                    "Naskenováno ${DateFormat('dd.MM.yyyy HH:mm').format(_record.date)},",
+                                                    "${AppLocalizations.of(context).translate("vrp_preview_page_scanned_at")} ${DateFormat('dd.MM.yyyy HH:mm').format(_record.date)},",
                                                     style: TextStyles.monserratStyle,
                                                   )),
                                             ),
@@ -171,7 +172,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                                     Padding(
                                                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                                       child: FlatButton(
-                                                        child: Text("UPRAVIT"),
+                                                        child: Text(AppLocalizations.of(context).translate("vrp_preview_page_edit")),
                                                         onPressed: () async {
                                                           String s = await _asyncInputDialog(context);
                                                           debugPrint(s);
@@ -217,7 +218,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                                             padding: const EdgeInsets.only(right: 5.0),
                                                             child: Icon(Icons.replay),
                                                           ),
-                                                          Text("Znovu".toUpperCase(), style: TextStyle(fontSize: 16)),
+                                                          Text(AppLocalizations.of(context).translate("vrp_preview_page_again").toUpperCase(), style: TextStyle(fontSize: 16)),
                                                         ],
                                                       ),
                                                     ),
@@ -233,7 +234,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                       children: <Widget>[
                                         Expanded(
                                           child: HeadingText(
-                                            "Adresa",
+                                            AppLocalizations.of(context).translate("vrp_preview_page_address"),
                                             fontSize: 22,
                                           ),
                                         ),
@@ -276,7 +277,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                             child: TextField(
                                               controller: _addressController,
                                               decoration: InputDecoration(
-                                                hintText: "Adresa, kde byla SPZ naskenována",
+                                                hintText: AppLocalizations.of(context).translate("vrp_preview_page_again_hint"),
                                                 border: OutlineInputBorder(
                                                   borderRadius: BorderRadius.circular(5.0),
                                                   borderSide: BorderSide(
@@ -309,7 +310,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                       ),
                                     ),
                                     HeadingText(
-                                      "Poznámka",
+                                      AppLocalizations.of(context).translate("vrp_preview_page_note"),
                                       fontSize: 22,
                                     ),
                                     Padding(
@@ -320,7 +321,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                             child: TextField(
                                               controller: _noteController,
                                               decoration: InputDecoration(
-                                                hintText: "Vlastní poznámka",
+                                                hintText: AppLocalizations.of(context).translate("vrp_preview_page_note_hint"),
                                                 border: OutlineInputBorder(
                                                   borderRadius: BorderRadius.circular(5.0),
                                                   borderSide: BorderSide(
@@ -351,7 +352,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                                 ));
                                               } else if (state is RecordingSuccess) {
                                                 Scaffold.of(context).showSnackBar(SnackBar(
-                                                  content: Text("Poznámka úspěšně nahrána"),
+                                                  content: Text(AppLocalizations.of(context).translate("vrp_preview_page_audio_note_success")),
                                                 ));
                                               }
                                             },
@@ -420,7 +421,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
 
                                                   return Padding(
                                                     padding: const EdgeInsets.all(8.0),
-                                                    child: Text("Chyba"),
+                                                    child: Text(AppLocalizations.of(context).translate("error")),
                                                   );
                                                 }),
                                           )
@@ -428,7 +429,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                       ),
                                     ),
                                     HeadingText(
-                                      "Zdroj",
+                                      AppLocalizations.of(context).translate("vrp_preview_page_source"),
                                       fontSize: 22,
                                     ),
                                     _buildSourcePreview(),
@@ -479,7 +480,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                           padding: const EdgeInsets.only(right: 5.0),
                                           child: Icon(Icons.close),
                                         ),
-                                        Text("Zrušit", style: TextStyle(fontSize: 18)),
+                                        Text(AppLocalizations.of(context).translate("cancel"), style: TextStyle(fontSize: 18)),
                                       ],
                                     ),
                                   ),
@@ -509,7 +510,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                           padding: const EdgeInsets.only(right: 5.0),
                                           child: Icon(Icons.done),
                                         ),
-                                        Text("Uložit", style: TextStyle(fontSize: 18)),
+                                        Text(AppLocalizations.of(context).translate("save"), style: TextStyle(fontSize: 18)),
                                       ],
                                     ),
                                   ),
@@ -546,7 +547,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
           markerId: MarkerId(""),
           position: BlocProvider.of<VrpPreviewBloc>(context).getMapMarkerPosition(),
           infoWindow: InfoWindow(
-            title: 'Pozice při naskenování',
+            title: AppLocalizations.of(context).translate("vrp_preview_page_dialog_position_title"),
             snippet: _record.address,
           ),
           icon: BitmapDescriptor.defaultMarker,
@@ -789,7 +790,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                       children: [
                         Expanded(
                           child: HeadingText(
-                            "Adresa na mapě",
+                            AppLocalizations.of(context).translate("vrp_preview_page_dialog_position_address_on_a_map"),
                             fontSize: 22,
                           ),
                         ),
@@ -870,7 +871,7 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
       title: Row(
         children: [
-          Expanded(child: HeadingText('Ručně upravit SPZ', fontSize: 18, noPadding: true)),
+          Expanded(child: HeadingText(AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_title"), fontSize: 18, noPadding: true)),
           IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
         ],
       ),
@@ -887,17 +888,17 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
                     maxLength: 3,
                     validator: (value) {
                       if (value.trim().isEmpty) {
-                        return "Tato část nesmí být prázdná";
+                        return AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_this_part_must_not_be_empty");
                       }
 
                       if (value.length > 3) {
-                        return "Tato část musí mít maximálně 3 znaky";
+                        return AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_this_part_mustnt_be_greater_than_three");
                       }
                       return null;
                     },
                     initialValue: vrp.firstPart,
                     decoration: InputDecoration(
-                      hintText: "První část SPZ",
+                      hintText: AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_first_part"),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5.0),
                         borderSide: BorderSide(
@@ -920,16 +921,16 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
                         maxLength: 5,
                         validator: (value) {
                           if (value.trim().isEmpty) {
-                            return "Tato část nesmí být prázdná";
+                            return AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_this_part_must_not_be_empty");
                           }
                           if (value.length > 5) {
-                            return "Tato část musí mít maximálně 5 znaků";
+                            return AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_this_part_mustnt_be_greater_than_five");
                           }
                           return null;
                         },
                         initialValue: vrp.secondPart,
                         decoration: InputDecoration(
-                          hintText: "Druhá část SPZ",
+                          hintText: AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_second_part"),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(5.0),
                             borderSide: BorderSide(
@@ -945,7 +946,8 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
             ),
             Row(
               children: [
-                Text("Typ SPZ:"),
+                Text(AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_type"),
+                ),
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
                   child: DropdownButton<int>(
@@ -971,7 +973,8 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
             Padding(
               padding: const EdgeInsets.only(top: 10.0),
               child: RaisedButton(
-                child: Text('OK'),
+                child: Text(AppLocalizations.of(context).translate("ok"),
+                ),
                 color: Colors.orange,
                 textColor: Colors.white,
                 shape: RoundedRectangleBorder(

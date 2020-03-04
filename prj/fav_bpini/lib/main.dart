@@ -39,52 +39,55 @@ class VRPAppState extends State<VRPApp> {
         return preferencesProvider;
       },
       child: Consumer<PreferencesProvider>(
-        builder: (context, value, child) => Provider(
-          create: (_) => Database(),
-          child: MaterialApp(
-            title: "VRP App",
-            supportedLocales: [
-              Locale('en', 'US'),
-              Locale('cs', 'CZ'),
-            ],
+        builder: (context, value, child) {
+          debugPrint("lang code " + value.appLanguageCode);
+          return Provider(
+            create: (_) => Database(),
+            child: MaterialApp(
+              title: "VRP App",
+              supportedLocales: [
+                Locale('en', 'US'),
+                Locale('cs', 'CZ'),
+              ],
 
-            locale: Locale(value.appLanguageCode),
+              locale: Locale(value.appLanguageCode),
 
-            theme: value.darkTheme
-                ? ThemeData.dark().copyWith(
-                    bottomSheetTheme: BottomSheetThemeData(backgroundColor: Colors.black.withOpacity(0)),
-                  )
-                : ThemeData.light().copyWith(
-                    bottomSheetTheme: BottomSheetThemeData(backgroundColor: Colors.black.withOpacity(0)),
-                  ),
+              theme: value.darkTheme
+                  ? ThemeData.dark().copyWith(
+                      bottomSheetTheme: BottomSheetThemeData(backgroundColor: Colors.black.withOpacity(0)),
+                    )
+                  : ThemeData.light().copyWith(
+                      bottomSheetTheme: BottomSheetThemeData(backgroundColor: Colors.black.withOpacity(0)),
+                    ),
 
-            // These delegates make sure that the localization data for the proper language is loaded
-            localizationsDelegates: [
-              AppLocalizations.delegate,
-              // Built-in localization of basic text for Material widgets
-              GlobalMaterialLocalizations.delegate,
-              // Built-in localization for text direction LTR/RTL
-              GlobalWidgetsLocalizations.delegate,
-            ],
+              // These delegates make sure that the localization data for the proper language is loaded
+              localizationsDelegates: [
+                AppLocalizationsDelegate(myLocale: Locale(value.appLanguageCode)),
+                // Built-in localization of basic text for Material widgets
+                GlobalMaterialLocalizations.delegate,
+                // Built-in localization for text direction LTR/RTL
+                GlobalWidgetsLocalizations.delegate,
+              ],
 
-            // Returns a locale which will be used by the app
-            localeResolutionCallback: (locale, supportedLocales) {
-              // Check if the current device locale is supported
-              for (var supportedLocale in supportedLocales) {
-                if (supportedLocale.languageCode == locale.languageCode &&
-                    supportedLocale.countryCode == locale.countryCode) {
-                  return supportedLocale;
+              // Returns a locale which will be used by the app
+              localeResolutionCallback: (locale, supportedLocales) {
+                // Check if the current device locale is supported
+                for (var supportedLocale in supportedLocales) {
+                  if (supportedLocale.languageCode == locale.languageCode &&
+                      supportedLocale.countryCode == locale.countryCode) {
+                    return supportedLocale;
+                  }
                 }
-              }
-              // If the locale of the device is not supported, use the first one
-              // from the list (English, in this case).
-              return supportedLocales.first;
-            },
+                // If the locale of the device is not supported, use the first one
+                // from the list (English, in this case).
+                return supportedLocales.first;
+              },
 
-            initialRoute: '/',
-            onGenerateRoute: Router.generateRoute,
-          ),
-        ),
+              initialRoute: '/',
+              onGenerateRoute: Router.generateRoute,
+            ),
+          );
+        },
       ),
     );
   }

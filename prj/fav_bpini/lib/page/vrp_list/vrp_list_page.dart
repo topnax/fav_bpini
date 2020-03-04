@@ -12,6 +12,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_animations/simple_animations.dart';
 
+import '../../app_localizations.dart';
+
 class VrpListPage extends StatefulWidget {
   @override
   VrpListPageState createState() => VrpListPageState();
@@ -26,7 +28,7 @@ class VrpListPageState extends State<VrpListPage> {
   @override
   Widget build(BuildContext context) {
     return CommonScaffold(
-      rightButtonHint: Icon(_sortByNewest ? Icons.arrow_downward : Icons.arrow_upward, size: 20),
+      rightButtonHint: Icon(_sortByNewest ? Icons.arrow_downward : Icons.arrow_upward, size: 20, color:Colors.white),
       onLeftButtonPressed: () async {
         var result = await showDialog<VRPType>(
           context: context,
@@ -103,7 +105,7 @@ class VrpListPageState extends State<VrpListPage> {
 //        crossAxisAlignment: CrossAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          HeadingText("Historie"),
+          HeadingText(AppLocalizations.of(context).translate('vrp_list_page_title')),
           if (_typeFilter != null)
             HeadingText(
               _typeFilter.getName(),
