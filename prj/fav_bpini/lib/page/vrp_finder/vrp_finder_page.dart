@@ -109,26 +109,13 @@ class VrpFinderPageState extends State<VrpFinderPage> {
               filter: ImageFilter.blur(sigmaX: _sigma, sigmaY: _sigma),
               child: Container(color: Colors.blue.withOpacity(0.2))),
 
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back_ios),
-                color: Colors.white,
-                iconSize: 30,
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ),
-          ),
-
           // center another camera preview with correct aspect ratio
           Center(
             child: AspectRatio(
               aspectRatio: controller.value.aspectRatio,
-              child: Stack(children: <Widget>[CameraPreview(controller)]),
+              child: Stack(children: [
+                CameraPreview(controller),
+              ]),
             ),
           ),
           Center(
@@ -138,6 +125,27 @@ class VrpFinderPageState extends State<VrpFinderPage> {
               painter: VrpHighlighterPainter(results, size, timeTook),
             ),
           )),
+          Center(
+            child: AspectRatio(
+              aspectRatio: controller.value.aspectRatio,
+              child: Stack(children: [
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_back_ios),
+                      color: Colors.white,
+                      iconSize: 30,
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                ),
+              ]),
+            ),
+          ),
         ]);
       },
     );
