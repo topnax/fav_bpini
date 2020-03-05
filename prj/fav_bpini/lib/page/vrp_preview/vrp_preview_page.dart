@@ -41,7 +41,6 @@ class VrpPreviewPage extends StatefulWidget {
 }
 
 class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProviderStateMixin {
-
   static const TextStyle _vrpStyle = TextStyle(fontSize: 60, fontWeight: FontWeight.w600, color: Colors.black);
   static const TextStyle _vrpStyleSmaller = TextStyle(fontSize: 50, fontWeight: FontWeight.w600, color: Colors.black);
 
@@ -86,434 +85,430 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
       child: Builder(
         builder: (context) => WillPopScope(
           onWillPop: () => onPop(context),
-          child: Scaffold(
-              body: Builder(
-            builder: (context) => BlocListener(
-              bloc: BlocProvider.of<VrpPreviewBloc>(context),
-              listener: (context, state) {
-                if (state is VrpSubmitted) {
-                  onPop(context);
-                } else if (state is PositionFailed) {
-                  Scaffold.of(context).showSnackBar(SnackBar(
-                    content: Text("${AppLocalizations.of(context).translate("vrp_preview_error_while_gathering_location")}: ${state.error}"),
-                  ));
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(top: 36.0),
-                child: Column(
+          child: Scaffold(body: _buildBody()),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    return Builder(
+      builder: (context) => BlocListener(
+        bloc: BlocProvider.of<VrpPreviewBloc>(context),
+        listener: (context, state) {
+          if (state is VrpSubmitted) {
+            onPop(context);
+          } else if (state is PositionFailed) {
+            Scaffold.of(context).showSnackBar(SnackBar(
+              content: Text(
+                  "${AppLocalizations.of(context).translate("vrp_preview_error_while_gathering_location")}: ${state.error}"),
+            ));
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(top: 36.0),
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          IconButton(
-                            icon: Icon(Icons.arrow_back_ios),
-                            color: Theme.of(context).textTheme.body1.color,
-                            onPressed: () {
-                              onPop(context);
-                            },
-                          )
-                        ],
-                      ),
-                    ),
-                    Container(
-                      child: Expanded(
-                        child: Column(
-                          children: <Widget>[
-                            Expanded(
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                    HeadingText(_edit ? AppLocalizations.of(context).translate("vrp_preview_page_title_edit") : AppLocalizations.of(context).translate("vrp_preview_page_title_edit")),
-                                    Padding(
-                                      padding: EdgeInsets.only(top: 40),
-                                      child: Center(
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          mainAxisSize: MainAxisSize.max,
-                                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                                          children: [
-                                            Center(
-                                              child: Padding(
-                                                  padding: EdgeInsets.only(bottom: 10),
-                                                  child: Text(
-                                                    "${AppLocalizations.of(context).translate("vrp_preview_page_scanned_at")} ${DateFormat('dd.MM.yyyy HH:mm').format(_record.date)},",
-                                                    style: TextStyles.monserratStyle,
-                                                  )),
-                                            ),
-                                            Center(
-                                                child: _buildVrp(VRP(_record.firstPart, _record.secondPart,
-                                                    VRPType.values[_record.type]))),
-                                            Center(
-                                              child: Padding(
-                                                padding: const EdgeInsets.all(8.0),
-                                                child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                                  children: [
-                                                    Padding(
-                                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                                      child: FlatButton(
-                                                        child: Text(AppLocalizations.of(context).translate("vrp_preview_page_edit")),
-                                                        onPressed: () async {
-                                                          String s = await _asyncInputDialog(context);
-                                                          debugPrint(s);
-                                                        },
-                                                      ),
-                                                    ),
-                                                    RaisedButton(
-                                                      shape: new RoundedRectangleBorder(
-                                                        borderRadius: new BorderRadius.circular(18.0),
-                                                      ),
-                                                      onPressed: () async {
-                                                        final result = await Navigator.of(context).pushNamed('/finder',
-                                                            arguments: VrpFinderPageArguments(rescan: true));
-                                                        if (result is VrpFinderResult) {
-                                                          setState(() {
-                                                            debugPrint("is vrpfinderresult");
-                                                            _record = _record.copyWith(
-                                                                type: result.foundVrp.type.index,
-                                                                firstPart: result.foundVrp.firstPart,
-                                                                secondPart: result.foundVrp.secondPart,
-                                                                sourceImagePath: result.srcPath,
-                                                                top: result.rect.top.toInt(),
-                                                                left: result.rect.left.toInt(),
-                                                                width: result.rect.width.toInt(),
-                                                                height: result.rect.height.toInt());
-                                                          });
-                                                          var bloc = BlocProvider.of<VrpPreviewBloc>(context);
-                                                          if (Provider.of<PreferencesProvider>(context, listen: false)
-                                                              .autoPositionLookup) {
-                                                            bloc.add(GetAddressByPosition());
-                                                          }
-                                                          bloc.add(VrpRescanned(result.srcPath));
-                                                        } else {
-                                                          debugPrint("not vrpfinderesult");
-                                                        }
-                                                      },
-                                                      color: Colors.blue,
-                                                      textColor: Colors.white,
-                                                      child: Row(
-                                                        mainAxisSize: MainAxisSize.min,
-                                                        children: <Widget>[
-                                                          Padding(
-                                                            padding: const EdgeInsets.only(right: 5.0),
-                                                            child: Icon(Icons.replay),
-                                                          ),
-                                                          Text(AppLocalizations.of(context).translate("vrp_preview_page_again").toUpperCase(), style: TextStyle(fontSize: 16)),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Row(
-                                      children: <Widget>[
-                                        Expanded(
-                                          child: HeadingText(
-                                            AppLocalizations.of(context).translate("vrp_preview_page_address"),
-                                            fontSize: 22,
-                                          ),
-                                        ),
-                                        BlocBuilder(
-                                            bloc: BlocProvider.of<VrpPreviewBloc>(context),
-                                            builder: (context, state) {
-                                              if ((BlocProvider.of<VrpPreviewBloc>(context).position.latitude != 0 &&
-                                                  BlocProvider.of<VrpPreviewBloc>(context).position.longitude != 0)) {
-                                                return Padding(
-                                                  padding: const EdgeInsets.only(right: 22.0),
-                                                  child: IconButton(
-                                                    icon: Icon(Icons.map),
-                                                    onPressed: () {
-                                                      if (!bottomSheetShown) {
-                                                        BlocProvider.of<VrpPreviewBloc>(context).mapController =
-                                                            Completer();
-                                                        bottomSheetShown = true;
-                                                        showBottomSheet(
-                                                                context: context,
-                                                                builder: (context) => _buildMapBottomSheetContent())
-                                                            .closed
-                                                            .whenComplete(() {
-                                                          bottomSheetShown = false;
-                                                        });
-                                                      }
-                                                    },
-                                                  ),
-                                                );
-                                              } else {
-                                                return Container();
-                                              }
-                                            })
-                                      ],
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(22.0),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: TextField(
-                                              controller: _addressController,
-                                              decoration: InputDecoration(
-                                                hintText: AppLocalizations.of(context).translate("vrp_preview_page_address_hint"),
-                                                border: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(5.0),
-                                                  borderSide: BorderSide(
-                                                    color: Colors.amber,
-                                                    style: BorderStyle.solid,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          BlocBuilder<VrpPreviewBloc, VrpPreviewState>(
-                                              bloc: BlocProvider.of<VrpPreviewBloc>(context),
-                                              builder: (BuildContext context, VrpPreviewState state) {
-                                                if (!(state is PositionLoading)) {
-                                                  return IconButton(
-                                                      icon: Icon(Icons.location_on),
-                                                      color: Colors.blueAccent,
-                                                      onPressed: () => {
-                                                            BlocProvider.of<VrpPreviewBloc>(context)
-                                                                .add(GetAddressByPosition())
-                                                          });
-                                                } else {
-                                                  return Padding(
-                                                    padding: const EdgeInsets.only(left: 16.0),
-                                                    child: CircularProgressIndicator(),
-                                                  );
-                                                }
-                                              })
-                                        ],
-                                      ),
-                                    ),
-                                    HeadingText(
-                                      AppLocalizations.of(context).translate("vrp_preview_page_note"),
-                                      fontSize: 22,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(22.0),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: TextField(
-                                              controller: _noteController,
-                                              decoration: InputDecoration(
-                                                hintText: AppLocalizations.of(context).translate("vrp_preview_page_note_hint"),
-                                                border: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(5.0),
-                                                  borderSide: BorderSide(
-                                                    color: Colors.amber,
-                                                    style: BorderStyle.solid,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          BlocListener(
-                                            bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
-                                            condition: (previousState, currentState) {
-                                              if (currentState is RecordingSuccess &&
-                                                  !(previousState is RecordingInProgress)) {
-                                                return false;
-                                              }
-                                              return true;
-                                            },
-                                            listener: (context, state) {
-                                              if (state is PlaybackFailed) {
-                                                Scaffold.of(context).showSnackBar(SnackBar(
-                                                  content: Text(state.error),
-                                                ));
-                                              } else if (state is RecordingFailed) {
-                                                Scaffold.of(context).showSnackBar(SnackBar(
-                                                  content: Text(state.error),
-                                                ));
-                                              } else if (state is RecordingSuccess) {
-                                                Scaffold.of(context).showSnackBar(SnackBar(
-                                                  content: Text(AppLocalizations.of(context).translate("vrp_preview_page_audio_note_success")),
-                                                ));
-                                              }
-                                            },
-                                            child: BlocBuilder(
-                                                bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
-                                                builder: (context, state) {
-                                                  if (state is InitialVrpPreviewRecordingState) {
-                                                    return IconButton(
-                                                        icon: Icon(Icons.mic),
-                                                        color: Colors.blueAccent,
-                                                        onPressed: () =>
-                                                            BlocProvider.of<VrpPreviewRecordingBloc>(context)
-                                                                .add(RecordingStarted()));
-                                                  } else if (state is RecordingInProgress) {
-                                                    return Row(
-                                                      children: [
-                                                        Padding(
-                                                          padding: const EdgeInsets.all(8.0),
-                                                          child: Text(
-                                                              DateFormat('mm:ss:SS', 'en_US').format(state.currentTime),
-                                                              style: Theme.of(context).textTheme.body2),
-                                                        ),
-                                                        IconButton(
-                                                            icon: Icon(Icons.stop),
-                                                            color: Colors.blueAccent,
-                                                            onPressed: () =>
-                                                                BlocProvider.of<VrpPreviewRecordingBloc>(context)
-                                                                    .add(RecordingStopped()))
-                                                      ],
-                                                    );
-                                                  } else if (state is RecordingSuccess) {
-                                                    return Row(
-                                                      children: [
-                                                        IconButton(
-                                                            icon: Icon(Icons.delete),
-                                                            color: Colors.redAccent,
-                                                            onPressed: () =>
-                                                                BlocProvider.of<VrpPreviewRecordingBloc>(context)
-                                                                    .add(RecordRemoved())),
-                                                        IconButton(
-                                                            icon: Icon(Icons.play_arrow),
-                                                            color: Colors.blueAccent,
-                                                            onPressed: () =>
-                                                                BlocProvider.of<VrpPreviewRecordingBloc>(context)
-                                                                    .add(PlaybackStarted())),
-                                                      ],
-                                                    );
-                                                  } else if (state is PlaybackInProgress) {
-                                                    return Row(
-                                                      children: [
-                                                        Padding(
-                                                          padding: const EdgeInsets.only(left: 8.0),
-                                                          child: Text(
-                                                              DateFormat('mm:ss:SS', 'en_US').format(state.currentTime),
-                                                              style: Theme.of(context).textTheme.body2),
-                                                        ),
-                                                        IconButton(
-                                                            icon: Icon(Icons.stop),
-                                                            color: Colors.blueAccent,
-                                                            onPressed: () =>
-                                                                BlocProvider.of<VrpPreviewRecordingBloc>(context)
-                                                                    .add(PlaybackStopped()))
-                                                      ],
-                                                    );
-                                                  }
-
-                                                  return Padding(
-                                                    padding: const EdgeInsets.all(8.0),
-                                                    child: Text(AppLocalizations.of(context).translate("error")),
-                                                  );
-                                                }),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    HeadingText(
-                                      AppLocalizations.of(context).translate("vrp_preview_page_source"),
-                                      fontSize: 22,
-                                    ),
-                                    _buildSourcePreview(),
-//                                        if (BlocProvider.of<VrpPreviewBloc>(context).position.latitude != 0 && BlocProvider.of<VrpPreviewBloc>(context).position.longitude != 0)
-//                                        AspectRatio(
-//                                          aspectRatio: 16.toDouble()/9.toDouble(),
-//                                          child: GoogleMap(
-//                                            mapToolbarEnabled: false,
-//                                            mapType: MapType.normal,
-//                                            initialCameraPosition: BlocProvider.of<VrpPreviewBloc>(context).getMapPosition(),
-//                                            markers: {Marker(
-//                                              // This marker id can be anything that uniquely identifies each marker.
-//                                              markerId: MarkerId(""),
-//                                              position: BlocProvider.of<VrpPreviewBloc>(context).getMapMarkerPosition(),
-//                                              infoWindow: InfoWindow(
-//                                                title: 'Pozice při naskenování',
-//                                                snippet: _record.address,
-//                                              ),
-//                                              icon: BitmapDescriptor.defaultMarker,
-//                                            )},
-//                                            onMapCreated: (GoogleMapController controller) {
-//                                              BlocProvider.of<VrpPreviewBloc>(context).mapController.complete(controller);
-//                                            },
-//                                          ),
-//                                        ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 24.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: <Widget>[
-                                  RaisedButton(
-                                    shape: new RoundedRectangleBorder(
-                                      borderRadius: new BorderRadius.circular(7.0),
-                                    ),
-                                    onPressed: () {
-                                      onPop(context);
-                                    },
-                                    color: Colors.blue,
-                                    textColor: Colors.white,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        Padding(
-                                          padding: const EdgeInsets.only(right: 5.0),
-                                          child: Icon(Icons.close),
-                                        ),
-                                        Text(AppLocalizations.of(context).translate("cancel"), style: TextStyle(fontSize: 18)),
-                                      ],
-                                    ),
-                                  ),
-                                  RaisedButton(
-                                    shape: new RoundedRectangleBorder(
-                                      borderRadius: new BorderRadius.circular(7.0),
-                                    ),
-                                    onPressed: () {
-                                      var recordingBloc = BlocProvider.of<VrpPreviewRecordingBloc>(context);
-                                      debugPrint("onPressed3.1");
-
-                                      var mainBloc = BlocProvider.of<VrpPreviewBloc>(context);
-                                      debugPrint("onPressed4");
-
-                                      mainBloc.add(SubmitVRP(_record,
-                                          edit: _edit,
-                                          audioNotePath: recordingBloc.audioPath,
-                                          audioNoteEdited: recordingBloc.audioNoteEdited,
-                                          audioNoteDeleted: recordingBloc.deletedNote));
-                                    },
-                                    color: Colors.orange,
-                                    textColor: Colors.white,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        Padding(
-                                          padding: const EdgeInsets.only(right: 5.0),
-                                          child: Icon(Icons.done),
-                                        ),
-                                        Text(AppLocalizations.of(context).translate("save"), style: TextStyle(fontSize: 18)),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
+                    IconButton(
+                      icon: Icon(Icons.arrow_back_ios),
+                      color: Theme.of(context).textTheme.body1.color,
+                      onPressed: () {
+                        onPop(context);
+                      },
+                    )
                   ],
                 ),
               ),
-            ),
-          )),
+              Container(
+                child: Expanded(
+                  child: Column(
+                    children: <Widget>[
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              HeadingText(_edit
+                                  ? AppLocalizations.of(context).translate("vrp_preview_page_title_edit")
+                                  : AppLocalizations.of(context).translate("vrp_preview_page_title_edit")),
+                              Padding(
+                                padding: EdgeInsets.only(top: 40),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      Center(
+                                        child: Padding(
+                                            padding: EdgeInsets.only(bottom: 10),
+                                            child: Text(
+                                              "${AppLocalizations.of(context).translate("vrp_preview_page_scanned_at")} ${DateFormat('dd.MM.yyyy HH:mm').format(_record.date)},",
+                                              style: TextStyles.monserratStyle,
+                                            )),
+                                      ),
+                                      Center(
+                                          child: _buildVrp(VRP(
+                                              _record.firstPart, _record.secondPart, VRPType.values[_record.type]))),
+                                      Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              _buildEditButton(context),
+                                              _buildRescanButton(context),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    child: HeadingText(
+                                      AppLocalizations.of(context).translate("vrp_preview_page_address"),
+                                      fontSize: 22,
+                                    ),
+                                  ),
+                                  _buildShowInMapIcon(context)
+                                ],
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(22.0),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _addressController,
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              AppLocalizations.of(context).translate("vrp_preview_page_address_hint"),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(5.0),
+                                            borderSide: BorderSide(
+                                              color: Colors.amber,
+                                              style: BorderStyle.solid,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    _buildGetLocationIcon(context)
+                                  ],
+                                ),
+                              ),
+                              HeadingText(
+                                AppLocalizations.of(context).translate("vrp_preview_page_note"),
+                                fontSize: 22,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(22.0),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _noteController,
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              AppLocalizations.of(context).translate("vrp_preview_page_note_hint"),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(5.0),
+                                            borderSide: BorderSide(
+                                              color: Colors.amber,
+                                              style: BorderStyle.solid,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    BlocListener(
+                                      bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
+                                      condition: (previousState, currentState) {
+                                        if (currentState is RecordingSuccess &&
+                                            !(previousState is RecordingInProgress)) {
+                                          return false;
+                                        }
+                                        return true;
+                                      },
+                                      listener: (context, state) {
+                                        if (state is PlaybackFailed) {
+                                          Scaffold.of(context).showSnackBar(SnackBar(
+                                            content: Text(state.error),
+                                          ));
+                                        } else if (state is RecordingFailed) {
+                                          Scaffold.of(context).showSnackBar(SnackBar(
+                                            content: Text(state.error),
+                                          ));
+                                        } else if (state is RecordingSuccess) {
+                                          Scaffold.of(context).showSnackBar(SnackBar(
+                                            content: Text(AppLocalizations.of(context)
+                                                .translate("vrp_preview_page_audio_note_success")),
+                                          ));
+                                        }
+                                      },
+                                      child: BlocBuilder(
+                                          bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
+                                          builder: (context, state) {
+                                            if (state is InitialVrpPreviewRecordingState) {
+                                              return IconButton(
+                                                  icon: Icon(Icons.mic),
+                                                  color: Colors.blueAccent,
+                                                  onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                      .add(RecordingStarted()));
+                                            } else if (state is RecordingInProgress) {
+                                              return Row(
+                                                children: [
+                                                  Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: Text(
+                                                        DateFormat('mm:ss:SS', 'en_US').format(state.currentTime),
+                                                        style: Theme.of(context).textTheme.body2),
+                                                  ),
+                                                  IconButton(
+                                                      icon: Icon(Icons.stop),
+                                                      color: Colors.blueAccent,
+                                                      onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                          .add(RecordingStopped()))
+                                                ],
+                                              );
+                                            } else if (state is RecordingSuccess) {
+                                              return Row(
+                                                children: [
+                                                  IconButton(
+                                                      icon: Icon(Icons.delete),
+                                                      color: Colors.redAccent,
+                                                      onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                          .add(RecordRemoved())),
+                                                  IconButton(
+                                                      icon: Icon(Icons.play_arrow),
+                                                      color: Colors.blueAccent,
+                                                      onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                          .add(PlaybackStarted())),
+                                                ],
+                                              );
+                                            } else if (state is PlaybackInProgress) {
+                                              return Row(
+                                                children: [
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(left: 8.0),
+                                                    child: Text(
+                                                        DateFormat('mm:ss:SS', 'en_US').format(state.currentTime),
+                                                        style: Theme.of(context).textTheme.body2),
+                                                  ),
+                                                  IconButton(
+                                                      icon: Icon(Icons.stop),
+                                                      color: Colors.blueAccent,
+                                                      onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context)
+                                                          .add(PlaybackStopped()))
+                                                ],
+                                              );
+                                            }
+
+                                            return Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Text(AppLocalizations.of(context).translate("error")),
+                                            );
+                                          }),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              HeadingText(
+                                AppLocalizations.of(context).translate("vrp_preview_page_source"),
+                                fontSize: 22,
+                              ),
+                              _buildSourcePreview(),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: <Widget>[
+                            RaisedButton(
+                              shape: new RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(7.0),
+                              ),
+                              onPressed: () {
+                                onPop(context);
+                              },
+                              color: Colors.blue,
+                              textColor: Colors.white,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 5.0),
+                                    child: Icon(Icons.close),
+                                  ),
+                                  Text(AppLocalizations.of(context).translate("cancel"),
+                                      style: TextStyle(fontSize: 18)),
+                                ],
+                              ),
+                            ),
+                            RaisedButton(
+                              shape: new RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(7.0),
+                              ),
+                              onPressed: () {
+                                var recordingBloc = BlocProvider.of<VrpPreviewRecordingBloc>(context);
+                                debugPrint("onPressed3.1");
+
+                                var mainBloc = BlocProvider.of<VrpPreviewBloc>(context);
+                                debugPrint("onPressed4");
+
+                                mainBloc.add(SubmitVRP(_record,
+                                    edit: _edit,
+                                    audioNotePath: recordingBloc.audioPath,
+                                    audioNoteEdited: recordingBloc.audioNoteEdited,
+                                    audioNoteDeleted: recordingBloc.deletedNote));
+                              },
+                              color: Colors.orange,
+                              textColor: Colors.white,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 5.0),
+                                    child: Icon(Icons.done),
+                                  ),
+                                  Text(AppLocalizations.of(context).translate("save"), style: TextStyle(fontSize: 18)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  BlocBuilder<VrpPreviewBloc, VrpPreviewState> _buildGetLocationIcon(BuildContext context) {
+    return BlocBuilder<VrpPreviewBloc, VrpPreviewState>(
+                                      bloc: BlocProvider.of<VrpPreviewBloc>(context),
+                                      builder: (BuildContext context, VrpPreviewState state) {
+                                        if (!(state is PositionLoading)) {
+                                          return IconButton(
+                                              icon: Icon(Icons.location_on),
+                                              color: Colors.blueAccent,
+                                              onPressed: () => {
+                                                    BlocProvider.of<VrpPreviewBloc>(context)
+                                                        .add(GetAddressByPosition())
+                                                  });
+                                        } else {
+                                          return Padding(
+                                            padding: const EdgeInsets.only(left: 16.0),
+                                            child: CircularProgressIndicator(),
+                                          );
+                                        }
+                                      });
+  }
+
+  Widget _buildShowInMapIcon(BuildContext context) {
+    return BlocBuilder(
+        bloc: BlocProvider.of<VrpPreviewBloc>(context),
+        builder: (context, state) {
+          if ((BlocProvider.of<VrpPreviewBloc>(context).position.latitude != 0 &&
+              BlocProvider.of<VrpPreviewBloc>(context).position.longitude != 0)) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 22.0),
+              child: IconButton(
+                icon: Icon(Icons.map),
+                onPressed: () {
+                  if (!bottomSheetShown) {
+                    BlocProvider.of<VrpPreviewBloc>(context).mapController = Completer();
+                    bottomSheetShown = true;
+                    showBottomSheet(context: context, builder: (context) => _buildMapBottomSheetContent())
+                        .closed
+                        .whenComplete(() {
+                      bottomSheetShown = false;
+                    });
+                  }
+                },
+              ),
+            );
+          } else {
+            return Container();
+          }
+        });
+  }
+
+  Widget _buildEditButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: FlatButton(
+        child: Text(AppLocalizations.of(context).translate("vrp_preview_page_edit")),
+        onPressed: () async {
+          String s = await _asyncInputDialog(context);
+          debugPrint(s);
+        },
+      ),
+    );
+  }
+
+  Widget _buildRescanButton(BuildContext context) {
+    return RaisedButton(
+      shape: new RoundedRectangleBorder(
+        borderRadius: new BorderRadius.circular(18.0),
+      ),
+      onPressed: () async {
+        final result =
+            await Navigator.of(context).pushNamed('/finder', arguments: VrpFinderPageArguments(rescan: true));
+        if (result is VrpFinderResult) {
+          setState(() {
+            debugPrint("is vrpfinderresult");
+            _record = _record.copyWith(
+                type: result.foundVrp.type.index,
+                firstPart: result.foundVrp.firstPart,
+                secondPart: result.foundVrp.secondPart,
+                sourceImagePath: result.srcPath,
+                top: result.rect.top.toInt(),
+                left: result.rect.left.toInt(),
+                width: result.rect.width.toInt(),
+                height: result.rect.height.toInt());
+          });
+          var bloc = BlocProvider.of<VrpPreviewBloc>(context);
+          if (Provider.of<PreferencesProvider>(context, listen: false).autoPositionLookup) {
+            bloc.add(GetAddressByPosition());
+          }
+          bloc.add(VrpRescanned(result.srcPath));
+        } else {
+          debugPrint("not vrpfinderesult");
+        }
+      },
+      color: Colors.blue,
+      textColor: Colors.white,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: 5.0),
+            child: Icon(Icons.replay),
+          ),
+          Text(AppLocalizations.of(context).translate("vrp_preview_page_again").toUpperCase(),
+              style: TextStyle(fontSize: 16)),
+        ],
       ),
     );
   }
@@ -858,7 +853,9 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
       title: Row(
         children: [
-          Expanded(child: HeadingText(AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_title"), fontSize: 18, noPadding: true)),
+          Expanded(
+              child: HeadingText(AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_title"),
+                  fontSize: 18, noPadding: true)),
           IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
         ],
       ),
@@ -875,11 +872,13 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
                     maxLength: 3,
                     validator: (value) {
                       if (value.trim().isEmpty) {
-                        return AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_this_part_must_not_be_empty");
+                        return AppLocalizations.of(context)
+                            .translate("vrp_preview_page_edit_dialog_this_part_must_not_be_empty");
                       }
 
                       if (value.length > 3) {
-                        return AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_this_part_mustnt_be_greater_than_three");
+                        return AppLocalizations.of(context)
+                            .translate("vrp_preview_page_edit_dialog_this_part_mustnt_be_greater_than_three");
                       }
                       return null;
                     },
@@ -908,10 +907,12 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
                         maxLength: 5,
                         validator: (value) {
                           if (value.trim().isEmpty) {
-                            return AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_this_part_must_not_be_empty");
+                            return AppLocalizations.of(context)
+                                .translate("vrp_preview_page_edit_dialog_this_part_must_not_be_empty");
                           }
                           if (value.length > 5) {
-                            return AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_this_part_mustnt_be_greater_than_five");
+                            return AppLocalizations.of(context)
+                                .translate("vrp_preview_page_edit_dialog_this_part_mustnt_be_greater_than_five");
                           }
                           return null;
                         },
@@ -933,7 +934,8 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
             ),
             Row(
               children: [
-                Text(AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_type"),
+                Text(
+                  AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_type"),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
@@ -960,7 +962,8 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
             Padding(
               padding: const EdgeInsets.only(top: 10.0),
               child: RaisedButton(
-                child: Text(AppLocalizations.of(context).translate("ok"),
+                child: Text(
+                  AppLocalizations.of(context).translate("ok"),
                 ),
                 color: Colors.orange,
                 textColor: Colors.white,
