@@ -14,7 +14,7 @@ description: A application created within the KIV&#x2F;PRJ5 and KIV&#x2F;BPINI.
 version: 1.0.1+3
 
 environment:
-  sdk: ">=2.3.0 <3.0.0"
+  sdk: ">=2.6.0 <3.0.0"
 
 dependencies:
   flutter:

@@ -38,7 +38,7 @@ class VrpListPageState extends State<VrpListPage> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
                 title: Row(
                   children: [
-                    Expanded(child: HeadingText('Filtrovat SPZ dle typu', fontSize: 18, noPadding: true)),
+                    Expanded(child: HeadingText(AppLocalizations.of(context).translate("vrp_filter_dialog_title"), fontSize: 18, noPadding: true)),
                     IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
                   ],
                 ),
@@ -48,7 +48,7 @@ class VrpListPageState extends State<VrpListPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _buildFilterDialogRow(context, null, label: "Všechny záznamy"),
+                      _buildFilterDialogRow(context, null, label: AppLocalizations.of(context).translate("vrp_type_all")),
                       for (var type in VRPType.values) _buildFilterDialogRow(context, type),
                     ],
                   ),
@@ -88,7 +88,7 @@ class VrpListPageState extends State<VrpListPage> {
                   child: Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: Text(
-                  type != null ? type.getName() : label,
+                  type != null ? type.getName(context) : label,
                   style: TextStyles.monserratStyle.copyWith(color: Colors.white),
                 ),
               )),
@@ -108,7 +108,7 @@ class VrpListPageState extends State<VrpListPage> {
           HeadingText(AppLocalizations.of(context).translate('vrp_list_page_title')),
           if (_typeFilter != null)
             HeadingText(
-              _typeFilter.getName(),
+              _typeFilter.getName(context),
               fontSize: 18,
             ),
           Expanded(
@@ -209,7 +209,7 @@ class VrpListPageState extends State<VrpListPage> {
                   Padding(
                     padding: const EdgeInsets.only(top: 5.0),
                     child: Text(
-                      record.address,
+                      record.address.isNotEmpty ? record.address : AppLocalizations.of(context).translate("vrp_list_address_unspecified"),
                       style: TextStyle(color: Colors.white),
                     ),
                   ),

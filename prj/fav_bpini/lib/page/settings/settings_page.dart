@@ -54,7 +54,7 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                               padding: EdgeInsets.only(top: 10),
                               child: CheckboxListTile(
                                 secondary: Icon(Icons.color_lens),
-                                title: Text('Tmavé téma'),
+                                title: Text(AppLocalizations.of(context).translate("settings_page_dark_theme")),
                                 value: preferences.darkTheme,
                                 activeColor: Colors.blueAccent,
                                 onChanged: (checked) => preferences.darkTheme = checked,
@@ -62,13 +62,13 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                             ),
                             ListTile(
                               leading: Icon(Icons.language),
-                              title: Text('Jazyk'),
+                              title: Text(AppLocalizations.of(context).translate("settings_page_language")),
                               trailing: DropdownButton<String>(
                                 value: preferences.appLanguageCode,
                                 items: <String>["cs", "en"].map((String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,
-                                    child: new Text(value),
+                                    child: Text(value),
                                   );
                                 }).toList(),
                                 onChanged: (value) {
@@ -82,7 +82,7 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                               padding: EdgeInsets.only(top: 10),
                               child: CheckboxListTile(
                                 secondary: Icon(Icons.location_on),
-                                title: Text('Automaticky získávat polohu při naskenování SPZ'),
+                                title: Text(AppLocalizations.of(context).translate("settings_page_automatic_location")),
                                 value: preferences.autoPositionLookup,
                                 activeColor: Colors.blueAccent,
                                 onChanged: (checked) => preferences.autoPositionLookup = checked,

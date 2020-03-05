@@ -1,3 +1,6 @@
+import 'package:favbpini/app_localizations.dart';
+import 'package:flutter/material.dart';
+
 class VRP {
   final String firstPart;
   final String secondPart;
@@ -9,18 +12,18 @@ class VRP {
 enum VRPType { ONE_LINE_CLASSIC, ONE_LINE_OLD, ONE_LINE_VIP, TWO_LINE_BIKE, TWO_LINE_OTHER }
 
 extension NameResolve on VRPType {
-  String getName() {
+  String getName(BuildContext context) {
     switch (this) {
       case VRPType.ONE_LINE_CLASSIC:
-        return "Klasická";
+        return AppLocalizations.of(context).translate("vrp_type_one_line_classic");
       case VRPType.ONE_LINE_OLD:
-        return "Historická";
+        return AppLocalizations.of(context).translate("vrp_type_one_line_old");
       case VRPType.ONE_LINE_VIP:
-        return "VIP";
+        return AppLocalizations.of(context).translate("vrp_type_one_line_vip");
       case VRPType.TWO_LINE_BIKE:
-        return "Dvouřádková - motorka";
+        return AppLocalizations.of(context).translate("vrp_type_two_line_bike");
       case VRPType.TWO_LINE_OTHER:
-        return "Dvouřádková - ostatní";
+        return AppLocalizations.of(context).translate("vrp_type_two_line_other");
       default:
         return "UNKNOWN";
     }

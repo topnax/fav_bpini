@@ -277,7 +277,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                             child: TextField(
                                               controller: _addressController,
                                               decoration: InputDecoration(
-                                                hintText: AppLocalizations.of(context).translate("vrp_preview_page_again_hint"),
+                                                hintText: AppLocalizations.of(context).translate("vrp_preview_page_address_hint"),
                                                 border: OutlineInputBorder(
                                                   borderRadius: BorderRadius.circular(5.0),
                                                   borderSide: BorderSide(
@@ -956,7 +956,7 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
                     items: VRPType.values.map((VRPType type) {
                       return DropdownMenuItem<int>(
                         value: type.index,
-                        child: Text(type.getName()),
+                        child: Text(type.getName(context)),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -986,7 +986,7 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
                     debugPrint("form done");
                     debugPrint(_firstPart);
                     debugPrint(_secondPart);
-                    debugPrint(VRPType.values[_type].getName());
+                    debugPrint(VRPType.values[_type].getName(context));
                     Navigator.of(context).pop(VRP(_firstPart, _secondPart, VRPType.values[_type]));
                   }
                 },

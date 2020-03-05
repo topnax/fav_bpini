@@ -94,7 +94,7 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
 
       var imgSourcePath = await handleSourceImageEvent(dir, event);
 
-      var address = _addressController.text.trim().isNotEmpty ? _addressController.text : "Nezadáno";
+      var address = _addressController.text.trim();
 
       if (!event.edit) {
         database.addVrpRecord(FoundVrpRecordsCompanion.insert(
