@@ -28,39 +28,8 @@ class VrpListPageState extends State<VrpListPage> {
   @override
   Widget build(BuildContext context) {
     return CommonScaffold(
-      rightButtonHint: Icon(_sortByNewest ? Icons.arrow_downward : Icons.arrow_upward, size: 20, color:Colors.white),
-      onLeftButtonPressed: () async {
-        var result = await showDialog<VRPType>(
-          context: context,
-          barrierDismissible: false, // dialog is dismissible with a tap on the barrier
-          builder: (BuildContext context) {
-            return AlertDialog(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
-                title: Row(
-                  children: [
-                    Expanded(child: HeadingText(AppLocalizations.of(context).translate("vrp_filter_dialog_title"), fontSize: 18, noPadding: true)),
-                    IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
-                  ],
-                ),
-                content: Padding(
-                  padding: EdgeInsets.only(left: 25, right: 25),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildFilterDialogRow(context, null, label: AppLocalizations.of(context).translate("vrp_type_all")),
-                      for (var type in VRPType.values) _buildFilterDialogRow(context, type),
-                    ],
-                  ),
-                ));
-          },
-        );
-
-        debugPrint("settings staet");
-        setState(() {
-          _typeFilter = result;
-        });
-      },
+      rightButtonHint: Icon(_sortByNewest ? Icons.arrow_downward : Icons.arrow_upward, size: 20, color: Colors.white),
+      onLeftButtonPressed: _openFilterRecordsDialog,
       onRightButtonPressed: () {
         setState(() {
           _sortByNewest = !_sortByNewest;
@@ -102,7 +71,6 @@ class VrpListPageState extends State<VrpListPage> {
   Widget _buildVRPHistory() {
     return Expanded(
       child: Column(
-//        crossAxisAlignment: CrossAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           HeadingText(AppLocalizations.of(context).translate('vrp_list_page_title')),
@@ -120,11 +88,9 @@ class VrpListPageState extends State<VrpListPage> {
                   if (snapshot.hasData) {
                     if (snapshot.data.length > 0) {
                       return FutureBuilder<String>(
-                        future: Future<String>.delayed(Duration(milliseconds: 500), () {
-                          return "Whatever";
-                        }),
+                        future: Future.delayed(Duration(milliseconds: 500)),
                         builder: (BuildContext context, AsyncSnapshot<String> snapshotz) {
-                          return snapshotz.hasData
+                          return snapshotz.connectionState == ConnectionState.done
                               ? ListView(padding: EdgeInsets.all(0), children: [
                                   for (FoundVrpRecord record in snapshot.data)
                                     _buildVRPRecordCard(
@@ -143,7 +109,9 @@ class VrpListPageState extends State<VrpListPage> {
                         },
                       );
                     } else {
-                      return Center(child: Text("Nenalezen žádný záznam", style: Theme.of(context).textTheme.subhead));
+                      return Center(
+                          child: Text(AppLocalizations.of(context).translate("vrp_list_page_no_record_found"),
+                              style: Theme.of(context).textTheme.subhead));
                     }
                   } else {
                     return ListView(
@@ -209,7 +177,9 @@ class VrpListPageState extends State<VrpListPage> {
                   Padding(
                     padding: const EdgeInsets.only(top: 5.0),
                     child: Text(
-                      record.address.isNotEmpty ? record.address : AppLocalizations.of(context).translate("vrp_list_address_unspecified"),
+                      record.address.isNotEmpty
+                          ? record.address
+                          : "",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -229,7 +199,6 @@ class VrpListPageState extends State<VrpListPage> {
       Track("color2")
           .add(Duration(milliseconds: 500), ColorTween(begin: Colors.blueAccent[100], end: Colors.blueAccent))
     ]);
-//
 
     return ControlledAnimation(
       playback: Playback.MIRROR,
@@ -286,7 +255,36 @@ class VrpListPageState extends State<VrpListPage> {
     );
   }
 
-//  Widget _buildVRPList(List<VRPRecord> vrpRecordList) {
-//
-//  }
+  _openFilterRecordsDialog() async {
+    var result = await showDialog<VRPType>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
+            title: Row(
+              children: [
+                Expanded(
+                    child: HeadingText(AppLocalizations.of(context).translate("vrp_filter_dialog_title"),
+                        fontSize: 18, noPadding: true)),
+                IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
+              ],
+            ),
+            content: Padding(
+              padding: EdgeInsets.only(left: 25, right: 25),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildFilterDialogRow(context, null, label: AppLocalizations.of(context).translate("vrp_type_all")),
+                  for (var type in VRPType.values) _buildFilterDialogRow(context, type),
+                ],
+              ),
+            ));
+      },
+    );
+    setState(() {
+      _typeFilter = result;
+    });
+  }
 }
