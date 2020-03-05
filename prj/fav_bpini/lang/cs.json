@@ -3,7 +3,7 @@
   "settings_page_title": "Nastavení",
   "vrp_list_page_title": "Historie",
   "vrp_list_page_no_record_found": "Nenalezen žádný záznam",
-  "vrp_list_address_unspecified": "Adresa nezadána",
+  "vrp_list_address_unspecified": "Žádná adresa",
   "vrp_preview_page_title_edit": "Upravit SPZ",
   "vrp_preview_page_title_new": "Nová VRP",
   "vrp_preview_page_scanned_at": "Naskenováno",
@@ -43,5 +43,10 @@
   "vrp_filter_dialog_title":"Filtrovat SPZ dle typu",
   "settings_page_dark_theme":"Tmavé téma",
   "settings_page_language":"Jazyk",
-  "settings_page_automatic_location":"Automaticky získávat polohu při naskenování SPZ"
+  "settings_page_automatic_location":"Automaticky získávat polohu při naskenování SPZ",
+
+  "vrp_finder_error_no_camera": "Zařízení nedisponuje fotoaparátem",
+  "vrp_finder_error_permissions": "Aplikace nemá právo na otevření fotoaparátu",
+  "vrp_finder_error_other": "Nelze otevřít fotoaparát",
+  "back": "Zpět"
 }

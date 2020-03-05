@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:favbpini/app_localizations.dart';
 import 'package:image/image.dart' as imglib;
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
@@ -32,11 +33,28 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
     VrpFinderEvent event,
   ) async* {
     if (event is LoadCamera) {
+      debugPrint("here1");
       List<CameraDescription> cameras = await availableCameras();
+      debugPrint("here2");
       if (cameras.length < 1) {
-        yield CameraErrorState("No camera found");
+        yield CameraErrorState("vrp_finder_error_no_camera");
       } else {
-        var controller = await _getCameraController();
+        var controller;
+        try {
+          controller = await _getCameraController();
+        } catch (e) {
+          if (e is CameraException) {
+            debugPrint("e content ${e.description}");
+            if (e.description.toString().toLowerCase().contains("permission")) {
+              yield CameraErrorState("vrp_finder_error_permissions");
+            }
+          } else {
+            yield CameraErrorState("vrp_finder_error_other");
+          }
+
+          return;
+        }
+        debugPrint("here3");
         if (!_streamStarted && controller.value.isInitialized) {
           await controller.startImageStream((CameraImage availableImage) async {
             _streamStarted = true;
@@ -70,8 +88,8 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
               }
             }
 
-            add(VrpResultsFound(
-                results, Size(availableImage.width.toDouble(), availableImage.height.toDouble()), took, DateTime.now()));
+            add(VrpResultsFound(results, Size(availableImage.width.toDouble(), availableImage.height.toDouble()), took,
+                DateTime.now()));
 
             _isScanBusy = false;
           });
@@ -99,7 +117,9 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
       );
     }
     if (!_cameraController.value.isInitialized) {
+      debugPrint("here bi");
       await _cameraController.initialize();
+      debugPrint("here ai");
     }
     return _cameraController;
   }

@@ -98,7 +98,7 @@ class VrpListPageState extends State<VrpListPage> {
                                             VRP(record.firstPart, record.secondPart, VRPType.values[record.type]),
                                             record.date,
                                             Position(longitude: record.longitude, latitude: record.latitude),
-                                            record.address),
+                                            record.address.isNotEmpty ? record.address : AppLocalizations.of(context).translate("vrp_list_address_unspecified")),
                                         record,
                                         context,
                                         snapshot)

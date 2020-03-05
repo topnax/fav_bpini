@@ -2,6 +2,7 @@
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
+import 'package:favbpini/app_localizations.dart';
 import 'package:favbpini/bloc/vrp_finder/bloc.dart';
 import 'package:favbpini/database/database.dart';
 import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
@@ -88,7 +89,36 @@ class VrpFinderPageState extends State<VrpFinderPage> {
           } else if (state is ResultsFoundState) {
             return _buildCameraPreviewStack(state.controller, state.results, state.imageSize, state.timeTook);
           } else if (state is CameraErrorState) {
-            return Center(child: Text(state.errorDescription));
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(child: Text(AppLocalizations.of(context).translate(state.errorDescription),textAlign: TextAlign.center,)),
+                Padding(
+                  padding: const EdgeInsets.only(top:16.0),
+                  child: RaisedButton(
+                    shape: new RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(7.0),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    color: Colors.blue,
+                    textColor: Colors.white,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.only(right: 5.0),
+                          child: Icon(Icons.arrow_back),
+                        ),
+                        Text(AppLocalizations.of(context).translate("back"),
+                            style: TextStyle(fontSize: 18)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
           }
           return Container();
         }),
