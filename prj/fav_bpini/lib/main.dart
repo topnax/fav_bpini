@@ -40,7 +40,7 @@ class VRPAppState extends State<VRPApp> {
       },
       child: Consumer<PreferencesProvider>(
         builder: (context, value, child) {
-          debugPrint("lang code " + value.appLanguageCode);
+          debugPrint("selected language code: " + value.appLanguageCode);
           return Provider(
             create: (_) => Database(),
             child: MaterialApp(

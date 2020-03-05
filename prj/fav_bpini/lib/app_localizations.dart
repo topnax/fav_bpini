@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AppLocalizations {
-
   final Locale locale;
 
   AppLocalizations(this.locale);
@@ -19,10 +18,8 @@ class AppLocalizations {
   Map<String, String> _localizedStrings;
 
   Future<bool> load() async {
-    debugPrint("set in load: " + locale.languageCode);
     // Load the language JSON file from the "lang" folder
-    String jsonString =
-    await rootBundle.loadString('lang/${locale.languageCode}.json');
+    String jsonString = await rootBundle.loadString('lang/${locale.languageCode}.json');
     Map<String, dynamic> jsonMap = json.decode(jsonString);
 
     _localizedStrings = jsonMap.map((key, value) {
@@ -34,7 +31,7 @@ class AppLocalizations {
 
   // This method will be called from every widget which needs a localized text
   String translate(String key) {
-    if (!_localizedStrings.containsKey(key)){
+    if (!_localizedStrings.containsKey(key)) {
       return "Untranslated (${locale.languageCode}:$key)";
     }
     return _localizedStrings[key];
@@ -43,8 +40,9 @@ class AppLocalizations {
 
 // LocalizationsDelegate is a factory for a set of localized resources
 // In this case, the localized strings will be gotten in an AppLocalizations object
-class AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+  static const _defaultLanguageCode = "en";
+
   // This delegate instance will never change (it doesn't even have fields!)
   // It can provide a constant constructor.
   final Locale myLocale;
@@ -53,7 +51,6 @@ class AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) {
-    debugPrint("is supported: " + locale.languageCode);
     // Include all of your supported language codes here
     return ['en', 'cs'].contains(locale.languageCode);
   }
@@ -62,7 +59,7 @@ class AppLocalizationsDelegate
   Future<AppLocalizations> load(Locale locale) async {
     var localeToBeSet = myLocale ?? locale;
     if (!isSupported(localeToBeSet)) {
-      localeToBeSet = Locale("en");
+      localeToBeSet = Locale(_defaultLanguageCode);
     }
     // AppLocalizations class is where the JSON loading actually runs
     AppLocalizations localizations = new AppLocalizations(myLocale ?? locale);
@@ -72,5 +69,4 @@ class AppLocalizationsDelegate
 
   @override
   bool shouldReload(AppLocalizationsDelegate old) => true;
-
 }

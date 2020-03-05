@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
+import 'package:favbpini/app_localizations.dart';
 import 'package:favbpini/database/database.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ const sourceImagesFolderName = "source";
 const audioNotesFolderName = "audio_notes";
 
 class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
+  final AppLocalizations _appLocalizations;
   final VRP vrp;
   final TextEditingController _addressController;
   final TextEditingController _noteController;
@@ -31,7 +33,7 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
   String _rescannedSourceImagePath;
 
   VrpPreviewBloc(this.vrp, this._addressController, this._noteController, this.database, this.initialSourceImagePath,
-      this.editing, double latitude, double longitude) {
+      this.editing, this._appLocalizations, double latitude, double longitude) {
     if (!editing) {
       rescanned = true;
       _rescannedSourceImagePath = initialSourceImagePath;
@@ -51,15 +53,16 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
       yield PositionLoading();
       final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
 
-      if (!(await geolocator.checkGeolocationPermissionStatus() == GeolocationStatus.granted)) {
-        debugPrint("enum is" + (await geolocator.checkGeolocationPermissionStatus()).toString());
-        yield PositionFailed(error: "Aplikace nemá právo na získání polohy");
-      }
+      final permission = await geolocator.checkGeolocationPermissionStatus();
 
       if (!(await geolocator.isLocationServiceEnabled())) {
-        yield PositionFailed(error: "GPS služby jsou vypnuté");
-      } else {
+        yield PositionFailed(_appLocalizations.translate("vrp_preview_error_position_disabled"));
+      } else if (permission == GeolocationStatus.restricted || permission == GeolocationStatus.disabled ) {
+        debugPrint("enum is" + (await geolocator.checkGeolocationPermissionStatus()).toString());
+        yield PositionFailed(_appLocalizations.translate("vrp_preview_error_position_permissions"));
+      }else   {
         try {
+
           print("Started getting current position");
           position = await geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
           print("Got position");
@@ -76,7 +79,7 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
           _addressController.text = address;
         } catch (e) {
           print("$e error");
-          yield PositionFailed();
+          yield PositionFailed(_appLocalizations.translate("vrp_preview_error_position_unknown"));
         }
       }
     } else if (event is DiscardVRP) {

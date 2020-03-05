@@ -41,6 +41,10 @@ class VrpPreviewPage extends StatefulWidget {
 }
 
 class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProviderStateMixin {
+
+  static const TextStyle _vrpStyle = TextStyle(fontSize: 60, fontWeight: FontWeight.w600, color: Colors.black);
+  static const TextStyle _vrpStyleSmaller = TextStyle(fontSize: 50, fontWeight: FontWeight.w600, color: Colors.black);
+
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
 
@@ -48,35 +52,17 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
   final bool _edit;
 
   PersistentBottomSheetController bottomSheetController;
-
   bool bottomSheetShown = false;
 
   VrpPreviewPageState(this._record, this._edit) {
-    debugPrint("VrpPreviewPageState constructor");
     _addressController.text = _record.address;
     _noteController.text = _record.note;
-  }
-
-  static const TextStyle _vrpStyle = TextStyle(fontSize: 60, fontWeight: FontWeight.w600, color: Colors.black);
-  static const TextStyle _vrpStyleSmaller = TextStyle(fontSize: 50, fontWeight: FontWeight.w600, color: Colors.black);
-
-  BoxDecoration myBoxDecoration() {
-    return BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.8),
-            spreadRadius: 10,
-            blurRadius: 5,
-            offset: Offset(0, 7), // changes position of shadow
-          ),
-        ],
-        border: Border.all(color: Colors.black, width: 2.0),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(10)));
   }
 
   @override
   Widget build(BuildContext context) {
     var database = Provider.of<Database>(context);
+    var localizations = AppLocalizations.of(context);
     return MultiBlocProvider(
       providers: [
         BlocProvider<VrpPreviewBloc>(create: (context) {
@@ -87,6 +73,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
               database,
               _record.sourceImagePath,
               _edit,
+              localizations,
               _record.latitude,
               _record.longitude);
           if (!_edit && Provider.of<PreferencesProvider>(context, listen: false).autoPositionLookup) {
@@ -108,7 +95,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                   onPop(context);
                 } else if (state is PositionFailed) {
                   Scaffold.of(context).showSnackBar(SnackBar(
-                    content: Text("Chyba při získávání polohy: ${state.error}"),
+                    content: Text("${AppLocalizations.of(context).translate("vrp_preview_error_while_gathering_location")}: ${state.error}"),
                   ));
                 }
               },
