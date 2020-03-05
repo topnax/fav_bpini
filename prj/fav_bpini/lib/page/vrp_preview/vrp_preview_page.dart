@@ -213,118 +213,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                 AppLocalizations.of(context).translate("vrp_preview_page_note"),
                                 fontSize: 22,
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(22.0),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: TextField(
-                                        controller: _noteController,
-                                        decoration: InputDecoration(
-                                          hintText:
-                                              AppLocalizations.of(context).translate("vrp_preview_page_note_hint"),
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(5.0),
-                                            borderSide: BorderSide(
-                                              color: Colors.amber,
-                                              style: BorderStyle.solid,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    BlocListener(
-                                      bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
-                                      condition: (previousState, currentState) {
-                                        if (currentState is RecordingSuccess &&
-                                            !(previousState is RecordingInProgress)) {
-                                          return false;
-                                        }
-                                        return true;
-                                      },
-                                      listener: (context, state) {
-                                        if (state is PlaybackFailed) {
-                                          Scaffold.of(context).showSnackBar(SnackBar(
-                                            content: Text(state.error),
-                                          ));
-                                        } else if (state is RecordingFailed) {
-                                          Scaffold.of(context).showSnackBar(SnackBar(
-                                            content: Text(state.error),
-                                          ));
-                                        } else if (state is RecordingSuccess) {
-                                          Scaffold.of(context).showSnackBar(SnackBar(
-                                            content: Text(AppLocalizations.of(context)
-                                                .translate("vrp_preview_page_audio_note_success")),
-                                          ));
-                                        }
-                                      },
-                                      child: BlocBuilder(
-                                          bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
-                                          builder: (context, state) {
-                                            if (state is InitialVrpPreviewRecordingState) {
-                                              return IconButton(
-                                                  icon: Icon(Icons.mic),
-                                                  color: Colors.blueAccent,
-                                                  onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context)
-                                                      .add(RecordingStarted()));
-                                            } else if (state is RecordingInProgress) {
-                                              return Row(
-                                                children: [
-                                                  Padding(
-                                                    padding: const EdgeInsets.all(8.0),
-                                                    child: Text(
-                                                        DateFormat('mm:ss:SS', 'en_US').format(state.currentTime),
-                                                        style: Theme.of(context).textTheme.body2),
-                                                  ),
-                                                  IconButton(
-                                                      icon: Icon(Icons.stop),
-                                                      color: Colors.blueAccent,
-                                                      onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context)
-                                                          .add(RecordingStopped()))
-                                                ],
-                                              );
-                                            } else if (state is RecordingSuccess) {
-                                              return Row(
-                                                children: [
-                                                  IconButton(
-                                                      icon: Icon(Icons.delete),
-                                                      color: Colors.redAccent,
-                                                      onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context)
-                                                          .add(RecordRemoved())),
-                                                  IconButton(
-                                                      icon: Icon(Icons.play_arrow),
-                                                      color: Colors.blueAccent,
-                                                      onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context)
-                                                          .add(PlaybackStarted())),
-                                                ],
-                                              );
-                                            } else if (state is PlaybackInProgress) {
-                                              return Row(
-                                                children: [
-                                                  Padding(
-                                                    padding: const EdgeInsets.only(left: 8.0),
-                                                    child: Text(
-                                                        DateFormat('mm:ss:SS', 'en_US').format(state.currentTime),
-                                                        style: Theme.of(context).textTheme.body2),
-                                                  ),
-                                                  IconButton(
-                                                      icon: Icon(Icons.stop),
-                                                      color: Colors.blueAccent,
-                                                      onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context)
-                                                          .add(PlaybackStopped()))
-                                                ],
-                                              );
-                                            }
-
-                                            return Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Text(AppLocalizations.of(context).translate("error")),
-                                            );
-                                          }),
-                                    )
-                                  ],
-                                ),
-                              ),
+                              _buildNoteSection(context),
                               HeadingText(
                                 AppLocalizations.of(context).translate("vrp_preview_page_source"),
                                 fontSize: 22,
@@ -366,10 +255,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                               ),
                               onPressed: () {
                                 var recordingBloc = BlocProvider.of<VrpPreviewRecordingBloc>(context);
-                                debugPrint("onPressed3.1");
-
                                 var mainBloc = BlocProvider.of<VrpPreviewBloc>(context);
-                                debugPrint("onPressed4");
 
                                 mainBloc.add(SubmitVRP(_record,
                                     edit: _edit,
@@ -404,25 +290,131 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     );
   }
 
+  Padding _buildNoteSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(22.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _noteController,
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context).translate("vrp_preview_page_note_hint"),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                  borderSide: BorderSide(
+                    color: Colors.amber,
+                    style: BorderStyle.solid,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          BlocListener(
+            bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
+            condition: (previousState, currentState) {
+              if (currentState is RecordingSuccess && !(previousState is RecordingInProgress)) {
+                return false;
+              }
+              return true;
+            },
+            listener: (context, state) {
+              if (state is PlaybackFailed) {
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Text(state.error),
+                ));
+              } else if (state is RecordingFailed) {
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Text(state.error),
+                ));
+              } else if (state is RecordingSuccess) {
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Text(AppLocalizations.of(context).translate("vrp_preview_page_audio_note_success")),
+                ));
+              }
+            },
+            child: _buildRecordAudioNoteControls(context),
+          )
+        ],
+      ),
+    );
+  }
+
+  BlocBuilder<VrpPreviewRecordingBloc, dynamic> _buildRecordAudioNoteControls(BuildContext context) {
+    return BlocBuilder(
+        bloc: BlocProvider.of<VrpPreviewRecordingBloc>(context),
+        builder: (context, state) {
+          if (state is InitialVrpPreviewRecordingState) {
+            return IconButton(
+                icon: Icon(Icons.mic),
+                color: Colors.blueAccent,
+                onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context).add(RecordingStarted()));
+          } else if (state is RecordingInProgress) {
+            return Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(DateFormat('mm:ss:SS', 'en_US').format(state.currentTime),
+                      style: Theme.of(context).textTheme.body2),
+                ),
+                IconButton(
+                    icon: Icon(Icons.stop),
+                    color: Colors.blueAccent,
+                    onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context).add(RecordingStopped()))
+              ],
+            );
+          } else if (state is RecordingSuccess) {
+            return Row(
+              children: [
+                IconButton(
+                    icon: Icon(Icons.delete),
+                    color: Colors.redAccent,
+                    onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context).add(RecordRemoved())),
+                IconButton(
+                    icon: Icon(Icons.play_arrow),
+                    color: Colors.blueAccent,
+                    onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context).add(PlaybackStarted())),
+              ],
+            );
+          } else if (state is PlaybackInProgress) {
+            return Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(DateFormat('mm:ss:SS', 'en_US').format(state.currentTime),
+                      style: Theme.of(context).textTheme.body2),
+                ),
+                IconButton(
+                    icon: Icon(Icons.stop),
+                    color: Colors.blueAccent,
+                    onPressed: () => BlocProvider.of<VrpPreviewRecordingBloc>(context).add(PlaybackStopped()))
+              ],
+            );
+          }
+
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(AppLocalizations.of(context).translate("error")),
+          );
+        });
+  }
+
   BlocBuilder<VrpPreviewBloc, VrpPreviewState> _buildGetLocationIcon(BuildContext context) {
     return BlocBuilder<VrpPreviewBloc, VrpPreviewState>(
-                                      bloc: BlocProvider.of<VrpPreviewBloc>(context),
-                                      builder: (BuildContext context, VrpPreviewState state) {
-                                        if (!(state is PositionLoading)) {
-                                          return IconButton(
-                                              icon: Icon(Icons.location_on),
-                                              color: Colors.blueAccent,
-                                              onPressed: () => {
-                                                    BlocProvider.of<VrpPreviewBloc>(context)
-                                                        .add(GetAddressByPosition())
-                                                  });
-                                        } else {
-                                          return Padding(
-                                            padding: const EdgeInsets.only(left: 16.0),
-                                            child: CircularProgressIndicator(),
-                                          );
-                                        }
-                                      });
+        bloc: BlocProvider.of<VrpPreviewBloc>(context),
+        builder: (BuildContext context, VrpPreviewState state) {
+          if (!(state is PositionLoading)) {
+            return IconButton(
+                icon: Icon(Icons.location_on),
+                color: Colors.blueAccent,
+                onPressed: () => {BlocProvider.of<VrpPreviewBloc>(context).add(GetAddressByPosition())});
+          } else {
+            return Padding(
+              padding: const EdgeInsets.only(left: 16.0),
+              child: CircularProgressIndicator(),
+            );
+          }
+        });
   }
 
   Widget _buildShowInMapIcon(BuildContext context) {

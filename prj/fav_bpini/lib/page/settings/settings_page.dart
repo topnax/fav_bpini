@@ -42,7 +42,7 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
             Container(
               child: Expanded(
                 child: Column(
-                  children: <Widget>[
+                  children: [
                     Expanded(
                       child: SingleChildScrollView(
                         child: Column(
