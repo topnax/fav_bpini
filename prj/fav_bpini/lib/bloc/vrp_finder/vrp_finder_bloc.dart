@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:favbpini/app_localizations.dart';
-import 'package:image/image.dart' as imglib;
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:favbpini/vrp_locator/vrp_locator_impl.dart';
 import 'package:flutter/widgets.dart';
+import 'package:image/image.dart' as imglib;
 import 'package:path_provider/path_provider.dart';
 
 import './bloc.dart';

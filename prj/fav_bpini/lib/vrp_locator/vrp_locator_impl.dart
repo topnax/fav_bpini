@@ -8,14 +8,15 @@ import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as imglib;
 
 const vrpWTBThreshold = 0.55;
 
-class Prepravka {
+class CameraImageTextBlocCarrier {
   final CameraImage image;
   final List<TextBlock> detectedBlocks;
 
-  Prepravka(this.image, this.detectedBlocks);
+  CameraImageTextBlocCarrier(this.image, this.detectedBlocks);
 }
 
 class VrpFinderImpl implements VrpFinder {
@@ -28,26 +29,24 @@ class VrpFinderImpl implements VrpFinder {
   final executorService = ExecutorService.newSingleExecutor();
 
   Future<List<VrpFinderResult>> findVrpInImage(CameraImage image) async {
-    List<TextBlock> detectedBlocks = await OcrManager.scanText(image);
+    List<TextBlock> detectedBlocks = await OcrManager.scanText(OcrManager.getFirebaseVisionImageFromCameraImage(image));
 
-//    var img = await compute(convertCameraImage, image);
-//    return Future<List<VrpFinderResult>>.value(List<VrpFinderResult>());
+    var results = executorService.submitCallable(findVrpResultsFromCameraImage, CameraImageTextBlocCarrier(image, detectedBlocks));
 
-    var img = executorService.submitCallable(findResults, Prepravka(image, detectedBlocks));
-//    var img = await compute(findResults, Prepravka(image, detectedBlocks));
-
-    return Future<List<VrpFinderResult>>.value(img);
+    return Future<List<VrpFinderResult>>.value(results);
   }
 }
 
-List<VrpFinderResult> findResults(Prepravka prepravka) {
-  CameraImage image = prepravka.image;
-  List<TextBlock> detectedBlocks = prepravka.detectedBlocks;
+List<VrpFinderResult> findVrpResultsFromCameraImage(CameraImageTextBlocCarrier carrier) {
+  CameraImage image = carrier.image;
+  List<TextBlock> detectedBlocks = carrier.detectedBlocks;
   var img = convertCameraImage(image);
 
-//    return Future<List<VrpFinderResult>>.value(results);
+  return findVrpResultsFromImage(img, detectedBlocks);
+}
 
-  var results = detectedBlocks
+List<VrpFinderResult> findVrpResultsFromImage(imglib.Image img, List<TextBlock> detectedBlocks) {
+   var results = detectedBlocks
       // filter text blocks that are within the image
       .where((tb) => _isRectangleWithinImage(tb.boundingBox, img.width, img.height))
       // map text blocks to results
@@ -97,9 +96,9 @@ List<VrpFinderResult> findResults(Prepravka prepravka) {
                   rect: tb.boundingBox, image: img);
             } else {
               return null;
-//          return VrpFinderResult(
-//              null, -1, "diffRatio=${diff / tb.boundingBox.width}",
-//              rect: tb.boundingBox);
+  //          return VrpFinderResult(
+  //              null, -1, "diffRatio=${diff / tb.boundingBox.width}",
+  //              rect: tb.boundingBox);
             }
           }
         } else if (tb.lines.length == 2) {
