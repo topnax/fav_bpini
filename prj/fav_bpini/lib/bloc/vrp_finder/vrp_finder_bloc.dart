@@ -15,7 +15,7 @@ import './bloc.dart';
 class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
   CameraController _cameraController;
 
-  bool _isScanBusy = false;
+  static bool _isScanBusy = false;
 
   bool _streamStarted = false;
 
@@ -60,6 +60,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
             debugPrint("received an image");
             _streamStarted = true;
             if (_isScanBusy) {
+              debugPrint("scan is busy");
               return;
             }
 
@@ -67,11 +68,14 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
 
             var start = DateTime.now().millisecondsSinceEpoch;
 
+            var took;
             List<VrpFinderResult> results;
             try {
               debugPrint("about to find vrps");
               results = await _finder.findVrpInImage(availableImage);
               debugPrint("finished");
+              took = DateTime.now().millisecondsSinceEpoch - start;
+              debugPrint("findVrpInImage took ${took.toString()}ms");
             } catch (e) {
               if (e is PlatformException) {
                 debugPrint("Caught PE code:${e.code}, message:${e.message}");
@@ -83,9 +87,6 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
             if (results == null) {
               return;
             }
-
-            var took = DateTime.now().millisecondsSinceEpoch - start;
-            debugPrint("findVrpInImage took ${took.toString()}ms");
 
             debugPrint("first");
 
@@ -108,6 +109,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
 
                 add(VrpFound(result[0], took, path, DateTime.now()));
                 this.close();
+                _isScanBusy = false;
                 return;
               }
             }

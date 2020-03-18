@@ -11,7 +11,7 @@ description: A application created within the KIV&#x2F;PRJ5 and KIV&#x2F;BPINI.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.1+4
+version: 1.0.1+5
 
 environment:
   sdk: ">=2.6.0 <3.0.0"
@@ -24,7 +24,7 @@ dependencies:
     sdk: flutter
 
   camera: ^0.5.7+3
-  firebase_ml_vision: ^0.9.3+5
+  firebase_ml_vision: ^0.9.3+8
   path_provider: ^1.6.0
   flutter_bloc: ^3.2.0
   equatable: ^1.0.3

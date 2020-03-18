@@ -5,8 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 
 class OcrManager {
-
-  static FirebaseVisionImage  getFirebaseVisionImageFromCameraImage(CameraImage image){
+  static FirebaseVisionImage getFirebaseVisionImageFromCameraImage(CameraImage image) {
     /*
      * https://firebase.google.com/docs/ml-kit/android/recognize-text
      */
@@ -16,11 +15,18 @@ class OcrManager {
         size: Size(image.width.toDouble(), image.height.toDouble()),
         planeData: image.planes
             .map((currentPlane) => FirebaseVisionImagePlaneMetadata(
-            bytesPerRow: currentPlane.bytesPerRow, height: currentPlane.height, width: currentPlane.width))
+                bytesPerRow: currentPlane.bytesPerRow, height: currentPlane.height, width: currentPlane.width))
             .toList(),
         rotation: ImageRotation.rotation90);
 
-    return FirebaseVisionImage.fromBytes(image.planes[0].bytes, metadata);
+    var allBytes = WriteBuffer();
+    allBytes.putUint8List(image.planes[0].bytes);
+    allBytes.putUint8List(image.planes[1].bytes);
+    allBytes.putUint8List(image.planes[2].bytes);
+
+    var allPlanes = allBytes.done().buffer.asUint8List();
+
+    return FirebaseVisionImage.fromBytes(allPlanes, metadata);
   }
 
   static Future<List<TextBlock>> scanText(FirebaseVisionImage visionImage) async {
@@ -30,13 +36,11 @@ class OcrManager {
     VisionText visionText;
     try {
       visionText = await textRecognizer.processImage(visionImage);
-    } catch(e) {
+    } catch (e) {
       debugPrint("got ${e.toString()} during processing of image");
       return null;
     }
     debugPrint("processed image");
-
-
 
     return visionText?.blocks;
   }
