@@ -24,8 +24,18 @@ class OcrManager {
   }
 
   static Future<List<TextBlock>> scanText(FirebaseVisionImage visionImage) async {
+    debugPrint("getting TR");
     final TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
-    final VisionText visionText = await textRecognizer.processImage(visionImage);
+    debugPrint("processing image");
+    VisionText visionText;
+    try {
+      visionText = await textRecognizer.processImage(visionImage);
+    } catch(e) {
+      debugPrint("got ${e.toString()} during processing of image");
+      return null;
+    }
+    debugPrint("processed image");
+
 
 
     return visionText?.blocks;

@@ -29,8 +29,10 @@ class VrpFinderImpl implements VrpFinder {
   final executorService = ExecutorService.newSingleExecutor();
 
   Future<List<VrpFinderResult>> findVrpInImage(CameraImage image) async {
+    debugPrint("doing ocr");
     List<TextBlock> detectedBlocks = await OcrManager.scanText(OcrManager.getFirebaseVisionImageFromCameraImage(image));
 
+    debugPrint("got ocr");
     var results = executorService.submitCallable(findVrpResultsFromCameraImage, CameraImageTextBlocCarrier(image, detectedBlocks));
 
     return Future<List<VrpFinderResult>>.value(results);

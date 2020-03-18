@@ -5,6 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:favbpini/vrp_locator/vrp_locator_impl.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image/image.dart' as imglib;
 import 'package:path_provider/path_provider.dart';
@@ -38,7 +39,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
       if (cameras.length < 1) {
         yield CameraErrorState("vrp_finder_error_no_camera");
       } else {
-        var controller;
+        CameraController controller;
         try {
           controller = await _getCameraController();
         } catch (e) {
@@ -56,6 +57,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
         debugPrint("here3");
         if (!_streamStarted && controller.value.isInitialized) {
           await controller.startImageStream((CameraImage availableImage) async {
+            debugPrint("received an image");
             _streamStarted = true;
             if (_isScanBusy) {
               return;
@@ -64,13 +66,37 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
             _isScanBusy = true;
 
             var start = DateTime.now().millisecondsSinceEpoch;
-            var results = await _finder.findVrpInImage(availableImage);
+
+            List<VrpFinderResult> results;
+            try {
+              debugPrint("about to find vrps");
+              results = await _finder.findVrpInImage(availableImage);
+              debugPrint("finished");
+            } catch (e) {
+              if (e is PlatformException) {
+                debugPrint("Caught PE code:${e.code}, message:${e.message}");
+                return;
+              }
+              debugPrint("some other exception ${e.toString()}");
+            }
+
+            if (results == null) {
+              return;
+            }
+
             var took = DateTime.now().millisecondsSinceEpoch - start;
             debugPrint("findVrpInImage took ${took.toString()}ms");
 
+            debugPrint("first");
+
             if (results.length > 0) {
+              debugPrint("second");
               var result = results.where((res) => res.foundVrp != null).toList();
+              debugPrint("third");
               if (result.length > 0) {
+                debugPrint("fourth");
+                controller.stopImageStream();
+
                 debugPrint("adding vrp found event");
 
                 var directory = await _localPath;
@@ -81,14 +107,15 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
                 debugPrint("Written to $path");
 
                 add(VrpFound(result[0], took, path, DateTime.now()));
-
                 this.close();
                 return;
               }
             }
 
+            debugPrint("this line");
             add(VrpResultsFound(results, Size(availableImage.width.toDouble(), availableImage.height.toDouble()), took,
                 DateTime.now()));
+            debugPrint("another this line");
 
             _isScanBusy = false;
           });

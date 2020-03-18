@@ -58,7 +58,8 @@ class VrpListPageState extends State<VrpListPage> {
                 padding: const EdgeInsets.all(15.0),
                 child: Text(
                   type != null ? type.getName(context) : label,
-                  style: TextStyles.monserratStyle.copyWith(color: Colors.white),
+                  style: TextStyles.monserratStyle.copyWith(color: Colors.white)
+                  ,textAlign: TextAlign.center,
                 ),
               )),
             ],
@@ -272,13 +273,15 @@ class VrpListPageState extends State<VrpListPage> {
             ),
             content: Padding(
               padding: EdgeInsets.only(left: 25, right: 25),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildFilterDialogRow(context, null, label: AppLocalizations.of(context).translate("vrp_type_all")),
-                  for (var type in VRPType.values) _buildFilterDialogRow(context, type),
-                ],
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildFilterDialogRow(context, null, label: AppLocalizations.of(context).translate("vrp_type_all")),
+                    for (var type in VRPType.values) _buildFilterDialogRow(context, type),
+                  ],
+                ),
               ),
             ));
       },
