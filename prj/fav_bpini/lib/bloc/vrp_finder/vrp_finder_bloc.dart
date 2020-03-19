@@ -54,13 +54,12 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
 
           return;
         }
-        debugPrint("here3");
         if (!_streamStarted && controller.value.isInitialized) {
           await controller.startImageStream((CameraImage availableImage) async {
-            debugPrint("received an image");
+//            debugPrint("received an image");
             _streamStarted = true;
             if (_isScanBusy) {
-              debugPrint("scan is busy");
+//              debugPrint("scan is busy");
               return;
             }
 
@@ -69,57 +68,38 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
             var start = DateTime.now().millisecondsSinceEpoch;
 
             var took;
-            List<VrpFinderResult> results;
+            VrpFinderResult result;
             try {
               debugPrint("about to find vrps");
-              results = await _finder.findVrpInImage(availableImage);
+              result = await _finder.findVrpInImage(availableImage);
               debugPrint("finished");
               took = DateTime.now().millisecondsSinceEpoch - start;
               debugPrint("findVrpInImage took ${took.toString()}ms");
-            } catch (e) {
+            } catch (e, s) {
               if (e is PlatformException) {
                 debugPrint("Caught PE code:${e.code}, message:${e.message}");
                 return;
               }
               debugPrint("some other exception ${e.toString()}");
+              debugPrint(s.toString());
             }
 
-            if (results == null) {
+            if (result == null) {
+              _isScanBusy = false;
               return;
             }
 
-            debugPrint("first");
+            controller.stopImageStream();
 
-            if (results.length > 0) {
-              debugPrint("second");
-              var result = results.where((res) => res.foundVrp != null).toList();
-              debugPrint("third");
-              if (result.length > 0) {
-                debugPrint("fourth");
-                controller.stopImageStream();
+            var directory = await _localPath;
+            var path = "$directory/${DateTime.now().millisecondsSinceEpoch.toString()}.jpg";
 
-                debugPrint("adding vrp found event");
+            File(path)..writeAsBytesSync(imglib.encodeJpg(result.image, quality: 40));
 
-                var directory = await _localPath;
-                var path = "$directory/${DateTime.now().millisecondsSinceEpoch.toString()}.jpg";
-
-                File(path)..writeAsBytesSync(imglib.encodeJpg(result[0].image, quality: 40));
-
-                debugPrint("Written to $path");
-
-                add(VrpFound(result[0], took, path, DateTime.now()));
-                this.close();
-                _isScanBusy = false;
-                return;
-              }
-            }
-
-            debugPrint("this line");
-            add(VrpResultsFound(results, Size(availableImage.width.toDouble(), availableImage.height.toDouble()), took,
-                DateTime.now()));
-            debugPrint("another this line");
-
+            debugPrint("Written to $path");
             _isScanBusy = false;
+            add(VrpFound(result, took, path, DateTime.now()));
+            this.close();
           });
         }
 

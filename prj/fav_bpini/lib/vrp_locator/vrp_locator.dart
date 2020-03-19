@@ -5,7 +5,7 @@ import 'package:favbpini/model/vrp.dart';
 import 'package:image/image.dart' as imglib;
 
 abstract class VrpFinder {
-  Future<List<VrpFinderResult>> findVrpInImage(CameraImage image);
+  Future<VrpFinderResult> findVrpInImage(CameraImage image);
 }
 
 class VrpFinderResult {

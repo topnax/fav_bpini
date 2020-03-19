@@ -41,8 +41,8 @@ class VrpPreviewPage extends StatefulWidget {
 }
 
 class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProviderStateMixin {
-  static const TextStyle _vrpStyle = TextStyle(fontSize: 60, fontWeight: FontWeight.w600, color: Colors.black);
-  static const TextStyle _vrpStyleSmaller = TextStyle(fontSize: 50, fontWeight: FontWeight.w600, color: Colors.black);
+  static const TextStyle _vrpStyle = TextStyle(fontSize: 48, fontWeight: FontWeight.w600, color: Colors.black);
+  static const TextStyle _vrpStyleSmaller = TextStyle(fontSize: 42, fontWeight: FontWeight.w600, color: Colors.black);
 
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();

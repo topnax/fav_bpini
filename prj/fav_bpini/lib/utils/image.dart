@@ -8,6 +8,10 @@ import 'package:image/image.dart' as imglib;
 imglib.Image convertCameraImage(CameraImage image) {
   int width = image.width;
   int height = image.height;
+  const aa = 1436 / 1024;
+  const bb = 46549 / 131072;
+  const cc = 1814 / 1024;
+  const dd = 93604 / 131072;
 // imglib -> Image package from https://pub.dartlang.org/packages/image
   var img = imglib.Image(width, height); // Create Image buffer
   const int hexFF = 0xFF000000;
@@ -21,9 +25,10 @@ imglib.Image convertCameraImage(CameraImage image) {
       final up = image.planes[1].bytes[uvIndex];
       final vp = image.planes[2].bytes[uvIndex];
 // Calculate pixel color
-      int r = (yp + vp * 1436 / 1024 - 179).round().clamp(0, 255);
-      int g = (yp - up * 46549 / 131072 + 44 - vp * 93604 / 131072 + 91).round().clamp(0, 255);
-      int b = (yp + up * 1814 / 1024 - 227).round().clamp(0, 255);
+
+      int r = (yp + vp * aa - 179).round().clamp(0, 255);
+      int g = (yp - up * bb + 44 - vp * dd + 91).round().clamp(0, 255);
+      int b = (yp + up * cc - 227).round().clamp(0, 255);
 // color: 0x FF  FF  FF  FF
 //           A   B   G   R
       img.data[index] = hexFF | (b << 16) | (g << 8) | r;
@@ -78,16 +83,13 @@ imglib.Image convertImageToGrayScale(imglib.Image image, {Rect area}) {
 }
 
 imglib.Image getBlackAndWhiteImage(imglib.Image image, {Rect area}) {
+  var start = DateTime.now();
   if (area == null) {
     area = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
   }
-  debugPrint(
-      "for bb of ${area.top.toString()}, ${area.left.toString()}, ${area.width.toString()},${area.height.toString()}");
 
   var grayScale = convertImageToGrayScale(image, area: area);
-//  return grayScale;
   var bht = getBht(getGrayScaleHistogram(grayScale));
-  debugPrint("bht is $bht");
 
   var bw = imglib.Image(area.width.toInt(), area.height.toInt());
   for (int i = 0; i < area.height.toInt(); i++) {
@@ -95,6 +97,7 @@ imglib.Image getBlackAndWhiteImage(imglib.Image image, {Rect area}) {
       bw.setPixel(j, i, (grayScale.getPixel(j, i) & 0xFF) > bht ? 0xFFFFFFFF : 0xFF000000);
     }
   }
+  debugPrint("getbwi took: ${DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch}ms");
 
   return bw;
 }
