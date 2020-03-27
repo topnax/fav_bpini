@@ -15,7 +15,7 @@ import './bloc.dart';
 class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
   CameraController _cameraController;
 
-  static bool _isScanBusy = false;
+  bool _isScanBusy = false;
 
   bool _streamStarted = false;
 
@@ -33,9 +33,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
     VrpFinderEvent event,
   ) async* {
     if (event is LoadCamera) {
-      debugPrint("here1");
       List<CameraDescription> cameras = await availableCameras();
-      debugPrint("here2");
       if (cameras.length < 1) {
         yield CameraErrorState("vrp_finder_error_no_camera");
       } else {
@@ -51,15 +49,12 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
           } else {
             yield CameraErrorState("vrp_finder_error_other");
           }
-
           return;
         }
         if (!_streamStarted && controller.value.isInitialized) {
           await controller.startImageStream((CameraImage availableImage) async {
-//            debugPrint("received an image");
             _streamStarted = true;
             if (_isScanBusy) {
-//              debugPrint("scan is busy");
               return;
             }
 

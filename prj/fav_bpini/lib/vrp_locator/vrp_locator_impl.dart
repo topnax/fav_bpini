@@ -1,15 +1,15 @@
+import 'dart:math' as m;
+
 import 'package:camera/camera.dart';
 import "package:executorservices/executorservices.dart";
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/ocr/ocr.dart';
 import 'package:favbpini/utils/image.dart';
-import 'package:favbpini/utils/numbers.dart';
 import 'package:favbpini/vrp_locator/validator/vrp_validator.dart';
 import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'dart:math' as m;
 import 'package:image/image.dart' as imglib;
 
 const vrpWTBThreshold = 0.55;
@@ -43,6 +43,7 @@ class VrpFinderImpl implements VrpFinder {
   final executorService = ExecutorService.newSingleExecutor();
 
   Future<VrpFinderResult> findVrpInImage(CameraImage image) async {
+    debugPrint("startin FindVrpInImage");
     var start = DateTime.now();
     debugPrint("doing ocr");
     List<TextBlock> detected = await OcrManager.scanText(OcrManager.getFirebaseVisionImageFromCameraImage(image));
@@ -59,14 +60,15 @@ class VrpFinderImpl implements VrpFinder {
     debugPrint("imageCenter (${image.width}/${image.height}): ${imageCenter.dx}:${imageCenter.dy}");
 
     bool deepScan = timeTookToOcr < OCR_TIME_LIMIT;
-    deepScan = true;
+//    deepScan = true;
 
     var possibleVrps = List<PossibleVrp>();
+    debugPrint("tbs:");
     textBlocks.forEach((tb) {
+      debugPrint(tb.text);
       var foundInvalid = false;
       for (var ch in VrpFinderImpl.INVALID_CHAR_SET) {
         if (tb.text.contains(ch)) {
-          debugPrint("finvalid");
           foundInvalid = true;
         }
       }
@@ -95,8 +97,11 @@ class VrpFinderImpl implements VrpFinder {
     if (possibleVrps.length > 0) {
       start = DateTime.now();
       var img = convertCameraImage(image);
+//      var img = await executorService.submitCallable(convertCameraImage, image);
+
       debugPrint(
           "convertCameraImageTook: ${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch).toString()}");
+
       if (!deepScan) {
         result = VrpFinderResult(possibleVrps[0].vrp, vrpWTBThreshold, "found without having to perform wtb",
             rect: possibleVrps[0].textBlock.boundingBox, image: img);
@@ -108,16 +113,18 @@ class VrpFinderImpl implements VrpFinder {
         debugPrint(
             "deep scan took: ${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch).toString()}");
       }
+
+      var firstPart, secondPart = "";
+      VrpFinderImpl.INVALID_TO_VALID_CHAR_MAP.forEach((invalidChar, replacementChar) {
+        firstPart = result.foundVrp.firstPart.replaceAll(invalidChar, replacementChar);
+        secondPart = result.foundVrp.secondPart.replaceAll(invalidChar, replacementChar);
+      });
+
+      return VrpFinderResult(VRP(firstPart, secondPart, result.foundVrp.type), result.wtb, result.meta,
+          rect: result.rect, image: result.image);
     }
 
-    var firstPart, secondPart = "";
-    VrpFinderImpl.INVALID_TO_VALID_CHAR_MAP.forEach((invalidChar, replacementChar) {
-      firstPart = result.foundVrp.firstPart.replaceAll(invalidChar, replacementChar);
-      secondPart = result.foundVrp.secondPart.replaceAll(invalidChar, replacementChar);
-    });
-
-    return VrpFinderResult(VRP(firstPart, secondPart, result.foundVrp.type), result.wtb, result.meta,
-        rect: result.rect, image: result.image);
+    return null;
   }
 }
 //

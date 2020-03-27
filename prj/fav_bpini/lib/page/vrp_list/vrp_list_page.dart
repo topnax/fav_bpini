@@ -58,8 +58,8 @@ class VrpListPageState extends State<VrpListPage> {
                 padding: const EdgeInsets.all(15.0),
                 child: Text(
                   type != null ? type.getName(context) : label,
-                  style: TextStyles.monserratStyle.copyWith(color: Colors.white)
-                  ,textAlign: TextAlign.center,
+                  style: TextStyles.monserratStyle.copyWith(color: Colors.white),
+                  textAlign: TextAlign.center,
                 ),
               )),
             ],
@@ -99,7 +99,10 @@ class VrpListPageState extends State<VrpListPage> {
                                             VRP(record.firstPart, record.secondPart, VRPType.values[record.type]),
                                             record.date,
                                             Position(longitude: record.longitude, latitude: record.latitude),
-                                            record.address.isNotEmpty ? record.address : AppLocalizations.of(context).translate("vrp_list_address_unspecified")),
+                                            record.address.isNotEmpty
+                                                ? record.address
+                                                : AppLocalizations.of(context)
+                                                    .translate("vrp_list_address_unspecified")),
                                         record,
                                         context,
                                         snapshot)
@@ -178,9 +181,7 @@ class VrpListPageState extends State<VrpListPage> {
                   Padding(
                     padding: const EdgeInsets.only(top: 5.0),
                     child: Text(
-                      record.address.isNotEmpty
-                          ? record.address
-                          : "",
+                      record.address.isNotEmpty ? record.address : "",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),

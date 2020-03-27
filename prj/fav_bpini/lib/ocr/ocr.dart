@@ -31,14 +31,18 @@ class OcrManager {
 
   static Future<List<TextBlock>> scanText(FirebaseVisionImage visionImage) async {
     debugPrint("getting TR");
+
     final TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
-    debugPrint("processing image");
+
     VisionText visionText;
     try {
+      var start = DateTime.now();
       visionText = await textRecognizer.processImage(visionImage);
+      debugPrint("processing image took ${DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch}ms");
     } catch (e) {
       debugPrint("got ${e.toString()} during processing of image");
-      return null;
+    } finally {
+      textRecognizer.close();
     }
     debugPrint("processed image");
 
