@@ -96,7 +96,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
 
             log.d("Written to $path");
             add(VrpFound(result, took, path, DateTime.now()));
-            this.close();
+            await this.close();
             _isScanBusy = false;
           });
         }
