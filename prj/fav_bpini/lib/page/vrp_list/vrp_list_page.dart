@@ -140,7 +140,6 @@ class VrpListPageState extends State<VrpListPage> {
         var sourceImage = File(dbItem.sourceImagePath);
         if (await sourceImage.exists()) {
           sourceImage.delete();
-          debugPrint("Deleted an image: ${sourceImage.path}");
         }
         Provider.of<Database>(context, listen: false).deleteEntry(dbItem);
         setState(() {

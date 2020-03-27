@@ -2,13 +2,13 @@ import 'dart:math' as m;
 
 import 'package:camera/camera.dart';
 import "package:executorservices/executorservices.dart";
+import 'package:favbpini/main.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/ocr/ocr.dart';
 import 'package:favbpini/utils/image.dart';
 import 'package:favbpini/vrp_locator/validator/vrp_validator.dart';
 import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as imglib;
 
@@ -43,29 +43,24 @@ class VrpFinderImpl implements VrpFinder {
   final executorService = ExecutorService.newSingleExecutor();
 
   Future<VrpFinderResult> findVrpInImage(CameraImage image) async {
-    debugPrint("startin FindVrpInImage");
     var start = DateTime.now();
-    debugPrint("doing ocr");
+
     List<TextBlock> detected = await OcrManager.scanText(OcrManager.getFirebaseVisionImageFromCameraImage(image));
 
     var textBlocks = List<TextBlock>.from(detected);
 
     var timeTookToOcr = DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch;
-    debugPrint("got ocr #${textBlocks.length} ${timeTookToOcr}ms");
+    log.d("got ocr #${textBlocks.length} ${timeTookToOcr}ms");
 
     final _validators = [ClassicVehicleVrpValidator(), TwoLineVrpVehicleValidator()];
 
     final Offset imageCenter = Offset((image.height / 2).toDouble(), (image.width / 2).toDouble());
 
-    debugPrint("imageCenter (${image.width}/${image.height}): ${imageCenter.dx}:${imageCenter.dy}");
-
     bool deepScan = timeTookToOcr < OCR_TIME_LIMIT;
 //    deepScan = true;
 
     var possibleVrps = List<PossibleVrp>();
-    debugPrint("tbs:");
     textBlocks.forEach((tb) {
-      debugPrint(tb.text);
       var foundInvalid = false;
       for (var ch in VrpFinderImpl.INVALID_CHAR_SET) {
         if (tb.text.contains(ch)) {
@@ -83,15 +78,9 @@ class VrpFinderImpl implements VrpFinder {
       }
     });
 
-    debugPrint("VRP Len:" + possibleVrps.length.toString());
-
     // sort detected text blocks by their distance to the center of the image
     possibleVrps.sort((a, b) => distanceBetweenOffsets(a.textBlock.boundingBox.center, imageCenter)
         .compareTo(distanceBetweenOffsets(b.textBlock.boundingBox.center, imageCenter)));
-
-    debugPrint("sorted:");
-    possibleVrps.forEach((tb) => print(
-        "sorted ${tb.textBlock.text}@${tb.textBlock.boundingBox.center} => ${distanceBetweenOffsets(tb.textBlock.boundingBox.center, imageCenter)}"));
 
     VrpFinderResult result;
     if (possibleVrps.length > 0) {
@@ -99,7 +88,7 @@ class VrpFinderImpl implements VrpFinder {
       var img = convertCameraImage(image);
 //      var img = await executorService.submitCallable(convertCameraImage, image);
 
-      debugPrint(
+      log.d(
           "convertCameraImageTook: ${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch).toString()}");
 
       if (!deepScan) {
@@ -110,8 +99,7 @@ class VrpFinderImpl implements VrpFinder {
         result = await findVrpResultsFromImage(img, possibleVrps);
 //        result = await executorService.submitCallable(
 //            findVrpResultsFromCameraImage, CameraImageTextBlocCarrier(img, possibleVrps));
-        debugPrint(
-            "deep scan took: ${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch).toString()}");
+        log.d("deep scan took: ${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch).toString()}");
       }
 
       var firstPart, secondPart = "";
@@ -134,11 +122,10 @@ class VrpFinderImpl implements VrpFinder {
 
 Future<VrpFinderResult> findVrpResultsFromImage(imglib.Image img, List<PossibleVrp> possibleVrps) async {
   var start = DateTime.now();
-  var result = possibleVrps
-      .where((tb) => _isRectangleWithinImage(tb.textBlock.boundingBox, img.width, img.height))
-      .firstWhere(
-          (result) => getBlackAndWhiteImage(getImageCutout(img, result.textBlock.boundingBox)).getWhiteBalance() > 120);
-  debugPrint("bwi filter took: ${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch).toString()}");
+  var result = possibleVrps.firstWhere((tb) =>
+      _isRectangleWithinImage(tb.textBlock.boundingBox, img.width, img.height) &&
+      getBlackAndWhiteImage(getImageCutout(img, tb.textBlock.boundingBox)).getWhiteBalance() > 120);
+  log.i("bwi filter took: ${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch).toString()}");
 
   if (result != null) {
     return Future.value(

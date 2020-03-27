@@ -14,8 +14,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class SettingsPageState extends State<SettingsPage> with SingleTickerProviderStateMixin {
-
-  static const _languageMap = {"cs": "Čeština", "en" : "English"};
+  static const _languageMap = {"cs": "Čeština", "en": "English"};
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +74,6 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                                   );
                                 }).toList(),
                                 onChanged: (value) {
-                                  debugPrint("language selected $value");
                                   preferences.appLanguageCode = value;
                                 },
                               ),

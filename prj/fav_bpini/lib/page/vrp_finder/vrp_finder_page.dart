@@ -47,7 +47,6 @@ class VrpFinderPageState extends State<VrpFinderPage> {
       child: BlocListener<VrpFinderBloc, VrpFinderState>(
         listener: (context, VrpFinderState state) {
           if (state is VrpFoundState) {
-            debugPrint("Pushing named route!");
             if (!_rescan) {
               Navigator.of(context).pushNamed("/found",
                   arguments: VrpPreviewPageArguments(
@@ -84,7 +83,6 @@ class VrpFinderPageState extends State<VrpFinderPage> {
           } else if (state is CameraLoadedState) {
             return _buildCameraPreviewStack(state.controller, List<VrpFinderResult>(), null, 0);
           } else if (state is CameraFoundText) {
-            debugPrint("new cft state");
             return _buildCameraPreviewStack(state.controller, List<VrpFinderResult>(), state.imageSize, 0);
           } else if (state is ResultsFoundState) {
             return _buildCameraPreviewStack(state.controller, state.results, state.imageSize, state.timeTook);
@@ -92,9 +90,13 @@ class VrpFinderPageState extends State<VrpFinderPage> {
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Center(child: Text(AppLocalizations.of(context).translate(state.errorDescription),textAlign: TextAlign.center,)),
+                Center(
+                    child: Text(
+                  AppLocalizations.of(context).translate(state.errorDescription),
+                  textAlign: TextAlign.center,
+                )),
                 Padding(
-                  padding: const EdgeInsets.only(top:16.0),
+                  padding: const EdgeInsets.only(top: 16.0),
                   child: RaisedButton(
                     shape: new RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(7.0),
@@ -111,8 +113,7 @@ class VrpFinderPageState extends State<VrpFinderPage> {
                           padding: const EdgeInsets.only(right: 5.0),
                           child: Icon(Icons.arrow_back),
                         ),
-                        Text(AppLocalizations.of(context).translate("back"),
-                            style: TextStyle(fontSize: 18)),
+                        Text(AppLocalizations.of(context).translate("back"), style: TextStyle(fontSize: 18)),
                       ],
                     ),
                   ),
@@ -127,7 +128,6 @@ class VrpFinderPageState extends State<VrpFinderPage> {
   }
 
   Widget _buildCameraPreviewStack(CameraController controller, List<VrpFinderResult> results, Size size, int timeTook) {
-    debugPrint("foundblocks size " + results.length.toString());
     return Builder(
       builder: (context) {
         return Stack(alignment: AlignmentDirectional.topCenter, children: <Widget>[

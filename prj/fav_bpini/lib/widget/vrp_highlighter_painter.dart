@@ -31,8 +31,6 @@ class VrpHighlighterPainter extends CustomPainter {
       fontSize: 12,
     );
 
-    debugPrint(_timeTook.toString());
-
     for (VrpFinderResult result in results) {
       var horizontalPadding = 0;
       var verticalPadding = 0;
@@ -59,8 +57,6 @@ class VrpHighlighterPainter extends CustomPainter {
         maxWidth: rect.width,
       );
 
-//      debugPrint(
-//          "${result.boundingBox.width} ${result.boundingBox.height} + ${imageSize.width} ${imageSize.height} + ${size.width} + ${size.height}");
       canvas.drawRect(rect, p);
 
       textPainter.paint(canvas, Offset(rect.left, rect.top));
@@ -80,7 +76,6 @@ class VrpHighlighterPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(VrpHighlighterPainter oldDelegate) {
-    debugPrint("shouldRepaint - " + (oldDelegate.results != results).toString());
     return oldDelegate.results != results || _timeTook != oldDelegate._timeTook;
   }
 }

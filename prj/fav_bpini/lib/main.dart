@@ -5,9 +5,20 @@ import 'package:favbpini/utils/preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart';
 
-void main() => {runApp(VRPApp())};
+final log = Logger(printer: SimplePrinter());
+
+void main() {
+  if (!kDebugMode) {
+    Logger.level = Level.nothing;
+  } else {
+    Logger.level = Level.debug;
+  }
+  runApp(VRPApp());
+}
 
 class VRPApp extends StatefulWidget {
   @override
@@ -40,7 +51,7 @@ class VRPAppState extends State<VRPApp> {
       },
       child: Consumer<PreferencesProvider>(
         builder: (context, value, child) {
-          debugPrint("selected language code: " + value.appLanguageCode);
+          log.d("selected language code: " + value.appLanguageCode);
           return Provider(
             create: (_) => Database(),
             child: MaterialApp(

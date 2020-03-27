@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
+import 'package:favbpini/main.dart';
 import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:favbpini/vrp_locator/vrp_locator_impl.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:image/image.dart' as imglib;
 import 'package:path_provider/path_provider.dart';
 
@@ -42,7 +42,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
           controller = await _getCameraController();
         } catch (e) {
           if (e is CameraException) {
-            debugPrint("e content ${e.description}");
+            log.e("e content ${e.description}");
             if (e.description.toString().toLowerCase().contains("permission")) {
               yield CameraErrorState("vrp_finder_error_permissions");
             }
@@ -65,18 +65,18 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
             var took;
             VrpFinderResult result;
             try {
-              debugPrint("about to find vrps");
+              log.d("about to find vrps");
               result = await _finder.findVrpInImage(availableImage);
-              debugPrint("finished");
+              log.d("finished");
               took = DateTime.now().millisecondsSinceEpoch - start;
-              debugPrint("findVrpInImage took ${took.toString()}ms");
+              log.d("findVrpInImage took ${took.toString()}ms");
             } catch (e, s) {
               if (e is PlatformException) {
-                debugPrint("Caught PE code:${e.code}, message:${e.message}");
+                log.e("Caught PE code:${e.code}, message:${e.message}");
                 return;
               }
-              debugPrint("some other exception ${e.toString()}");
-              debugPrint(s.toString());
+              log.e("some other exception ${e.toString()}");
+              log.e(s.toString());
             }
 
             if (result == null) {
@@ -91,7 +91,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
 
             File(path)..writeAsBytesSync(imglib.encodeJpg(result.image, quality: 40));
 
-            debugPrint("Written to $path");
+            log.d("Written to $path");
             _isScanBusy = false;
             add(VrpFound(result, took, path, DateTime.now()));
             this.close();
@@ -120,16 +120,13 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
       );
     }
     if (!_cameraController.value.isInitialized) {
-      debugPrint("here bi");
       await _cameraController.initialize();
-      debugPrint("here ai");
     }
     return _cameraController;
   }
 
   @override
   Future<void> close() {
-    debugPrint("disposing a vrp finder bloc");
     _streamStarted = false;
     if (_cameraController != null) {
       _cameraController.dispose();

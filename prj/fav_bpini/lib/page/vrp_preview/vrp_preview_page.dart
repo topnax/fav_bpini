@@ -10,6 +10,7 @@ import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_bloc.dart';
 import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_event.dart';
 import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_state.dart';
 import 'package:favbpini/database/database.dart';
+import 'package:favbpini/main.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
 import 'package:favbpini/utils/preferences.dart';
@@ -452,8 +453,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
       child: FlatButton(
         child: Text(AppLocalizations.of(context).translate("vrp_preview_page_edit")),
         onPressed: () async {
-          String s = await _asyncInputDialog(context);
-          debugPrint(s);
+          await _asyncInputDialog(context);
         },
       ),
     );
@@ -469,7 +469,6 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
             await Navigator.of(context).pushNamed('/finder', arguments: VrpFinderPageArguments(rescan: true));
         if (result is VrpFinderResult) {
           setState(() {
-            debugPrint("is vrpfinderresult");
             _record = _record.copyWith(
                 type: result.foundVrp.type.index,
                 firstPart: result.foundVrp.firstPart,
@@ -485,8 +484,6 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
             bloc.add(GetAddressByPosition());
           }
           bloc.add(VrpRescanned(result.srcPath));
-        } else {
-          debugPrint("not vrpfinderesult");
         }
       },
       color: Colors.blue,
@@ -539,18 +536,14 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     }
     BlocProvider.of<VrpPreviewBloc>(context).add(DiscardVRP(_record.sourceImagePath));
     if (_edit) {
-      debugPrint("popping");
       Navigator.pop(context);
-      debugPrint("did pop");
     } else {
-      debugPrint("Popping until");
       Navigator.popUntil(context, ModalRoute.withName("/"));
     }
     return false;
   }
 
   Widget _buildSourcePreview() {
-    debugPrint("Showing ${_record.sourceImagePath}");
     return BlocProvider(
       create: (context) => VrpSourceDetailBloc(),
       child: Builder(
@@ -561,7 +554,6 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
             builder: (context, state) {
               return GestureDetector(
                 onTapDown: (_) async {
-                  debugPrint("onTapDown");
                   File image = new File(_record.sourceImagePath); // Or any other way to get a File instance.
                   var decodedImage = await decodeImageFromList(image.readAsBytesSync());
                   BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHighlight(
@@ -570,11 +562,9 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                       Size(decodedImage.width.toDouble(), decodedImage.height.toDouble())));
                 },
                 onTapUp: (_) {
-                  debugPrint("onTapUp");
                   BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHideHighlight());
                 },
                 onTapCancel: () {
-                  debugPrint("onTapCancel");
                   BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHideHighlight());
                 },
                 child: Stack(
@@ -944,8 +934,6 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
                       setState(() {
                         _type = value;
                       });
-
-                      debugPrint("val selected ${value.toString()}");
                     },
                   ),
                 ),
@@ -965,10 +953,10 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
                 onPressed: () {
                   if (_formState.currentState.validate()) {
                     _formState.currentState.save();
-                    debugPrint("form done");
-                    debugPrint(_firstPart);
-                    debugPrint(_secondPart);
-                    debugPrint(VRPType.values[_type].getName(context));
+                    log.d("form done");
+                    log.d(_firstPart);
+                    log.d(_secondPart);
+                    log.d(VRPType.values[_type].getName(context));
                     Navigator.of(context).pop(VRP(_firstPart, _secondPart, VRPType.values[_type]));
                   }
                 },

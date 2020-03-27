@@ -1,3 +1,4 @@
+import 'package:favbpini/main.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
@@ -30,7 +31,7 @@ class OcrManager {
   }
 
   static Future<List<TextBlock>> scanText(FirebaseVisionImage visionImage) async {
-    debugPrint("getting TR");
+    log.d("starting OCR...");
 
     final TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
 
@@ -38,14 +39,12 @@ class OcrManager {
     try {
       var start = DateTime.now();
       visionText = await textRecognizer.processImage(visionImage);
-      debugPrint("processing image took ${DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch}ms");
+      log.i("ocr finished, took  ${DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch}ms");
     } catch (e) {
-      debugPrint("got ${e.toString()} during processing of image");
+      log.e("got ${e.toString()} during processing of image");
     } finally {
       textRecognizer.close();
     }
-    debugPrint("processed image");
-
     return visionText?.blocks;
   }
 

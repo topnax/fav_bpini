@@ -1,7 +1,8 @@
-import 'dart:math';
+import 'dart:math' hide log;
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
+import 'package:favbpini/main.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as imglib;
 
@@ -97,7 +98,7 @@ imglib.Image getBlackAndWhiteImage(imglib.Image image, {Rect area}) {
       bw.setPixel(j, i, (grayScale.getPixel(j, i) & 0xFF) > bht ? 0xFFFFFFFF : 0xFF000000);
     }
   }
-  debugPrint("getbwi took: ${DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch}ms");
+  log.i("getbwi took: ${DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch}ms");
 
   return bw;
 }
@@ -139,13 +140,8 @@ int getBht(List<int> histogram, {int minCount = 5}) {
     end--;
   }
 
-  if (start == end) {
-    debugPrint(start.toString());
-  }
-
-  //     h_c = int(round(np.average(np.linspace(0, 2 ** 8 - 1, n_bins), weights=hist)))
   int center = ((start + end) / 2).floor();
-  debugPrint(
+  log.d(
       "start=${start.toString()}, end=${end.toString()}, center=${center.toString()}, h.len=${histogram.length.toString()}");
   int weightLeft = start != center ? histogram.getRange(start, center).reduce((a, b) => a + b) : 0;
   int weightRight = center != end + 1 ? histogram.getRange(center, end + 1).reduce((a, b) => a + b) : 0;

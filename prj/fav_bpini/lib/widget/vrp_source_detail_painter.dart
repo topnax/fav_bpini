@@ -30,7 +30,6 @@ class VrpSourceDetailPainter extends CustomPainter {
     // draw over the whole screen
     canvas.drawRect(screen, p);
 
-//    debugPrint("Whatever ${size.width}, ${size.width}");
 //
 //    p.color = Colors.white;
 //    p.blendMode = BlendMode.srcOver;

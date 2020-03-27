@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:favbpini/app_localizations.dart';
 import 'package:favbpini/database/database.dart';
+import 'package:favbpini/main.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -38,7 +39,6 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
       rescanned = true;
       _rescannedSourceImagePath = initialSourceImagePath;
     }
-    debugPrint("lat:$latitude, long:$longitude");
     position = Position(latitude: latitude, longitude: longitude);
   }
 
@@ -57,28 +57,25 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
 
       if (!(await geolocator.isLocationServiceEnabled())) {
         yield PositionFailed(_appLocalizations.translate("vrp_preview_error_position_disabled"));
-      } else if (permission == GeolocationStatus.restricted || permission == GeolocationStatus.disabled ) {
-        debugPrint("enum is" + (await geolocator.checkGeolocationPermissionStatus()).toString());
+      } else if (permission == GeolocationStatus.restricted || permission == GeolocationStatus.disabled) {
+        log.e("enum is" + (await geolocator.checkGeolocationPermissionStatus()).toString());
         yield PositionFailed(_appLocalizations.translate("vrp_preview_error_position_permissions"));
-      }else   {
+      } else {
         try {
-
-          print("Started getting current position");
+          log.d("Started getting current position");
           position = await geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
-          print("Got position");
+          log.d("Got position");
 
           List<Placemark> placemarks = await geolocator.placemarkFromCoordinates(position.latitude, position.longitude);
-          var address = "nenalezeno";
+          var address = "unknown";
           if (placemarks.length > 0) {
             address =
                 "${placemarks[0].thoroughfare} ${placemarks[0].name}, ${placemarks[0].locality} ${placemarks[0].postalCode}";
           }
-
-          print("$address loaded");
           yield PositionLoaded(position, address);
           _addressController.text = address;
         } catch (e) {
-          print("$e error");
+          log.e("$e error");
           yield PositionFailed(_appLocalizations.translate("vrp_preview_error_position_unknown"));
         }
       }
@@ -87,7 +84,7 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
         var rescannedSourceImageFile = File(_rescannedSourceImagePath);
         if (await rescannedSourceImageFile.exists()) {
           rescannedSourceImageFile.delete();
-          debugPrint("deleted previous image source file $_rescannedSourceImagePath");
+          log.d("deleted previous image source file $_rescannedSourceImagePath");
         }
       }
     } else if (event is SubmitVRP) {
@@ -115,7 +112,7 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
             note: _noteController.text,
             audioNotePath: audioNotePath,
             sourceImagePath: imgSourcePath));
-        debugPrint("Successfully added a new VrpRecord to the database");
+        log.d("Successfully added a new VrpRecord to the database");
       } else {
         database.updateEntry(event.record.copyWith(
             address: address,
@@ -128,14 +125,13 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
 
       yield VrpSubmitted();
     } else if (event is VrpRescanned) {
-      debugPrint("VrRescanned event received");
       if (rescanned) {
         var tempFile = File(_rescannedSourceImagePath);
         if (await tempFile.exists()) {
           tempFile.delete();
-          debugPrint("deleted temporary image source file $_rescannedSourceImagePath");
+          log.d("deleted temporary image source file $_rescannedSourceImagePath");
         } else {
-          debugPrint("temporary image source file $_rescannedSourceImagePath does not exist");
+          log.d("temporary image source file $_rescannedSourceImagePath does not exist");
         }
       } else {
         rescanned = true;
@@ -153,30 +149,27 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
     var sourceImagesDirectory = Directory(rootDirectory.path + "/" + sourceImagesFolderName);
     if (!await sourceImagesDirectory.exists()) {
       await sourceImagesDirectory.create();
-      debugPrint(sourceImagesDirectory.path + " created");
+      log.d(sourceImagesDirectory.path + " created");
     } else {
-      debugPrint(sourceImagesDirectory.path + " already exists");
+      log.d(sourceImagesDirectory.path + " already exists");
     }
 
     var storePath = sourceImagesDirectory.path + "/" + p.basename(tempFile.path);
 
-    debugPrint("Store path is =$storePath");
+    log.d("Store path is =$storePath");
 
     try {
       tempFile.copy(storePath);
-
-      debugPrint("Copied =$storePath");
-      debugPrint("Successfully added a new VrpRecord to the database");
     } catch (err) {
       // TODO what to do when copying fails?
-      print("caught error: $err");
+      log.e("caught error: $err");
     }
 
     if (editing) {
       var previousImageSourceFile = File(initialSourceImagePath);
       if (await previousImageSourceFile.exists()) {
         previousImageSourceFile.delete();
-        debugPrint("deleted previous image source file $initialSourceImagePath");
+        log.d("deleted previous image source file $initialSourceImagePath");
       }
     }
 
@@ -200,22 +193,22 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
         var tempFile = File(event.audioNotePath);
 
         try {
-          debugPrint("Copied a new audio note");
+          log.d("Copied a new audio note");
           tempFile.copy(audioStorePath);
           result = audioStorePath;
         } catch (err) {
-          print("caught error: $err");
+          log.e("caught error: $err");
         }
       }
     }
     if (event.audioNoteEdited) {
-      debugPrint("deleting previous audio note");
+      log.d("deleting previous audio note");
       var previousNoteFile = File(event.record.audioNotePath);
       if (await previousNoteFile.exists()) {
         await previousNoteFile.delete();
-        debugPrint("Deleted previous audio note file=${previousNoteFile.path}");
+        log.d("Deleted previous audio note file=${previousNoteFile.path}");
       } else {
-        debugPrint("Did not delete previous audio note file");
+        log.d("Did not delete previous audio note file");
       }
     }
 
