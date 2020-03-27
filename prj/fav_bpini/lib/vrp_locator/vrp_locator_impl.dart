@@ -57,7 +57,6 @@ class VrpFinderImpl implements VrpFinder {
     final Offset imageCenter = Offset((image.height / 2).toDouble(), (image.width / 2).toDouble());
 
     bool deepScan = timeTookToOcr < OCR_TIME_LIMIT;
-//    deepScan = true;
 
     var possibleVrps = List<PossibleVrp>();
     textBlocks.forEach((tb) {

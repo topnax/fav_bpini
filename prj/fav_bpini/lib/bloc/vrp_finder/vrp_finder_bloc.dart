@@ -32,6 +32,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
   Stream<VrpFinderState> mapEventToState(
     VrpFinderEvent event,
   ) async* {
+    log.wtf("Received $event");
     if (event is LoadCamera) {
       List<CameraDescription> cameras = await availableCameras();
       if (cameras.length < 1) {
@@ -53,8 +54,10 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
         }
         if (!_streamStarted && controller.value.isInitialized) {
           await controller.startImageStream((CameraImage availableImage) async {
+            log.wtf("receiving an image");
             _streamStarted = true;
             if (_isScanBusy) {
+              log.wtf("skipping is busy");
               return;
             }
 
@@ -65,7 +68,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
             var took;
             VrpFinderResult result;
             try {
-              log.d("about to find vrps");
+              log.wtf("about to find vrps");
               result = await _finder.findVrpInImage(availableImage);
               log.d("finished");
               took = DateTime.now().millisecondsSinceEpoch - start;
@@ -84,7 +87,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
               return;
             }
 
-            controller.stopImageStream();
+            await controller.stopImageStream();
 
             var directory = await _localPath;
             var path = "$directory/${DateTime.now().millisecondsSinceEpoch.toString()}.jpg";
@@ -92,9 +95,9 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
             File(path)..writeAsBytesSync(imglib.encodeJpg(result.image, quality: 40));
 
             log.d("Written to $path");
-            _isScanBusy = false;
             add(VrpFound(result, took, path, DateTime.now()));
             this.close();
+            _isScanBusy = false;
           });
         }
 
@@ -126,10 +129,10 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
   }
 
   @override
-  Future<void> close() {
+  Future<void> close() async {
     _streamStarted = false;
     if (_cameraController != null) {
-      _cameraController.dispose();
+      await _cameraController.dispose();
       _cameraController = null;
     }
     return super.close();
