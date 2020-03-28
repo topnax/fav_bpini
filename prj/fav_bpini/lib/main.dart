@@ -9,7 +9,7 @@ import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 
-final log = Logger(printer: SimplePrinter(printTime: true));
+final log = Logger(printer: SimplePrinter(printTime: false));
 
 void main() {
   if (!kDebugMode) {

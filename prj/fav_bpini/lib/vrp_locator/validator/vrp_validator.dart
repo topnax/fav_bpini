@@ -15,6 +15,9 @@ class ClassicVehicleVrpValidator extends VrpValidator {
     if (tb.lines.length == 1) {
       // one line VRP
       if (tb.lines[0].elements.length == 2 && tb.lines[0].elements[0].text.length == 3) {
+        String firstPart = tb.lines[0].elements[0].text;
+        String secondPart = tb.lines[0].elements[1].text;
+
         var el1 = tb.lines[0].elements[0].boundingBox;
         var el2 = tb.lines[0].elements[1].boundingBox;
 
@@ -40,10 +43,14 @@ class ClassicVehicleVrpValidator extends VrpValidator {
           if (!isDigit(tb.text, 0)) {
             return null;
           }
+          firstPart = tb.lines[0].elements[0].text;
+          if (firstPart[1] == "8") {
+            firstPart = firstPart.replaceRange(1, 2, "B");
+          }
         }
 
         if (diffRatio > diffRatioLower && diffRatio < diffRatioUpper) {
-          return VRP(tb.lines[0].elements[0].text, tb.lines[0].elements[1].text, type);
+          return VRP(firstPart, secondPart, type);
         }
       }
     }
