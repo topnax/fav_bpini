@@ -49,7 +49,7 @@ class VrpListPageState extends State<VrpListPage> {
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
-          onTap: () => Navigator.of(context).pop(type),
+          onTap: () => Navigator.of(context).pop(FilterDialogResult(type)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -257,7 +257,7 @@ class VrpListPageState extends State<VrpListPage> {
   }
 
   _openFilterRecordsDialog() async {
-    var result = await showDialog<VRPType>(
+    var result = await showDialog<FilterDialogResult>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -286,8 +286,15 @@ class VrpListPageState extends State<VrpListPage> {
             ));
       },
     );
-    setState(() {
-      _typeFilter = result;
-    });
+    if (result != null && result.type != _typeFilter) {
+      setState(() {
+        _typeFilter = result.type;
+      });
+    }
   }
+}
+
+class FilterDialogResult {
+  final VRPType type;
+  FilterDialogResult(this.type);
 }
