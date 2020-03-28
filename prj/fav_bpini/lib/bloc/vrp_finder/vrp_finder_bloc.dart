@@ -53,51 +53,13 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
           return;
         }
         if (!_streamStarted && controller.value.isInitialized) {
-          await controller.startImageStream((CameraImage availableImage) async {
-            log.wtf("receiving an image");
+          await controller.startImageStream((CameraImage image) async {
             _streamStarted = true;
-            if (_isScanBusy) {
-              log.wtf("skipping is busy");
-              return;
-            }
-
-            _isScanBusy = true;
-
-            var start = DateTime.now().millisecondsSinceEpoch;
-
-            var took;
-            VrpFinderResult result;
-            try {
-              log.wtf("about to find vrps");
-              result = await _finder.findVrpInImage(availableImage);
-              log.d("finished");
-              took = DateTime.now().millisecondsSinceEpoch - start;
-              log.d("findVrpInImage took ${took.toString()}ms");
-            } catch (e, s) {
-              if (e is PlatformException) {
-                log.e("Caught PE code:${e.code}, message:${e.message}");
-                return;
-              }
-              log.e("some other exception ${e.toString()}");
-              log.e(s.toString());
-            }
-
-            if (result == null) {
+            if (!_isScanBusy) {
+              _isScanBusy = true;
+              await _processImage(image);
               _isScanBusy = false;
-              return;
             }
-
-            await controller.stopImageStream();
-
-            var directory = await _localPath;
-            var path = "$directory/${DateTime.now().millisecondsSinceEpoch.toString()}.jpg";
-
-            File(path)..writeAsBytesSync(imglib.encodeJpg(result.image, quality: 40));
-
-            log.d("Written to $path");
-            add(VrpFound(result, took, path, DateTime.now()));
-            await this.close();
-            _isScanBusy = false;
           });
         }
 
@@ -109,6 +71,8 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
       yield VrpFoundState(event.result, event.timeTook, event.pathToImage, event.date);
     } else if (event is VrpResultsFound) {
       yield ResultsFoundState(event.results, event.size, _cameraController, event.timeTook);
+    } else if (event is LoadingScreen) {
+      yield CameraLoadingState();
     }
   }
 
@@ -137,10 +101,44 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
     }
     return super.close();
   }
+
+  _processImage(CameraImage availableImage) async {
+    var start = DateTime.now().millisecondsSinceEpoch;
+
+    var took;
+    VrpFinderResult result;
+    try {
+      log.d("about to find vrps");
+      result = await _finder.findVrpInImage(availableImage);
+      took = DateTime.now().millisecondsSinceEpoch - start;
+      log.d("findVrpInImage took ${took.toString()}ms");
+    } catch (e, s) {
+      if (e is PlatformException) {
+        log.e("Caught PE code:${e.code}, message:${e.message}");
+        return;
+      }
+      log.e("some other exception ${e.toString()}");
+      log.e(s.toString());
+    }
+
+    if (result != null) {
+      this.add(LoadingScreen());
+
+      await Future.delayed(Duration(milliseconds: 500));
+      var directory = await _localPath;
+      var file = File(getSourceImagePath(directory));
+      await file.writeAsBytes(imglib.encodeJpg(result.image, quality: 40));
+
+      await _cameraController.stopImageStream();
+      add(VrpFound(result, took, file.path, DateTime.now()));
+      await this.close();
+    }
+  }
+
+  String getSourceImagePath(String directory) => "$directory/${DateTime.now().millisecondsSinceEpoch.toString()}.jpg";
 }
 
 Future<String> get _localPath async {
-//  final directory = await getExternalStorageDirectory();
   final directory = await getTemporaryDirectory();
 
   return directory.path;

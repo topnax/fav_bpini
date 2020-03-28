@@ -11,6 +11,12 @@ abstract class VrpFinderEvent extends Equatable {
 }
 
 @immutable
+class LoadingScreen extends VrpFinderEvent {
+  @override
+  List<Object> get props => [];
+}
+
+@immutable
 class LoadCamera extends VrpFinderEvent {
   @override
   List<Object> get props => [];

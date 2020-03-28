@@ -121,14 +121,16 @@ class VrpFinderImpl implements VrpFinder {
 
 Future<VrpFinderResult> findVrpResultsFromImage(imglib.Image img, List<PossibleVrp> possibleVrps) async {
   var start = DateTime.now();
-  var result = possibleVrps.firstWhere((tb) =>
-      _isRectangleWithinImage(tb.textBlock.boundingBox, img.width, img.height) &&
-      getBlackAndWhiteImage(getImageCutout(img, tb.textBlock.boundingBox)).getWhiteBalance() > 120);
-  log.i("bwi filter took: ${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch).toString()}");
+  if (possibleVrps.isNotEmpty) {
+    var result = possibleVrps.firstWhere((tb) =>
+        _isRectangleWithinImage(tb.textBlock.boundingBox, img.width, img.height) &&
+        getBlackAndWhiteImage(getImageCutout(img, tb.textBlock.boundingBox)).getWhiteBalance() > 120);
+    log.i("bwi filter took: ${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch).toString()}");
 
-  if (result != null) {
-    return Future.value(
-        VrpFinderResult(result.vrp, 666, "found by BWT", rect: result.textBlock.boundingBox, image: img));
+    if (result != null) {
+      return Future.value(
+          VrpFinderResult(result.vrp, 666, "found by BWT", rect: result.textBlock.boundingBox, image: img));
+    }
   }
   return null;
 }
