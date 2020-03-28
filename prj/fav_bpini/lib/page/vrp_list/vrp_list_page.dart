@@ -88,30 +88,20 @@ class VrpListPageState extends State<VrpListPage> {
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     if (snapshot.data.length > 0) {
-                      return FutureBuilder<String>(
-                        future: Future.delayed(Duration(milliseconds: 500)),
-                        builder: (BuildContext context, AsyncSnapshot<String> snapshotz) {
-                          return snapshotz.connectionState == ConnectionState.done
-                              ? ListView(padding: EdgeInsets.all(0), children: [
-                                  for (FoundVrpRecord record in snapshot.data)
-                                    _buildVRPRecordCard(
-                                        VRPRecord(
-                                            VRP(record.firstPart, record.secondPart, VRPType.values[record.type]),
-                                            record.date,
-                                            Position(longitude: record.longitude, latitude: record.latitude),
-                                            record.address.isNotEmpty
-                                                ? record.address
-                                                : AppLocalizations.of(context)
-                                                    .translate("vrp_list_address_unspecified")),
-                                        record,
-                                        context,
-                                        snapshot)
-                                ])
-                              : ListView(
-                                  padding: EdgeInsets.all(0),
-                                  children: [for (var i = 0; i < 10; i++) _buildVRPRecordCardLoading()]);
-                        },
-                      );
+                      return ListView(padding: EdgeInsets.all(0), children: [
+                        for (FoundVrpRecord record in snapshot.data)
+                          _buildVRPRecordCard(
+                              VRPRecord(
+                                  VRP(record.firstPart, record.secondPart, VRPType.values[record.type]),
+                                  record.date,
+                                  Position(longitude: record.longitude, latitude: record.latitude),
+                                  record.address.isNotEmpty
+                                      ? record.address
+                                      : AppLocalizations.of(context).translate("vrp_list_address_unspecified")),
+                              record,
+                              context,
+                              snapshot)
+                      ]);
                     } else {
                       return Center(
                           child: Text(AppLocalizations.of(context).translate("vrp_list_page_no_record_found"),
@@ -121,6 +111,7 @@ class VrpListPageState extends State<VrpListPage> {
                     return ListView(
                         padding: EdgeInsets.all(0),
                         children: [for (var i = 0; i < 10; i++) _buildVRPRecordCardLoading()]);
+//                        children: [for (var i = 0; i < 10; i++) CircularProgressIndicator()]);
                   }
                 },
               ),
