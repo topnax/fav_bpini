@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:meta/meta.dart';
 
 import '../../../model/vrp.dart';
@@ -19,7 +18,6 @@ class InitialVrpPreviewState extends VrpPreviewState {
 }
 
 class PositionFailed extends VrpPreviewState {
-
   final String error;
 
   PositionFailed(this.error);
@@ -36,13 +34,12 @@ class PositionLoading extends VrpPreviewState {
 }
 
 class PositionLoaded extends VrpPreviewState {
-  final Position position;
-  final String address;
+  final addressLoaded;
 
-  PositionLoaded(this.position, this.address);
+  PositionLoaded({this.addressLoaded = false});
 
   @override
-  List<Object> get props => [this.position, this.address];
+  List<Object> get props => [addressLoaded];
 }
 
 class VrpSubmitted extends VrpPreviewState {

@@ -11,6 +11,8 @@
   "vrp_preview_page_again": "znovu",
   "vrp_preview_page_address": "Adresa",
   "vrp_preview_page_address_hint": "Adresa, kde byla SPZ naskenována",
+  "vrp_preview_page_position_loaded": "Byla získána poloha zařízení",
+  "vrp_preview_page_position_loaded_with_address": "Byla získána poloha zařízení včetně adresy",
   "vrp_preview_page_note": "Poznámka",
   "vrp_preview_page_note_hint": "Vlastní poznámka",
   "vrp_preview_page_audio_note_success": "Audio poznámka úspěšně nahrána",

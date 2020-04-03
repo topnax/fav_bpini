@@ -61,22 +61,34 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
         log.e("enum is" + (await geolocator.checkGeolocationPermissionStatus()).toString());
         yield PositionFailed(_appLocalizations.translate("vrp_preview_error_position_permissions"));
       } else {
+        Position position;
         try {
           log.d("Started getting current position");
-          position = await geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
-          log.d("Got position");
-
-          List<Placemark> placemarks = await geolocator.placemarkFromCoordinates(position.latitude, position.longitude);
-          var address = "unknown";
-          if (placemarks.length > 0) {
-            address =
-                "${placemarks[0].thoroughfare} ${placemarks[0].name}, ${placemarks[0].locality} ${placemarks[0].postalCode}";
-          }
-          yield PositionLoaded(position, address);
-          _addressController.text = address;
+          position = await geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+          log.d("Success fully received device position");
         } catch (e) {
-          log.e("$e error");
+          log.e("'$e' error during position retrieval");
           yield PositionFailed(_appLocalizations.translate("vrp_preview_error_position_unknown"));
+        }
+
+        // attempt to get address by location only if it was loaded
+        if (position != null) {
+          String address;
+          this.position = position;
+
+          try {
+            List<Placemark> placemarks =
+                await geolocator.placemarkFromCoordinates(position.latitude, position.longitude);
+            if (placemarks.length > 0) {
+              address =
+                  "${placemarks[0].thoroughfare} ${placemarks[0].name}, ${placemarks[0].locality} ${placemarks[0].postalCode}";
+              _addressController.text = address;
+            }
+          } catch (e) {
+            log.e("Failed to get placemark from coordinates");
+          }
+
+          yield PositionLoaded(addressLoaded: address != null);
         }
       }
     } else if (event is DiscardVRP) {

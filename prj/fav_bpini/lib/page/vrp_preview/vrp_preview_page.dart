@@ -104,6 +104,16 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
               content: Text(
                   "${AppLocalizations.of(context).translate("vrp_preview_error_while_gathering_location")}: ${state.error}"),
             ));
+          } else if (state is PositionLoaded) {
+            String message;
+            if (state.addressLoaded) {
+              message = AppLocalizations.of(context).translate("vrp_preview_page_position_loaded_with_address");
+            } else {
+              message = AppLocalizations.of(context).translate("vrp_preview_page_position_loaded");
+            }
+            Scaffold.of(context).showSnackBar(SnackBar(
+              content: Text(message),
+            ));
           }
         },
         child: Padding(
