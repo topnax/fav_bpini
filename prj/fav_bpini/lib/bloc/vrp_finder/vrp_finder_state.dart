@@ -11,39 +11,25 @@ abstract class VrpFinderState extends Equatable {
 }
 
 @immutable
-class CameraLoadingState extends VrpFinderState {
+class CameraLoading extends VrpFinderState {
   @override
   List<Object> get props => [];
 }
 
 @immutable
 class CameraInitialState extends VrpFinderState {
-  CameraInitialState();
-
   @override
   List<Object> get props => [];
 }
 
 @immutable
-class CameraLoadedState extends VrpFinderState {
+class CameraLoaded extends VrpFinderState {
   final CameraController controller;
 
-  CameraLoadedState(this.controller);
+  CameraLoaded(this.controller);
 
   @override
   List<Object> get props => [controller];
-}
-
-@immutable
-class CameraFoundText extends VrpFinderState {
-  final CameraController controller;
-  final List<TextBlock> textBlocks;
-  final Size imageSize;
-
-  CameraFoundText(this.controller, this.textBlocks, this.imageSize);
-
-  @override
-  List<Object> get props => [controller, textBlocks, imageSize];
 }
 
 @immutable
@@ -60,23 +46,10 @@ class VrpFoundState extends VrpFinderState {
 }
 
 @immutable
-class ResultsFoundState extends VrpFinderState {
-  final CameraController controller;
-  final Size imageSize;
-  final List<VrpFinderResult> results;
-  final int timeTook;
-
-  ResultsFoundState(this.results, this.imageSize, this.controller, this.timeTook);
-
-  @override
-  List<Object> get props => [results];
-}
-
-@immutable
-class CameraErrorState extends VrpFinderState {
+class CameraFailure extends VrpFinderState {
   final String errorDescription;
 
-  CameraErrorState(this.errorDescription);
+  CameraFailure(this.errorDescription);
 
   @override
   List<Object> get props => [errorDescription];

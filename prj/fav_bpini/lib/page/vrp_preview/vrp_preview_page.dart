@@ -566,16 +566,16 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                 onTapDown: (_) async {
                   File image = new File(_record.sourceImagePath); // Or any other way to get a File instance.
                   var decodedImage = await decodeImageFromList(image.readAsBytesSync());
-                  BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHighlight(
+                  BlocProvider.of<VrpSourceDetailBloc>(context).add(Highlighted(
                       Rect.fromLTWH(_record.left.toDouble(), _record.top.toDouble(), _record.width.toDouble(),
                           _record.height.toDouble()),
                       Size(decodedImage.width.toDouble(), decodedImage.height.toDouble())));
                 },
                 onTapUp: (_) {
-                  BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHideHighlight());
+                  BlocProvider.of<VrpSourceDetailBloc>(context).add(NotHighlighted());
                 },
                 onTapCancel: () {
-                  BlocProvider.of<VrpSourceDetailBloc>(context).add(OnHideHighlight());
+                  BlocProvider.of<VrpSourceDetailBloc>(context).add(NotHighlighted());
                 },
                 child: Stack(
                   children: [
@@ -584,7 +584,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                       AspectRatio(
                           aspectRatio: state.imageSize.width / state.imageSize.height,
                           child: CustomPaint(painter: VrpSourceDetailPainter(state.highlightedArea, state.imageSize))),
-                    if (state is StaticDetail)
+                    if (state is ClassicDetail)
                       Align(
                           alignment: Alignment.bottomRight,
                           child: Padding(
@@ -854,125 +854,132 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
       content: Form(
         autovalidate: true,
         key: _formState,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    maxLength: 3,
-                    validator: (value) {
-                      if (value.trim().isEmpty) {
-                        return AppLocalizations.of(context)
-                            .translate("vrp_preview_page_edit_dialog_this_part_must_not_be_empty");
-                      }
-
-                      if (value.length > 3) {
-                        return AppLocalizations.of(context)
-                            .translate("vrp_preview_page_edit_dialog_this_part_mustnt_be_greater_than_three");
-                      }
-                      return null;
-                    },
-                    initialValue: vrp.firstPart,
-                    decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_first_part"),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.0),
-                        borderSide: BorderSide(
-                          color: Colors.amber,
-                          style: BorderStyle.solid,
-                        ),
-                      ),
-                    ),
-                    onSaved: (newValue) => _firstPart = newValue,
-                  ),
-                )
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Row(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
                 children: [
                   Expanded(
                     child: TextFormField(
-                        maxLength: 5,
-                        validator: (value) {
-                          if (value.trim().isEmpty) {
-                            return AppLocalizations.of(context)
-                                .translate("vrp_preview_page_edit_dialog_this_part_must_not_be_empty");
-                          }
-                          if (value.length > 5) {
-                            return AppLocalizations.of(context)
-                                .translate("vrp_preview_page_edit_dialog_this_part_mustnt_be_greater_than_five");
-                          }
-                          return null;
-                        },
-                        initialValue: vrp.secondPart,
-                        decoration: InputDecoration(
-                          hintText: AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_second_part"),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                            borderSide: BorderSide(
-                              color: Colors.amber,
-                              style: BorderStyle.solid,
-                            ),
+                      maxLength: 3,
+                      validator: (value) {
+                        if (value.trim().isEmpty) {
+                          return AppLocalizations.of(context)
+                              .translate("vrp_preview_page_edit_dialog_this_part_must_not_be_empty");
+                        }
+
+                        if (value.length > 3) {
+                          return AppLocalizations.of(context)
+                              .translate("vrp_preview_page_edit_dialog_this_part_mustnt_be_greater_than_three");
+                        }
+                        return null;
+                      },
+                      initialValue: vrp.firstPart,
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_first_part"),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: BorderSide(
+                            color: Colors.amber,
+                            style: BorderStyle.solid,
                           ),
                         ),
-                        onSaved: (newValue) => _secondPart = newValue),
+                      ),
+                      onSaved: (newValue) => _firstPart = newValue,
+                    ),
                   )
                 ],
               ),
-            ),
-            Row(
-              children: [
-                Text(
-                  AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_type"),
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                          maxLength: 5,
+                          validator: (value) {
+                            if (value.trim().isEmpty) {
+                              return AppLocalizations.of(context)
+                                  .translate("vrp_preview_page_edit_dialog_this_part_must_not_be_empty");
+                            }
+                            if (value.length > 5) {
+                              return AppLocalizations.of(context)
+                                  .translate("vrp_preview_page_edit_dialog_this_part_mustnt_be_greater_than_five");
+                            }
+                            return null;
+                          },
+                          initialValue: vrp.secondPart,
+                          decoration: InputDecoration(
+                            hintText:
+                                AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_second_part"),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                              borderSide: BorderSide(
+                                color: Colors.amber,
+                                style: BorderStyle.solid,
+                              ),
+                            ),
+                          ),
+                          onSaved: (newValue) => _secondPart = newValue),
+                    )
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: DropdownButton<int>(
-                    value: _type,
-//                        value: _record.type,
-                    items: VRPType.values.map((VRPType type) {
-                      return DropdownMenuItem<int>(
-                        value: type.index,
-                        child: Text(type.getName(context)),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _type = value;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 10.0),
-              child: RaisedButton(
-                child: Text(
-                  AppLocalizations.of(context).translate("ok"),
-                ),
-                color: Colors.orange,
-                textColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(7.0),
-                ),
-                onPressed: () {
-                  if (_formState.currentState.validate()) {
-                    _formState.currentState.save();
-                    log.d("form done");
-                    log.d(_firstPart);
-                    log.d(_secondPart);
-                    log.d(VRPType.values[_type].getName(context));
-                    Navigator.of(context).pop(VRP(_firstPart, _secondPart, VRPType.values[_type]));
-                  }
-                },
               ),
-            )
-          ],
+              FittedBox(
+                fit: BoxFit.contain,
+                child: Row(
+                  children: [
+                    Text(
+                      AppLocalizations.of(context).translate("vrp_preview_page_edit_dialog_type"),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: DropdownButton<int>(
+                        value: _type,
+//                        value: _record.type,
+                        items: VRPType.values.map((VRPType type) {
+                          return DropdownMenuItem<int>(
+                              value: type.index,
+                              child: Text(
+                                type.getName(context),
+                              ));
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _type = value;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 10.0),
+                child: RaisedButton(
+                  child: Text(
+                    AppLocalizations.of(context).translate("ok"),
+                  ),
+                  color: Colors.orange,
+                  textColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(7.0),
+                  ),
+                  onPressed: () {
+                    if (_formState.currentState.validate()) {
+                      _formState.currentState.save();
+                      log.d("form done");
+                      log.d(_firstPart);
+                      log.d(_secondPart);
+                      log.d(VRPType.values[_type].getName(context));
+                      Navigator.of(context).pop(VRP(_firstPart, _secondPart, VRPType.values[_type]));
+                    }
+                  },
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

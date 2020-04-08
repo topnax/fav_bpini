@@ -15,14 +15,6 @@ class GetAddressByPosition extends VrpPreviewEvent {
 }
 
 @immutable
-class RescanVRP extends VrpPreviewEvent {
-  RescanVRP();
-
-  @override
-  List<Object> get props => [];
-}
-
-@immutable
 class SubmitVRP extends VrpPreviewEvent {
   final FoundVrpRecord record;
   final bool edit;
@@ -30,7 +22,8 @@ class SubmitVRP extends VrpPreviewEvent {
   final bool audioNoteEdited;
   final bool audioNoteDeleted;
 
-  SubmitVRP(this.record, {this.edit = false, this.audioNotePath = "", this.audioNoteEdited = false, this.audioNoteDeleted = false});
+  SubmitVRP(this.record,
+      {this.edit = false, this.audioNotePath = "", this.audioNoteEdited = false, this.audioNoteDeleted = false});
 
   @override
   List<Object> get props => [record, edit];
@@ -55,4 +48,3 @@ class VrpRescanned extends VrpPreviewEvent {
   @override
   List<Object> get props => [pathToImage];
 }
-

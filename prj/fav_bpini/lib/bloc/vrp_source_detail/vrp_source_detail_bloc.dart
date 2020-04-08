@@ -9,24 +9,24 @@ class VrpSourceDetailBloc extends Bloc<VrpSourceDetailEvent, VrpSourceDetailStat
   var _earlyHide = false;
 
   @override
-  VrpSourceDetailState get initialState => StaticDetail();
+  VrpSourceDetailState get initialState => ClassicDetail();
 
   @override
   Stream<VrpSourceDetailState> mapEventToState(
     VrpSourceDetailEvent event,
   ) async* {
-    if (event is OnHighlight) {
+    if (event is Highlighted) {
       if (_earlyHide) {
         _earlyHide = false;
-        yield StaticDetail();
+        yield ClassicDetail();
       } else {
         yield HighlightedDetail(event.highlightedArea, event.imageSize);
       }
-    } else if (event is OnHideHighlight) {
-      if (state is StaticDetail) {
+    } else if (event is NotHighlighted) {
+      if (state is ClassicDetail) {
         _earlyHide = true;
       } else {
-        yield StaticDetail();
+        yield ClassicDetail();
       }
     }
   }

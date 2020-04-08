@@ -11,7 +11,7 @@ abstract class VrpFinderEvent extends Equatable {
 }
 
 @immutable
-class LoadingScreen extends VrpFinderEvent {
+class ShowLoadingScreen extends VrpFinderEvent {
   @override
   List<Object> get props => [];
 }
@@ -20,17 +20,6 @@ class LoadingScreen extends VrpFinderEvent {
 class LoadCamera extends VrpFinderEvent {
   @override
   List<Object> get props => [];
-}
-
-@immutable
-class TextFound extends VrpFinderEvent {
-  final List<TextBlock> textBlocks;
-  final Size imageSize;
-
-  TextFound(this.textBlocks, this.imageSize);
-
-  @override
-  List<Object> get props => [textBlocks];
 }
 
 @immutable
@@ -44,17 +33,4 @@ class VrpFound extends VrpFinderEvent {
 
   @override
   List<Object> get props => [result];
-}
-
-@immutable
-class VrpResultsFound extends VrpFinderEvent {
-  final List<VrpFinderResult> results;
-  final Size size;
-  final int timeTook;
-  final DateTime date;
-
-  VrpResultsFound(this.results, this.size, this.timeTook, this.date);
-
-  @override
-  List<Object> get props => [results, size];
 }

@@ -8,7 +8,7 @@ abstract class VrpSourceDetailState extends Equatable {
 }
 
 @immutable
-class StaticDetail extends VrpSourceDetailState {
+class ClassicDetail extends VrpSourceDetailState {
   @override
   List<Object> get props => [];
 }

@@ -78,15 +78,11 @@ class VrpFinderPageState extends State<VrpFinderPage> {
           if (state is CameraInitialState) {
             BlocProvider.of<VrpFinderBloc>(context).add(LoadCamera());
             return Center(child: CircularProgressIndicator());
-          } else if (state is CameraLoadingState) {
+          } else if (state is CameraLoading) {
             return Center(child: CircularProgressIndicator());
-          } else if (state is CameraLoadedState) {
+          } else if (state is CameraLoaded) {
             return _buildCameraPreviewStack(state.controller, List<VrpFinderResult>(), null, 0);
-          } else if (state is CameraFoundText) {
-            return _buildCameraPreviewStack(state.controller, List<VrpFinderResult>(), state.imageSize, 0);
-          } else if (state is ResultsFoundState) {
-            return _buildCameraPreviewStack(state.controller, state.results, state.imageSize, state.timeTook);
-          } else if (state is CameraErrorState) {
+          } else if (state is CameraFailure) {
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

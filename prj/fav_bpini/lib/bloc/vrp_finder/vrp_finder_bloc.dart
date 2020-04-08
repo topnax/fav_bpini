@@ -36,7 +36,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
     if (event is LoadCamera) {
       List<CameraDescription> cameras = await availableCameras();
       if (cameras.length < 1) {
-        yield CameraErrorState("vrp_finder_error_no_camera");
+        yield CameraFailure("vrp_finder_error_no_camera");
       } else {
         CameraController controller;
         try {
@@ -45,10 +45,10 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
           if (e is CameraException) {
             log.e("e content ${e.description}");
             if (e.description.toString().toLowerCase().contains("permission")) {
-              yield CameraErrorState("vrp_finder_error_permissions");
+              yield CameraFailure("vrp_finder_error_permissions");
             }
           } else {
-            yield CameraErrorState("vrp_finder_error_other");
+            yield CameraFailure("vrp_finder_error_other");
           }
           return;
         }
@@ -63,16 +63,12 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
           });
         }
 
-        yield CameraLoadedState(controller);
+        yield CameraLoaded(controller);
       }
-    } else if (event is TextFound) {
-      yield CameraFoundText(_cameraController, event.textBlocks, event.imageSize);
     } else if (event is VrpFound) {
       yield VrpFoundState(event.result, event.timeTook, event.pathToImage, event.date);
-    } else if (event is VrpResultsFound) {
-      yield ResultsFoundState(event.results, event.size, _cameraController, event.timeTook);
-    } else if (event is LoadingScreen) {
-      yield CameraLoadingState();
+    } else if (event is ShowLoadingScreen) {
+      yield CameraLoading();
     }
   }
 
@@ -122,7 +118,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
     }
 
     if (result != null) {
-      this.add(LoadingScreen());
+      this.add(ShowLoadingScreen());
 
       await Future.delayed(Duration(milliseconds: 500));
       var directory = await _localPath;

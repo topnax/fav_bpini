@@ -6,18 +6,16 @@ import 'package:meta/meta.dart';
 abstract class VrpSourceDetailEvent extends Equatable {}
 
 @immutable
-class OnHighlight extends VrpSourceDetailEvent {
+class Highlighted extends VrpSourceDetailEvent {
   final Rect highlightedArea;
   final Size imageSize;
 
-  OnHighlight(this.highlightedArea, this.imageSize);
+  Highlighted(this.highlightedArea, this.imageSize);
 
   List<Object> get props => [highlightedArea];
 }
 
 @immutable
-class OnHideHighlight extends VrpSourceDetailEvent {
+class NotHighlighted extends VrpSourceDetailEvent {
   List<Object> get props => [];
 }
-
-
