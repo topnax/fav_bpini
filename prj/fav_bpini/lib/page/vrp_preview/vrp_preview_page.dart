@@ -14,6 +14,7 @@ import 'package:favbpini/main.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
 import 'package:favbpini/utils/preferences.dart';
+import 'package:favbpini/utils/size_config.dart';
 import 'package:favbpini/vrp_locator/vrp_locator.dart';
 import 'package:favbpini/widget/common_texts.dart';
 import 'package:favbpini/widget/vrp_source_detail_painter.dart';
@@ -42,7 +43,8 @@ class VrpPreviewPage extends StatefulWidget {
 }
 
 class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProviderStateMixin {
-  static const TextStyle _vrpStyle = TextStyle(fontSize: 48, fontWeight: FontWeight.w600, color: Colors.black);
+  static TextStyle _vrpStyle =
+      TextStyle(fontSize: SizeConfig.blockSizeHorizontal * 11, fontWeight: FontWeight.w600, color: Colors.black);
   static const TextStyle _vrpStyleSmaller = TextStyle(fontSize: 42, fontWeight: FontWeight.w600, color: Colors.black);
 
   final TextEditingController _addressController = TextEditingController();
@@ -117,7 +119,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
           }
         },
         child: Padding(
-          padding: const EdgeInsets.only(top: 36.0),
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + SizeConfig.safeBlockVertical * 2.5),
           child: Column(
             children: <Widget>[
               Padding(
@@ -128,6 +130,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                   children: <Widget>[
                     IconButton(
                       icon: Icon(Icons.arrow_back_ios),
+                      iconSize: SizeConfig.blockSizeHorizontal * 7,
                       color: Theme.of(context).textTheme.body1.color,
                       onPressed: () {
                         onPop(context);
@@ -150,7 +153,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                   ? AppLocalizations.of(context).translate("vrp_preview_page_title_edit")
                                   : AppLocalizations.of(context).translate("vrp_preview_page_title_edit")),
                               Padding(
-                                padding: EdgeInsets.only(top: 40),
+                                padding: EdgeInsets.only(top: SizeConfig.blockSizeVertical * 3),
                                 child: Center(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -190,7 +193,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                   Expanded(
                                     child: HeadingText(
                                       AppLocalizations.of(context).translate("vrp_preview_page_address"),
-                                      fontSize: 22,
+                                      fontSize: SizeConfig.blockSizeHorizontal * 5.5,
                                     ),
                                   ),
                                   _buildShowInMapIcon(context)
@@ -222,12 +225,12 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                               ),
                               HeadingText(
                                 AppLocalizations.of(context).translate("vrp_preview_page_note"),
-                                fontSize: 22,
+                                fontSize: SizeConfig.blockSizeHorizontal * 5.5,
                               ),
                               _buildNoteSection(context),
                               HeadingText(
                                 AppLocalizations.of(context).translate("vrp_preview_page_source"),
-                                fontSize: 22,
+                                fontSize: SizeConfig.blockSizeHorizontal * 5.5,
                               ),
                               _buildSourcePreview(),
                             ],
@@ -235,7 +238,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 24.0),
+                        padding: EdgeInsets.symmetric(vertical: SizeConfig.blockSizeVertical * 1.5),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
@@ -643,7 +646,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                   style: vip ? _vrpStyleSmaller : _vrpStyle,
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockSizeHorizontal * 3),
                 ),
                 if (!twoRows)
                   Text(

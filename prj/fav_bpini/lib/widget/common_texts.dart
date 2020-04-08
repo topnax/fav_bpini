@@ -1,3 +1,4 @@
+import 'package:favbpini/utils/size_config.dart';
 import 'package:flutter/material.dart';
 
 class TextStyles {
@@ -6,10 +7,14 @@ class TextStyles {
 
 class HeadingText extends StatelessWidget {
   final String text;
-  final double fontSize;
+  double fontSize;
   final bool noPadding;
 
-  HeadingText(this.text, {this.fontSize = 28, this.noPadding = false});
+  HeadingText(this.text, {this.fontSize, this.noPadding = false}) {
+    if (fontSize == null) {
+      fontSize = SizeConfig.blockSizeHorizontal * 7.5;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +34,7 @@ class HeaderPadding extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 12, left: 25.0),
+      padding: EdgeInsets.only(top: SizeConfig.blockSizeVertical, left: 25.0),
       child: child,
     );
   }

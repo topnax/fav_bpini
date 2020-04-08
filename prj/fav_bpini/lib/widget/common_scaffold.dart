@@ -1,4 +1,5 @@
 import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
+import 'package:favbpini/utils/size_config.dart';
 import 'package:flutter/material.dart';
 
 class CommonScaffold extends StatelessWidget {
@@ -7,14 +8,13 @@ class CommonScaffold extends StatelessWidget {
   final Function onRightButtonPressed;
   final Widget rightButtonHint;
 
-
   CommonScaffold({@required this.child, this.onLeftButtonPressed, this.onRightButtonPressed, this.rightButtonHint});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: Padding(
-          padding: const EdgeInsets.only(top: 36.0),
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + SizeConfig.safeBlockVertical * 2.5),
           child: Column(
             children: <Widget>[
               Padding(
@@ -25,6 +25,7 @@ class CommonScaffold extends StatelessWidget {
                   children: <Widget>[
                     IconButton(
                       icon: Icon(Icons.settings),
+                      iconSize: SizeConfig.blockSizeHorizontal * 7,
                       color: Theme.of(context).textTheme.body1.color,
                       onPressed: () {
                         Navigator.of(context).pushNamed("/settings");
@@ -72,10 +73,10 @@ class CommonScaffold extends StatelessWidget {
                       onPressed: onRightButtonPressed,
                     ),
                     if (rightButtonHint != null)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: rightButtonHint,
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: rightButtonHint,
+                      ),
                   ],
                 ),
               ],

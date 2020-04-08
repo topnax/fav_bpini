@@ -2,12 +2,12 @@ import 'package:favbpini/app_localizations.dart';
 import 'package:favbpini/database/database.dart';
 import 'package:favbpini/routing/router.dart';
 import 'package:favbpini/utils/preferences.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/foundation.dart';
 
 final log = Logger(printer: SimplePrinter(printTime: false));
 

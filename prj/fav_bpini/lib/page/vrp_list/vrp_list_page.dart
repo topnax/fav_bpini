@@ -4,6 +4,7 @@ import 'package:favbpini/database/database.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/model/vrp_record.dart';
 import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
+import 'package:favbpini/utils/size_config.dart';
 import 'package:favbpini/widget/common_scaffold.dart';
 import 'package:favbpini/widget/common_texts.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +28,7 @@ class VrpListPageState extends State<VrpListPage> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return CommonScaffold(
       rightButtonHint: Icon(_sortByNewest ? Icons.arrow_downward : Icons.arrow_upward, size: 20, color: Colors.white),
       onLeftButtonPressed: _openFilterRecordsDialog,
@@ -74,11 +76,13 @@ class VrpListPageState extends State<VrpListPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          HeadingText(AppLocalizations.of(context).translate('vrp_list_page_title')),
+          HeadingText(
+            AppLocalizations.of(context).translate('vrp_list_page_title'),
+          ),
           if (_typeFilter != null)
             HeadingText(
               _typeFilter.getName(context),
-              fontSize: 18,
+              fontSize: SizeConfig.blockSizeHorizontal * 5,
             ),
           Expanded(
             child: Padding(
@@ -157,7 +161,8 @@ class VrpListPageState extends State<VrpListPage> {
                       alignment: Alignment.bottomLeft,
                       child: Text(
                         record.vrp.firstPart + " " + record.vrp.secondPart,
-                        style: TextStyles.monserratStyle.copyWith(fontSize: 18, color: Colors.white),
+                        style: TextStyles.monserratStyle
+                            .copyWith(fontSize: SizeConfig.blockSizeHorizontal * 5, color: Colors.white),
                       ),
                     ),
                     Align(
@@ -165,14 +170,15 @@ class VrpListPageState extends State<VrpListPage> {
                         child: Center(
                             child: Text(
                           record.date != null ? DateFormat('dd.MM.yyyy HH:mm').format(record.date) : "Nenalezeno",
-                          style: TextStyles.monserratStyle.copyWith(fontSize: 12, color: Colors.white),
+                          style: TextStyles.monserratStyle
+                              .copyWith(fontSize: SizeConfig.blockSizeHorizontal * 3.5, color: Colors.white),
                         )))
                   ])),
                   Padding(
                     padding: const EdgeInsets.only(top: 5.0),
                     child: Text(
                       record.address.isNotEmpty ? record.address : "",
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.white, fontSize: SizeConfig.blockSizeHorizontal * 4),
                     ),
                   ),
                 ],

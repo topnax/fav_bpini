@@ -1,4 +1,5 @@
 import 'package:favbpini/utils/preferences.dart';
+import 'package:favbpini/utils/size_config.dart';
 import 'package:favbpini/widget/common_texts.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
@@ -22,7 +23,7 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.only(top: 36.0),
+        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + SizeConfig.safeBlockVertical * 2.5),
         child: Column(
           children: <Widget>[
             Padding(
@@ -33,6 +34,7 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                 children: <Widget>[
                   IconButton(
                     icon: Icon(Icons.arrow_back_ios),
+                    iconSize: SizeConfig.blockSizeHorizontal * 7,
                     color: Theme.of(context).textTheme.body1.color,
                     onPressed: () {
                       Navigator.pop(context);
