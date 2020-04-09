@@ -41,16 +41,8 @@ class CommonScaffold extends StatelessWidget {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-//            var image = await ImagePicker.pickImage(source: ImageSource.gallery);
-//            imglib.Image img = imglib.decodeJpg(File(image.path).readAsBytesSync());
-//            var bw = getBlackAndWhiteImage(img, area: Rect.fromLTWH(150, 179, 120,35));
-//            var file = await _localFile;
-//            debugPrint("local file is: " + file.path);
-//            file..writeAsBytesSync(imglib.encodePng(bw, level: 1));
-
             Navigator.of(context).pushNamed('/finder', arguments: VrpFinderPageArguments());
           },
-          tooltip: 'New VRP',
           backgroundColor: Colors.orange,
           child: Icon(Icons.add),
           elevation: 2.0,
