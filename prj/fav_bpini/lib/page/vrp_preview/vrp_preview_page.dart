@@ -15,7 +15,7 @@ import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
 import 'package:favbpini/utils/preferences.dart';
 import 'package:favbpini/utils/size_config.dart';
-import 'package:favbpini/vrp_locator/vrp_locator.dart';
+import 'package:favbpini/vrp_locator/vrp_finder.dart';
 import 'package:favbpini/widget/common_texts.dart';
 import 'package:favbpini/widget/vrp_source_detail_painter.dart';
 import 'package:flutter/foundation.dart';
@@ -802,7 +802,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     );
   }
 
-  Future<String> _asyncInputDialog(BuildContext context) async {
+  _asyncInputDialog(BuildContext context) async {
     var result = await showDialog<VRP>(
       context: context,
       barrierDismissible: false, // dialog is dismissible with a tap on the barrier

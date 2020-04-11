@@ -6,11 +6,10 @@ import 'package:favbpini/app_localizations.dart';
 import 'package:favbpini/bloc/vrp_finder/bloc.dart';
 import 'package:favbpini/database/database.dart';
 import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
+import 'package:favbpini/vrp_locator/vrp_finder.dart';
 import 'package:favbpini/widget/vrp_highlighter_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../vrp_locator/vrp_locator.dart';
 
 class VrpFinderPageArguments {
   final bool rescan;

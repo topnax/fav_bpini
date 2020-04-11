@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:favbpini/utils/preferences.dart';
 import 'package:favbpini/utils/size_config.dart';
+import 'package:favbpini/utils/vrp_finder_tester.dart';
 import 'package:favbpini/widget/common_texts.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
@@ -94,22 +98,25 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: FutureBuilder<PackageInfo>(
-                          future: PackageInfo.fromPlatform(),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return Center(child: Text(""));
-                            } else {
-                              return Center(
-                                child: Text(
-                                  "${snapshot.data.version}+${snapshot.data.buildNumber}",
-                                  style: Theme.of(context).textTheme.caption,
-                                ),
-                              );
-                            }
-                          }),
+                    GestureDetector(
+                      onTap: _onVersionTapped,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: FutureBuilder<PackageInfo>(
+                            future: PackageInfo.fromPlatform(),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return Center(child: Text(""));
+                              } else {
+                                return Center(
+                                  child: Text(
+                                    "${snapshot.data.version}+${snapshot.data.buildNumber}",
+                                    style: Theme.of(context).textTheme.caption,
+                                  ),
+                                );
+                              }
+                            }),
+                      ),
                     )
                   ],
                 ),
@@ -119,5 +126,21 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
         ),
       ),
     );
+  }
+
+  int versionTappedCounter = 0;
+
+  Future<void> _onVersionTapped() async {
+    versionTappedCounter++;
+    if (versionTappedCounter > 5) {
+      versionTappedCounter = 0;
+      List<File> files = await FilePicker.getMultiFile(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'png'],
+      );
+      if (files.length > 0) {
+        startTestInFolder(files);
+      }
+    }
   }
 }

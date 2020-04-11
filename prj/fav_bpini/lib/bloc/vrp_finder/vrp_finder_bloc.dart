@@ -4,8 +4,9 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:favbpini/main.dart';
-import 'package:favbpini/vrp_locator/vrp_locator.dart';
-import 'package:favbpini/vrp_locator/vrp_locator_impl.dart';
+import 'package:favbpini/utils/image_wrappers.dart';
+import 'package:favbpini/vrp_locator/vrp_finder.dart';
+import 'package:favbpini/vrp_locator/vrp_finder_impl.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as imglib;
 import 'package:path_provider/path_provider.dart';
@@ -105,7 +106,7 @@ class VrpFinderBloc extends Bloc<VrpFinderEvent, VrpFinderState> {
     VrpFinderResult result;
     try {
       log.d("about to find vrps");
-      result = await _finder.findVrpInImage(availableImage);
+      result = await _finder.findVrpInImage(CameraImageWrapper(availableImage));
       took = DateTime.now().millisecondsSinceEpoch - start;
       log.d("findVrpInImage took ${took.toString()}ms");
     } catch (e, s) {

@@ -1,11 +1,11 @@
 import 'dart:ui';
 
-import 'package:camera/camera.dart';
 import 'package:favbpini/model/vrp.dart';
+import 'package:favbpini/utils/image_wrappers.dart';
 import 'package:image/image.dart' as imglib;
 
 abstract class VrpFinder {
-  Future<VrpFinderResult> findVrpInImage(CameraImage image);
+  Future<VrpFinderResult> findVrpInImage(ImageWrapper imageWrapper);
 }
 
 class VrpFinderResult {

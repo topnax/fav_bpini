@@ -1,8 +1,5 @@
-import 'dart:ui';
-
 import 'package:equatable/equatable.dart';
-import 'package:favbpini/vrp_locator/vrp_locator.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:favbpini/vrp_locator/vrp_finder.dart';
 import 'package:meta/meta.dart';
 
 @immutable
