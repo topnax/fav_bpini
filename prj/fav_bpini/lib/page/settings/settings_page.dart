@@ -20,6 +20,7 @@ class SettingsPage extends StatefulWidget {
 
 class SettingsPageState extends State<SettingsPage> with SingleTickerProviderStateMixin {
   static const _languageMap = {"cs": "Čeština", "en": "English"};
+  var _loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -109,9 +110,22 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                                 return Center(child: Text(""));
                               } else {
                                 return Center(
-                                  child: Text(
-                                    "${snapshot.data.version}+${snapshot.data.buildNumber}",
-                                    style: Theme.of(context).textTheme.caption,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text(
+                                        "${snapshot.data.version}+${snapshot.data.buildNumber}",
+                                        style: Theme.of(context).textTheme.caption,
+                                      ),
+                                      if (_loading)
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 8.0),
+                                          child: Text(
+                                            "performing test...",
+                                            style: Theme.of(context).textTheme.caption,
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                 );
                               }
@@ -132,14 +146,21 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
 
   Future<void> _onVersionTapped() async {
     versionTappedCounter++;
-    if (versionTappedCounter > 5) {
+    if (versionTappedCounter > 0) {
       versionTappedCounter = 0;
       List<File> files = await FilePicker.getMultiFile(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'png'],
       );
+
       if (files.length > 0) {
-        startTestInFolder(files);
+        setState(() {
+          _loading = true;
+        });
+        var result = await VrpFinderTester().startTestInFolder(files);
+        setState(() {
+          _loading = false;
+        });
       }
     }
   }

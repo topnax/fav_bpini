@@ -83,7 +83,7 @@ imglib.Image convertImageToGrayScale(imglib.Image image, {Rect area}) {
   return grayScaleImage;
 }
 
-imglib.Image getBlackAndWhiteImage(imglib.Image image, {Rect area}) {
+Future<imglib.Image> getBlackAndWhiteImage(imglib.Image image, {Rect area}) async {
   var start = DateTime.now();
   if (area == null) {
     area = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
@@ -92,12 +92,16 @@ imglib.Image getBlackAndWhiteImage(imglib.Image image, {Rect area}) {
   var grayScale = convertImageToGrayScale(image, area: area);
   var bht = getBht(getGrayScaleHistogram(grayScale));
 
+  log.i("for area ${area.toString()}");
+  log.i("got bht:${bht}");
+
   var bw = imglib.Image(area.width.toInt(), area.height.toInt());
   for (int i = 0; i < area.height.toInt(); i++) {
     for (int j = 0; j < area.width.toInt(); j++) {
       bw.setPixel(j, i, (grayScale.getPixel(j, i) & 0xFF) > bht ? 0xFFFFFFFF : 0xFF000000);
     }
   }
+
   log.i("getbwi took: ${DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch}ms");
 
   return bw;

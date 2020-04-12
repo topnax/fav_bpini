@@ -77,6 +77,8 @@ class VrpFinderImpl implements VrpFinder {
     var candidates = List<VrpCandidate>();
 
     textBlocks.forEach((tb) {
+      log.i("tb => '${tb.text}'");
+
       // check whether the text block contains forbidden characters
       for (var ch in VrpFinderImpl.INVALID_CHAR_SET) {
         if (tb.text.contains(ch)) {
@@ -97,6 +99,8 @@ class VrpFinderImpl implements VrpFinder {
     candidates.sort((a, b) => distanceBetweenOffsets(a.textBlock.boundingBox.center, imageCenter)
         .compareTo(distanceBetweenOffsets(b.textBlock.boundingBox.center, imageCenter)));
 
+    log.i("candidates len ${candidates.length}");
+
     return Future<List<VrpCandidate>>.value(candidates);
   }
 }
@@ -104,14 +108,14 @@ class VrpFinderImpl implements VrpFinder {
 Future<VrpFinderResult> findVrpByThreshold(imglib.Image img, List<VrpCandidate> candidates) async {
   var start = DateTime.now();
   if (candidates.isNotEmpty) {
-    var result = candidates.firstWhere((tb) =>
-        _isRectangleWithinImage(tb.textBlock.boundingBox, img.width, img.height) &&
-        getBlackAndWhiteImage(getImageCutout(img, tb.textBlock.boundingBox)).getWhiteBalance() > 120);
-    log.i("bwi filter took: ${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch).toString()}");
-
-    if (result != null) {
-      return Future.value(
-          VrpFinderResult(result.vrp, 666, "found by BWT", rect: result.textBlock.boundingBox, image: img));
+    for (var candidate in candidates) {
+      var wb = (await getBlackAndWhiteImage(getImageCutout(img, candidate.textBlock.boundingBox))).getWhiteBalance();
+      log.i("got wb of $wb");
+      if (_isRectangleWithinImage(candidate.textBlock.boundingBox, img.width, img.height) && wb > 120) {
+        log.i("bwi filter took: ${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch).toString()}");
+        return Future.value(VrpFinderResult(candidate.vrp, wb.toDouble(), "found by BWT",
+            rect: candidate.textBlock.boundingBox, image: img));
+      }
     }
   }
   return null;

@@ -36,12 +36,13 @@ class CameraImageWrapper extends ImageWrapper {
 class FileImageWrapper extends ImageWrapper {
   final imglib.Image _image;
   final String _path;
+  final angleRotation;
 
-  FileImageWrapper(this._image, this._path);
+  FileImageWrapper(this._image, this._path, {this.angleRotation = 0});
 
   @override
   imglib.Image getImage() {
-    return _image;
+    return imglib.copyRotate(_image, 90);
   }
 
   @override
