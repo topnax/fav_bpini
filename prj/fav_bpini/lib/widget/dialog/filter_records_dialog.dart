@@ -1,32 +1,22 @@
 import 'package:favbpini/app_localizations.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/widget/common_texts.dart';
+import 'package:favbpini/widget/dialog/dialog.dart';
 import 'package:flutter/material.dart';
 
 class FilterRecordsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
-        title: Row(
-          children: [
-            Expanded(
-                child: HeadingText(AppLocalizations.of(context).translate("vrp_filter_dialog_title"),
-                    fontSize: 18, noPadding: true)),
-            IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
-          ],
-        ),
-        content: Padding(
-          padding: EdgeInsets.only(left: 25, right: 25),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildFilterDialogRow(context, null, label: AppLocalizations.of(context).translate("vrp_type_all")),
-                for (var type in VRPType.values) _buildFilterDialogRow(context, type),
-              ],
-            ),
+    return CustomDialog(
+        title: AppLocalizations.of(context).translate("vrp_filter_dialog_title"),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildFilterDialogRow(context, null, label: AppLocalizations.of(context).translate("vrp_type_all")),
+              for (var type in VRPType.values) _buildFilterDialogRow(context, type),
+            ],
           ),
         ));
   }

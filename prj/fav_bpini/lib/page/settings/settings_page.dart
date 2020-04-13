@@ -4,6 +4,7 @@ import 'package:favbpini/utils/preferences.dart';
 import 'package:favbpini/utils/size_config.dart';
 import 'package:favbpini/utils/vrp_finder_tester.dart';
 import 'package:favbpini/widget/common_texts.dart';
+import 'package:favbpini/widget/dialog/vrp_test_result_dialog.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
@@ -21,6 +22,8 @@ class SettingsPage extends StatefulWidget {
 class SettingsPageState extends State<SettingsPage> with SingleTickerProviderStateMixin {
   static const _languageMap = {"cs": "Čeština", "en": "English"};
   var _loading = false;
+  var _versionTappedCounter = 0;
+  static const _versionTappedLimit = 3;
 
   @override
   Widget build(BuildContext context) {
@@ -142,12 +145,10 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
     );
   }
 
-  int versionTappedCounter = 0;
-
-  Future<void> _onVersionTapped() async {
-    versionTappedCounter++;
-    if (versionTappedCounter > 0) {
-      versionTappedCounter = 0;
+  _onVersionTapped() async {
+    _versionTappedCounter++;
+    if (_versionTappedCounter >= _versionTappedLimit) {
+      _versionTappedCounter = 0;
       List<File> files = await FilePicker.getMultiFile(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'png'],
@@ -157,10 +158,18 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
         setState(() {
           _loading = true;
         });
-        var result = await VrpFinderTester().startTestInFolder(files);
+        var results = await VrpFinderTester().startTestInFolder(files);
         setState(() {
           _loading = false;
         });
+
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return VrpFinderTesterResultDialog(results);
+          },
+        );
       }
     }
   }

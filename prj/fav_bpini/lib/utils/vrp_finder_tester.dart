@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:favbpini/main.dart';
+import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/utils/image_wrappers.dart';
 import 'package:favbpini/vrp_locator/vrp_finder_impl.dart';
 import 'package:image/image.dart' as imglib;
@@ -17,13 +18,17 @@ class VrpFinderTester {
     var failure = 0;
     var angles = [0, -3, -2, -1, 1, 2, 3];
     var totalTime = 0;
+    var results = List<VrpFinderTesterTestCaseResult>();
     for (var file in files) {
       var found = false;
+      var foundIncorrect = false;
       var attempt = 0;
       var name = basenameWithoutExtension(file.path);
       var parts = name.split("_");
       var img = imglib.decodeImage(file.readAsBytesSync());
       for (var angle in angles) {
+        log.e("trying angle $angle");
+        attempt++;
         if (parts.length == 2) {
           var tempImg = angle != 0 ? imglib.copyRotate(img, angle) : img;
           tempFile.writeAsBytesSync(imglib.encodeJpg(tempImg));
@@ -35,24 +40,31 @@ class VrpFinderTester {
             if (parts[0] != result.foundVrp.firstPart || parts[1] != result.foundVrp.secondPart) {
               log.e(
                   "INCORRECT '${result.foundVrp.firstPart} ${result.foundVrp.secondPart}' instead of ${parts[0]} ${parts[1]}");
+              foundIncorrect = true;
             } else {
-              attempt++;
               found = true;
-              break;
             }
+            if (found) {
+              log.e("bht is: ${result.wtb}");
+            }
+            results.add(VrpFinderTesterTestCaseResult(
+                VRP(parts[0], parts[1], VRPType.ONE_LINE_CLASSIC), result.foundVrp, file.path));
             break;
           } else {
             log.e("did not find anything for instead of ${parts[0]} ${parts[1]}");
           }
-          attempt++;
         }
       }
       totalAttempts += attempt;
       if (!found) {
         failure++;
         log.e("FAILED TO RECOGNIZE VRP");
+        if (!foundIncorrect) {
+          results
+              .add(VrpFinderTesterTestCaseResult(VRP(parts[0], parts[1], VRPType.ONE_LINE_CLASSIC), null, file.path));
+        }
       } else {
-        if (attempt > 0) {
+        if (attempt > 1) {
           log.e("RECOGNIZED AFTER $attempt tries");
         }
       }
@@ -60,16 +72,24 @@ class VrpFinderTester {
     }
     log.i(
         "SUMMARY:\nFAILURE:$failure\nSUCCESS:${total - failure}\nACCURACY:${(total - failure) / total * 100}%\nTOTAL:$total\nTOTAL ATTEMPTS:${totalAttempts}\nATTEMPTS PER TEST CASE:${totalAttempts / total}\nTotal time:${totalTime}ms\nTime per record:${totalTime / totalAttempts}ms");
-    return VrpFinderTesterResult(failure, total - failure, total, totalAttempts, totalTime);
+    return VrpFinderTesterResult(failure, total - failure, results, totalAttempts, totalTime);
   }
 }
 
 class VrpFinderTesterResult {
   final int failure;
   final int success;
-  final int testCases;
   final int attempts;
   final int timeTook;
+  final List<VrpFinderTesterTestCaseResult> testCases;
 
   VrpFinderTesterResult(this.failure, this.success, this.testCases, this.attempts, this.timeTook);
+}
+
+class VrpFinderTesterTestCaseResult {
+  VRP expected;
+  VRP found;
+  String path;
+
+  VrpFinderTesterTestCaseResult(this.expected, this.found, this.path);
 }

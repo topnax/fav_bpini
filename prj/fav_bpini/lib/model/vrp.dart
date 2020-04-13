@@ -1,12 +1,16 @@
+import 'package:equatable/equatable.dart';
 import 'package:favbpini/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-class VRP {
+class VRP extends Equatable {
   final String firstPart;
   final String secondPart;
   final VRPType type;
 
   VRP(this.firstPart, this.secondPart, this.type);
+
+  @override
+  List<Object> get props => [firstPart, secondPart];
 }
 
 enum VRPType { ONE_LINE_CLASSIC, ONE_LINE_OLD, ONE_LINE_VIP, TWO_LINE_BIKE, TWO_LINE_OTHER }

@@ -103,7 +103,6 @@ Future<imglib.Image> getBlackAndWhiteImage(imglib.Image image, {Rect area}) asyn
   }
 
   log.i("getbwi took: ${DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch}ms");
-
   return bw;
 }
 
