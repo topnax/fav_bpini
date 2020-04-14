@@ -118,6 +118,12 @@ class VrpPreviewRecordingBloc extends Bloc<VrpPreviewRecordingEvent, VrpPreviewR
     } else if (_sound.audioState == t_AUDIO_STATE.IS_RECORDING) {
       _sound.stopRecorder();
     }
+    if (audioPath != initialAudioPath) {
+      var file = File(audioPath);
+      if (file.existsSync()) {
+        file.delete();
+      }
+    }
 
     return super.close();
   }
