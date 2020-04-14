@@ -100,10 +100,11 @@ class VrpListPageState extends State<VrpListPage> {
         dateTime: record.date,
         key: Key(record.toString()),
         onDismissed: (direction) async {
-          Provider.of<Database>(context, listen: false).deleteEntry(record);
           setState(() {
             snapshot.data.remove(record);
           });
+          Provider.of<Database>(context, listen: false).deleteEntry(record);
+
           var sourceImage = File(record.sourceImagePath);
           if (await sourceImage.exists()) {
             sourceImage.delete();

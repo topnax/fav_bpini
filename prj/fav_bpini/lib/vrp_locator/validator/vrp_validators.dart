@@ -43,7 +43,7 @@ class ClassicVehicleVrpValidator extends VrpValidator {
           diffRatioUpper = 0.67;
           diffRatioLower = 0.51;
           type = VRPType.ONE_LINE_CLASSIC;
-          if (tb.text[0] != "O" && !isDigit(tb.text, 0)) {
+          if (tb.text[0] != "O" && !isDigit(tb.text, 0) && tb.text[0] != "E") {
             return null;
           }
           firstPart = tb.lines[0].elements[0].text;
