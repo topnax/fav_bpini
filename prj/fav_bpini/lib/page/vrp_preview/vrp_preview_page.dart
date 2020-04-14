@@ -493,7 +493,9 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                 height: result.rect.height.toInt());
           });
           var bloc = BlocProvider.of<VrpPreviewBloc>(context);
-          if (Provider.of<PreferencesProvider>(context, listen: false).autoPositionLookup) {
+          if (_record.latitude != 0 &&
+              _record.longitude != 0 &&
+              Provider.of<PreferencesProvider>(context, listen: false).autoPositionLookup) {
             bloc.add(GetAddressByPosition());
           }
           bloc.add(VrpRescanned(result.srcPath));
@@ -785,13 +787,31 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                 Container(
                     child: AspectRatio(
                   aspectRatio: 16.toDouble() / 10.toDouble(),
-                  child: FutureBuilder(
-                    future: Future<double>.delayed(Duration(milliseconds: 500), () => 1.0),
-                    builder: (context, snapshot) => AnimatedOpacity(
-                      opacity: snapshot.hasData ? snapshot.data : 0.0,
-                      duration: Duration(seconds: 1),
-                      child: _buildGoogleMap(context),
-                    ),
+                  child: Stack(
+                    children: [
+                      FutureBuilder(
+                        future: Future<double>.delayed(Duration(milliseconds: 500), () => 1.0),
+                        builder: (context, snapshot) => AnimatedOpacity(
+                          opacity: snapshot.hasData ? snapshot.data : 0.0,
+                          duration: Duration(seconds: 1),
+                          child: Stack(children: [
+                            snapshot.hasData ? _buildGoogleMap(context) : Container(color: Colors.red),
+                          ]),
+                        ),
+                      ),
+                      Positioned.fill(
+                          child: FutureBuilder(
+                        future: Future.delayed(Duration(milliseconds: 1500)),
+                        builder: (context, snapshot) => AnimatedOpacity(
+                            opacity: snapshot.connectionState == ConnectionState.done ? 0 : 1,
+                            duration: Duration(milliseconds: 1000),
+                            child: snapshot.connectionState != ConnectionState.done
+                                ? Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : Container(color: Theme.of(context).dialogBackgroundColor)),
+                      )),
+                    ],
                   ),
                 )),
               ],
