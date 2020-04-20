@@ -201,25 +201,36 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(22.0),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: TextField(
-                                        controller: _addressController,
-                                        decoration: InputDecoration(
-                                          hintText:
-                                              AppLocalizations.of(context).translate("vrp_preview_page_address_hint"),
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(5.0),
-                                            borderSide: BorderSide(
-                                              color: Colors.amber,
-                                              style: BorderStyle.solid,
+                                child: Column(
+                                  children: <Widget>[
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextField(
+                                            controller: _addressController,
+                                            decoration: InputDecoration(
+                                              hintText: AppLocalizations.of(context)
+                                                  .translate("vrp_preview_page_address_hint"),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(5.0),
+                                                borderSide: BorderSide(
+                                                  color: Colors.amber,
+                                                  style: BorderStyle.solid,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
+                                        _buildGetLocationIcon(context)
+                                      ],
                                     ),
-                                    _buildGetLocationIcon(context)
+                                    if (_record.latitude != 0 || _record.longitude != 0)
+                                      Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(top: 8.0, left: 8.0),
+                                            child: Text("${_record.latitude} °N, ${_record.longitude}°E"),
+                                          ))
                                   ],
                                 ),
                               ),
@@ -992,10 +1003,6 @@ class _EditVrpDialogState extends State<EditVrpDialog> {
                   onPressed: () {
                     if (_formState.currentState.validate()) {
                       _formState.currentState.save();
-                      log.d("form done");
-                      log.d(_firstPart);
-                      log.d(_secondPart);
-                      log.d(VRPType.values[_type].getName(context));
                       Navigator.of(context).pop(VRP(_firstPart, _secondPart, VRPType.values[_type]));
                     }
                   },
