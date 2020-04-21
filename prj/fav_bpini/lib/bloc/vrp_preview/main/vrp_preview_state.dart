@@ -34,9 +34,11 @@ class PositionLoading extends VrpPreviewState {
 }
 
 class PositionLoaded extends VrpPreviewState {
+  final double longitude;
+  final double latitude;
   final addressLoaded;
 
-  PositionLoaded({this.addressLoaded = false});
+  PositionLoaded({this.addressLoaded = false, @required this.latitude, @required this.longitude});
 
   @override
   List<Object> get props => [addressLoaded];

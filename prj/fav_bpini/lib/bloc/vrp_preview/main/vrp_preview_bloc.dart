@@ -88,7 +88,8 @@ class VrpPreviewBloc extends Bloc<VrpPreviewEvent, VrpPreviewState> {
             log.e("Failed to get placemark from coordinates");
           }
 
-          yield PositionLoaded(addressLoaded: address != null);
+          yield PositionLoaded(
+              addressLoaded: address != null, longitude: position.longitude, latitude: position.latitude);
         }
       }
     } else if (event is DiscardVRP) {
