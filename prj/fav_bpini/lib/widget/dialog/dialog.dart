@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 class CustomDialog extends StatelessWidget {
   final Widget child;
   final String title;
+  final EdgeInsets padding;
 
-  CustomDialog({this.child, this.title});
+  CustomDialog({this.child, this.title, this.padding = const EdgeInsets.all(25)});
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+        contentPadding: padding,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
         title: Row(
           children: [
@@ -17,6 +19,6 @@ class CustomDialog extends StatelessWidget {
             IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
           ],
         ),
-        content: Padding(padding: EdgeInsets.only(left: 25, right: 25), child: child));
+        content: child);
   }
 }

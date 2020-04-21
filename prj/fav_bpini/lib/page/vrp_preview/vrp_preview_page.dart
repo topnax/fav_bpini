@@ -10,16 +10,14 @@ import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_bloc.dart';
 import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_event.dart';
 import 'package:favbpini/bloc/vrp_source_detail/vrp_source_detail_state.dart';
 import 'package:favbpini/database/database.dart';
-import 'package:favbpini/main.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
 import 'package:favbpini/utils/preferences.dart';
 import 'package:favbpini/utils/size_config.dart';
 import 'package:favbpini/vrp_locator/vrp_finder.dart';
 import 'package:favbpini/widget/common_texts.dart';
+import 'package:favbpini/widget/dialog/google_map_dialog.dart';
 import 'package:favbpini/widget/vrp_source_detail_painter.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -53,7 +51,6 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
   FoundVrpRecord _record;
   final bool _edit;
 
-  PersistentBottomSheetController bottomSheetController;
   bool bottomSheetShown = false;
 
   VrpPreviewPageState(this._record, this._edit) {
@@ -275,8 +272,8 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                               ),
                             ),
                             RaisedButton(
-                              shape: new RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(7.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(7.0),
                               ),
                               onPressed: () {
                                 var recordingBloc = BlocProvider.of<VrpPreviewRecordingBloc>(context);
@@ -303,7 +300,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                             ),
                           ],
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -446,21 +443,24 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     return BlocBuilder(
         bloc: BlocProvider.of<VrpPreviewBloc>(context),
         builder: (context, state) {
-          if ((BlocProvider.of<VrpPreviewBloc>(context).position.latitude != 0 &&
-              BlocProvider.of<VrpPreviewBloc>(context).position.longitude != 0)) {
+          var position = LatLng(BlocProvider.of<VrpPreviewBloc>(context).position.latitude,
+              BlocProvider.of<VrpPreviewBloc>(context).position.longitude);
+          if (position.latitude != 0 && position.longitude != 0) {
             return Padding(
               padding: const EdgeInsets.only(right: 22.0),
               child: IconButton(
                 icon: Icon(Icons.map),
-                onPressed: () {
+                onPressed: () async {
                   if (!bottomSheetShown) {
                     BlocProvider.of<VrpPreviewBloc>(context).mapController = Completer();
                     bottomSheetShown = true;
-                    showBottomSheet(context: context, builder: (context) => _buildMapBottomSheetContent())
-                        .closed
-                        .whenComplete(() {
-                      bottomSheetShown = false;
-                    });
+                    await showDialog(
+                        context: context,
+                        builder: (context) => GoogleMapDialog(
+                            title: AppLocalizations.of(context)
+                                .translate("vrp_preview_page_dialog_position_address_on_a_map"),
+                            markerPosition: position));
+                    bottomSheetShown = false;
                   }
                 },
               ),
@@ -477,7 +477,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
       child: FlatButton(
         child: Text(AppLocalizations.of(context).translate("vrp_preview_page_edit")),
         onPressed: () async {
-          await _asyncInputDialog(context);
+          await _showEditVrpDialog(context);
         },
       ),
     );
@@ -525,34 +525,6 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
               style: TextStyle(fontSize: 16)),
         ],
       ),
-    );
-  }
-
-  GoogleMap _buildGoogleMap(BuildContext context) {
-    return GoogleMap(
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-        new Factory<OneSequenceGestureRecognizer>(
-          () => new EagerGestureRecognizer(),
-        ),
-      ].toSet(),
-      mapToolbarEnabled: false,
-      mapType: MapType.normal,
-      initialCameraPosition: BlocProvider.of<VrpPreviewBloc>(context).getMapPosition(),
-      markers: {
-        Marker(
-          // This marker id can be anything that uniquely identifies each marker.
-          markerId: MarkerId(""),
-          position: BlocProvider.of<VrpPreviewBloc>(context).getMapMarkerPosition(),
-          infoWindow: InfoWindow(
-            title: AppLocalizations.of(context).translate("vrp_preview_page_dialog_position_title"),
-            snippet: _record.address,
-          ),
-          icon: BitmapDescriptor.defaultMarker,
-        )
-      },
-      onMapCreated: (GoogleMapController controller) {
-        BlocProvider.of<VrpPreviewBloc>(context).mapController.complete(controller);
-      },
     );
   }
 
@@ -760,80 +732,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     );
   }
 
-  Widget _buildMapBottomSheetContent() {
-    return Container(
-      child: Card(
-        elevation: 5.0,
-        margin: EdgeInsets.all(15.0),
-        child: Container(
-          child: Container(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2.0),
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: HeadingText(
-                            AppLocalizations.of(context).translate("vrp_preview_page_dialog_position_address_on_a_map"),
-                            fontSize: 22,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: IconButton(
-                            icon: Icon(Icons.keyboard_arrow_down),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                    child: AspectRatio(
-                  aspectRatio: 16.toDouble() / 10.toDouble(),
-                  child: Stack(
-                    children: [
-                      FutureBuilder(
-                        future: Future<double>.delayed(Duration(milliseconds: 500), () => 1.0),
-                        builder: (context, snapshot) => AnimatedOpacity(
-                          opacity: snapshot.hasData ? snapshot.data : 0.0,
-                          duration: Duration(seconds: 1),
-                          child: Stack(children: [
-                            snapshot.hasData ? _buildGoogleMap(context) : Container(color: Colors.red),
-                          ]),
-                        ),
-                      ),
-                      Positioned.fill(
-                          child: FutureBuilder(
-                        future: Future.delayed(Duration(milliseconds: 1500)),
-                        builder: (context, snapshot) => AnimatedOpacity(
-                            opacity: snapshot.connectionState == ConnectionState.done ? 0 : 1,
-                            duration: Duration(milliseconds: 1000),
-                            child: snapshot.connectionState != ConnectionState.done
-                                ? Center(
-                                    child: CircularProgressIndicator(),
-                                  )
-                                : Container(color: Theme.of(context).dialogBackgroundColor)),
-                      )),
-                    ],
-                  ),
-                )),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  _asyncInputDialog(BuildContext context) async {
+  _showEditVrpDialog(BuildContext context) async {
     var result = await showDialog<VRP>(
       context: context,
       barrierDismissible: false, // dialog is dismissible with a tap on the barrier
