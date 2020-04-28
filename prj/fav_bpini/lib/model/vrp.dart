@@ -3,8 +3,13 @@ import 'package:favbpini/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class VRP extends Equatable {
+  /// The first part of the VRP identifier.
   final String firstPart;
+
+  /// The second part of the VRP identifier.
   final String secondPart;
+
+  /// The type part of the VRP.
   final VRPType type;
 
   VRP(this.firstPart, this.secondPart, this.type);

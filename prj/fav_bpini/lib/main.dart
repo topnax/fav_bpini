@@ -73,7 +73,7 @@ class VRPAppState extends State<VRPApp> {
 
               // These delegates make sure that the localization data for the proper language is loaded
               localizationsDelegates: [
-                AppLocalizationsDelegate(myLocale: Locale(value.appLanguageCode)),
+                AppLocalizationsDelegate(appLocale: Locale(value.appLanguageCode)),
                 // Built-in localization of basic text for Material widgets
                 GlobalMaterialLocalizations.delegate,
                 // Built-in localization for text direction LTR/RTL

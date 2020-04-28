@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:favbpini/app_localizations.dart';
 import 'package:favbpini/utils/preferences.dart';
 import 'package:favbpini/utils/size_config.dart';
 import 'package:favbpini/utils/vrp_finder_tester.dart';
@@ -10,8 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 
-import '../../app_localizations.dart';
-
 class SettingsPage extends StatefulWidget {
   @override
   SettingsPageState createState() => SettingsPageState();
@@ -20,6 +19,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class SettingsPageState extends State<SettingsPage> with SingleTickerProviderStateMixin {
+  /// A map containing supported languages of the application
   static const _languageMap = {"cs": "Čeština", "en": "English"};
   var _loading = false;
   var _versionTappedCounter = 0;

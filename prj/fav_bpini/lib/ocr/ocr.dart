@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class OcrHelper {
+  /// Scans the text and returns a [Future] containing a collection of found text blocks
   static Future<List<TextBlock>> scanText(FirebaseVisionImage visionImage) async {
     log.d("starting OCR...");
 
@@ -23,11 +24,8 @@ class OcrHelper {
     return visionText?.blocks;
   }
 
+  /// Converts a [CameraImage] to [FirebaseVisionImage]
   static FirebaseVisionImage getFirebaseVisionImageFromCameraImage(CameraImage image) {
-    /*
-     * https://firebase.google.com/docs/ml-kit/android/recognize-text
-     */
-
     final FirebaseVisionImageMetadata metadata = FirebaseVisionImageMetadata(
         rawFormat: image.format.raw,
         size: Size(image.width.toDouble(), image.height.toDouble()),

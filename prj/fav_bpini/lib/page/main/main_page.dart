@@ -7,9 +7,7 @@ class MainPage extends StatefulWidget {
   MainPageState createState() => MainPageState();
 }
 
-class MainPageState extends State<MainPage> with SingleTickerProviderStateMixin {
-  TabController _tabController;
-
+class MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
@@ -20,7 +18,6 @@ class MainPageState extends State<MainPage> with SingleTickerProviderStateMixin 
 
   @override
   void dispose() {
-    _tabController.dispose();
     super.dispose();
   }
 
