@@ -40,7 +40,7 @@ class Preferences {
     if (prefLanguage == null) {
       prefLanguage = AppLocalizations.DEFAULT_LANGUAGE_CODE;
       // if no language preference is set, try to set the language according to the device's locale otherwise use the default one
-      for (var langCode in AppLocalizations.SUPPORTED_LANGUAGE_CODES.keys) {
+      for (var langCode in AppLocalizations.SUPPORTED_LANGUAGES.keys) {
         if (Platform.localeName.contains(langCode)) {
           prefLanguage = langCode;
           break;

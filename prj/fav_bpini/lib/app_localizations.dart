@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 
 class AppLocalizations {
   /// A map containing supported languages of the application.
-  static const SUPPORTED_LANGUAGE_CODES = {"cs": "Čeština", "en": "English"};
+  static const SUPPORTED_LANGUAGES = {"cs": "Čeština", "en": "English"};
 
   /// Default language code.
   static const DEFAULT_LANGUAGE_CODE = "en";
@@ -50,22 +50,20 @@ class AppLocalizations {
 /// LocalizationsDelegate is a factory for a set of localized resources.
 /// In this case, the localized strings will be gotten in an AppLocalizations object.
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
-  static const _defaultLanguageCode = "en";
-
   final Locale appLocale;
 
-  AppLocalizationsDelegate({this.appLocale = const Locale(_defaultLanguageCode)});
+  AppLocalizationsDelegate({this.appLocale = const Locale(AppLocalizations.DEFAULT_LANGUAGE_CODE)});
 
   @override
   bool isSupported(Locale locale) {
-    return AppLocalizations.SUPPORTED_LANGUAGE_CODES.keys.contains(locale.languageCode);
+    return AppLocalizations.SUPPORTED_LANGUAGES.keys.contains(locale.languageCode);
   }
 
   @override
   Future<AppLocalizations> load(Locale locale) async {
     var localeToBeSet = appLocale ?? locale;
     if (!isSupported(localeToBeSet)) {
-      localeToBeSet = Locale(_defaultLanguageCode);
+      localeToBeSet = Locale(AppLocalizations.DEFAULT_LANGUAGE_CODE);
     }
     // AppLocalizations class is where the JSON loading actually runs
     AppLocalizations localizations = new AppLocalizations(appLocale ?? locale);

@@ -19,8 +19,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class SettingsPageState extends State<SettingsPage> with SingleTickerProviderStateMixin {
-  /// A map containing supported languages of the application
-  static const _languageMap = {"cs": "Čeština", "en": "English"};
   var _loading = false;
   var _versionTappedCounter = 0;
   static const _versionTappedLimit = 3;
@@ -77,10 +75,10 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                               title: Text(AppLocalizations.of(context).translate("settings_page_language")),
                               trailing: DropdownButton<String>(
                                 value: preferences.appLanguageCode,
-                                items: <String>["cs", "en"].map((String value) {
+                                items: AppLocalizations.SUPPORTED_LANGUAGES.keys.map((String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,
-                                    child: Text(_languageMap[value]),
+                                    child: Text(AppLocalizations.SUPPORTED_LANGUAGES[value]),
                                   );
                                 }).toList(),
                                 onChanged: (value) {
