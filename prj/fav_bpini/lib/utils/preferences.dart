@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:favbpini/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -5,8 +8,6 @@ class Preferences {
   static const THEME_STATUS_KEY = "THEMESTATUS";
   static const AUTO_POSITION_LOOKUP_KEY = "AUTOPOSITIONLOOKUP";
   static const APP_LANGUAGE_KEY = "APPLANGUAGE";
-
-  static const DEFAULT_LANGUAGE_CODE = "cs";
 
   setDarkTheme(bool value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -35,9 +36,19 @@ class Preferences {
 
   Future<String> getAppLanguageCode() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString(APP_LANGUAGE_KEY) ?? DEFAULT_LANGUAGE_CODE;
+    var prefLanguage = prefs.getString(APP_LANGUAGE_KEY);
+    if (prefLanguage == null) {
+      prefLanguage = AppLocalizations.DEFAULT_LANGUAGE_CODE;
+      // if no language preference is set, try to set the language according to the device's locale otherwise use the default one
+      for (var langCode in AppLocalizations.SUPPORTED_LANGUAGE_CODES.keys) {
+        if (Platform.localeName.contains(langCode)) {
+          prefLanguage = langCode;
+          break;
+        }
+      }
+    }
+    return prefLanguage;
   }
-
 }
 
 class PreferencesProvider with ChangeNotifier {
@@ -45,7 +56,7 @@ class PreferencesProvider with ChangeNotifier {
 
   bool _darkTheme = false;
   bool _autoPositionLookup = false;
-  String _appLanguageCode = Preferences.DEFAULT_LANGUAGE_CODE;
+  String _appLanguageCode = AppLocalizations.DEFAULT_LANGUAGE_CODE;
 
   bool get autoPositionLookup => _autoPositionLookup;
   bool get darkTheme => _darkTheme;

@@ -6,7 +6,10 @@ import 'package:flutter/services.dart';
 
 class AppLocalizations {
   /// A map containing supported languages of the application.
-  static const supportedLanguageMap = {"cs": "Čeština", "en": "English"};
+  static const SUPPORTED_LANGUAGE_CODES = {"cs": "Čeština", "en": "English"};
+
+  /// Default language code.
+  static const DEFAULT_LANGUAGE_CODE = "en";
 
   /// Selected locale.
   final Locale locale;
@@ -55,7 +58,7 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
 
   @override
   bool isSupported(Locale locale) {
-    return AppLocalizations.supportedLanguageMap.keys.contains(locale.languageCode);
+    return AppLocalizations.SUPPORTED_LANGUAGE_CODES.keys.contains(locale.languageCode);
   }
 
   @override
