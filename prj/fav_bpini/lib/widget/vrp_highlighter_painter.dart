@@ -1,6 +1,7 @@
 import 'package:favbpini/vrp_locator/vrp_finder.dart';
 import 'package:flutter/material.dart';
 
+/// used for debug purposes
 class VrpHighlighterPainter extends CustomPainter {
   static const _latencyTextStyle = TextStyle(
     color: Colors.red,

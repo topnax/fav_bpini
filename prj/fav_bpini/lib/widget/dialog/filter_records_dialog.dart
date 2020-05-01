@@ -38,7 +38,7 @@ class FilterRecordsDialog extends StatelessWidget {
                 padding: const EdgeInsets.all(15.0),
                 child: Text(
                   type != null ? type.getName(context) : label,
-                  style: TextStyles.monserratStyle.copyWith(color: Colors.white),
+                  style: TextStyles.montserratStyle.copyWith(color: Colors.white),
                   textAlign: TextAlign.center,
                 ),
               )),

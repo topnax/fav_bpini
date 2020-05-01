@@ -29,21 +29,6 @@ class VrpSourceDetailPainter extends CustomPainter {
 
     // draw over the whole screen
     canvas.drawRect(screen, p);
-
-//
-//    p.color = Colors.white;
-//    p.blendMode = BlendMode.srcOver;
-//
-//
-//
-//    canvas.clipRect(rect)
-//
-//
-//
-//    canvas.drawRect(
-//        Rect.fromLTWH(_highlightedArea.left * widthRatio, _highlightedArea.top * heightRatio,
-//            _highlightedArea.width * widthRatio, _highlightedArea.height * heightRatio),
-//        p);
   }
 
   @override

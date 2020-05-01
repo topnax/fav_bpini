@@ -34,6 +34,7 @@ class VRPAppState extends State<VRPApp> {
     getCurrentAppTheme();
   }
 
+  /// asynchronously loads the app preferences
   void getCurrentAppTheme() async {
     preferencesProvider.darkTheme = await preferencesProvider.preferences.getDarkTheme();
     preferencesProvider.autoPositionLookup = await preferencesProvider.preferences.getAutoPositionLookup();
@@ -90,7 +91,6 @@ class VRPAppState extends State<VRPApp> {
                   }
                 }
                 // If the locale of the device is not supported, use the first one
-                // from the list (English, in this case).
                 return supportedLocales.first;
               },
 

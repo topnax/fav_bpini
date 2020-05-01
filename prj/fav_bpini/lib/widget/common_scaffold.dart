@@ -2,6 +2,7 @@ import 'package:favbpini/page/vrp_finder/vrp_finder_page.dart';
 import 'package:favbpini/utils/size_config.dart';
 import 'package:flutter/material.dart';
 
+/// a reusable [Scaffold] widget
 class CommonScaffold extends StatelessWidget {
   final Widget child;
   final Function onLeftButtonPressed;

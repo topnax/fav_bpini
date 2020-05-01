@@ -7,7 +7,6 @@ import 'package:favbpini/bloc/vrp_finder/bloc.dart';
 import 'package:favbpini/database/database.dart';
 import 'package:favbpini/page/vrp_preview/vrp_preview_page.dart';
 import 'package:favbpini/vrp_locator/vrp_finder.dart';
-import 'package:favbpini/widget/vrp_highlighter_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -27,16 +26,12 @@ class VrpFinderPage extends StatefulWidget {
 }
 
 class VrpFinderPageState extends State<VrpFinderPage> {
-  var _sigma = 10.0;
+  static const _sigma = 10.0;
+
+  /// a flag indicating whether the user is rescanning
   final bool _rescan;
 
   VrpFinderPageState(this._rescan);
-
-  @override
-  void dispose() {
-    // Make sure to dispose of the controller when the Widget is disposed
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,13 +138,6 @@ class VrpFinderPageState extends State<VrpFinderPage> {
               ]),
             ),
           ),
-          Center(
-              child: AspectRatio(
-            aspectRatio: controller.value.aspectRatio,
-            child: CustomPaint(
-              painter: VrpHighlighterPainter(results, size, timeTook),
-            ),
-          )),
           Center(
             child: AspectRatio(
               aspectRatio: controller.value.aspectRatio,

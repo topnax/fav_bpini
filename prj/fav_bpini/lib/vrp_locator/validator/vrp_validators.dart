@@ -5,6 +5,10 @@ import 'package:favbpini/vrp_locator/validator/vrp_validator.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 
 class ClassicVehicleVrpValidator extends VrpValidator {
+  static const VIP_DIFF_RATIO_UPPER_THRESHOLD = 0.7;
+  static const VIP_DIFF_RATIO_LOWER_THRESHOLD = 0.55;
+  static const CLASSIC_DIFF_RATIO_UPPER_THRESHOLD = 0.67;
+  static const CLASSIC_DIFF_RATIO_LOWER_THRESHOLD = 0.51;
   static const ONE_LINE_OLD_SEPARATOR = "-";
 
   const ClassicVehicleVrpValidator();
@@ -34,14 +38,14 @@ class ClassicVehicleVrpValidator extends VrpValidator {
         var type;
         if (secondPart.length == 5) {
           type = VRPType.ONE_LINE_VIP;
-          diffRatioUpper = 0.7;
-          diffRatioLower = 0.55;
+          diffRatioUpper = VIP_DIFF_RATIO_UPPER_THRESHOLD;
+          diffRatioLower = VIP_DIFF_RATIO_LOWER_THRESHOLD;
           if (tb.text.contains(ONE_LINE_OLD_SEPARATOR)) {
             type = VRPType.ONE_LINE_OLD;
           }
         } else if (secondPart.length == 4) {
-          diffRatioUpper = 0.67;
-          diffRatioLower = 0.51;
+          diffRatioUpper = CLASSIC_DIFF_RATIO_UPPER_THRESHOLD;
+          diffRatioLower = CLASSIC_DIFF_RATIO_LOWER_THRESHOLD;
           type = VRPType.ONE_LINE_CLASSIC;
           if (tb.text[0] != "O" && !isDigit(tb.text, 0) && tb.text[0] != "E") {
             return null;
@@ -67,6 +71,10 @@ class ClassicVehicleVrpValidator extends VrpValidator {
 }
 
 class TwoLineVrpVehicleValidator extends VrpValidator {
+  static const OTHER_DIFF_RATIO_UPPER_THRESHOLD = .06;
+  static const BIKE_DIFF_RATIO_LOWER_THRESHOLD = 0.10;
+  static const BIKE_DIFF_RATIO_UPPER_THRESHOLD = .25;
+
   const TwoLineVrpVehicleValidator();
 
   @override
@@ -76,6 +84,7 @@ class TwoLineVrpVehicleValidator extends VrpValidator {
       if (tb.lines[0].elements.length == 1 && tb.lines[1].elements.length == 1) {
         if (tb.lines[1].elements[0].text.length == 4) {
           if (tb.lines[0].elements[0].text.length == 3) {
+            // OTHER TWO LINE
             var el1 = tb.lines[0].elements[0].boundingBox;
             var el2 = tb.lines[1].elements[0].boundingBox;
 
@@ -83,10 +92,11 @@ class TwoLineVrpVehicleValidator extends VrpValidator {
 
             var diffRatio = diff / tb.boundingBox.width;
 
-            if (diffRatio < .06) {
+            if (diffRatio < OTHER_DIFF_RATIO_UPPER_THRESHOLD) {
               return VRP(tb.lines[0].elements[0].text, tb.lines[1].elements[0].text, VRPType.TWO_LINE_OTHER);
             }
           } else if (tb.lines[0].elements[0].text.length == 2) {
+            // BIKE VRP
             var el1 = tb.lines[0].elements[0].boundingBox;
             var el2 = tb.lines[1].elements[0].boundingBox;
 
@@ -94,7 +104,7 @@ class TwoLineVrpVehicleValidator extends VrpValidator {
 
             var diffRatio = diff / tb.boundingBox.width;
 
-            if (diffRatio > 0.10 && diffRatio < .25) {
+            if (diffRatio > BIKE_DIFF_RATIO_LOWER_THRESHOLD && diffRatio < BIKE_DIFF_RATIO_UPPER_THRESHOLD) {
               return VRP(tb.lines[0].elements[0].text, tb.lines[1].elements[0].text, VRPType.TWO_LINE_BIKE);
             }
           }

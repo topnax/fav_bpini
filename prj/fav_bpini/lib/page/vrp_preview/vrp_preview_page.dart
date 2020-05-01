@@ -18,6 +18,7 @@ import 'package:favbpini/vrp_locator/vrp_finder.dart';
 import 'package:favbpini/widget/common_texts.dart';
 import 'package:favbpini/widget/dialog/edit_vrp_dialog.dart';
 import 'package:favbpini/widget/dialog/google_map_dialog.dart';
+import 'package:favbpini/widget/vrp/vrp_preview.dart';
 import 'package:favbpini/widget/vrp_source_detail_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,10 +43,6 @@ class VrpPreviewPage extends StatefulWidget {
 }
 
 class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProviderStateMixin {
-  static TextStyle _vrpStyle =
-      TextStyle(fontSize: SizeConfig.blockSizeHorizontal * 11, fontWeight: FontWeight.w600, color: Colors.black);
-  static const TextStyle _vrpStyleSmaller = TextStyle(fontSize: 42, fontWeight: FontWeight.w600, color: Colors.black);
-
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
 
@@ -120,21 +117,18 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
           padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + SizeConfig.safeBlockVertical * 2.5),
           child: Column(
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    IconButton(
-                      icon: Icon(Icons.arrow_back_ios),
-                      iconSize: SizeConfig.blockSizeHorizontal * 7,
-                      color: Theme.of(context).textTheme.body1.color,
-                      onPressed: () {
-                        onPop(context);
-                      },
-                    )
-                  ],
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_back_ios),
+                    iconSize: SizeConfig.blockSizeHorizontal * 7,
+                    color: Theme.of(context).textTheme.body1.color,
+                    onPressed: () {
+                      onPop(context);
+                    },
+                  ),
                 ),
               ),
               Container(
@@ -150,42 +144,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                               HeadingText(_edit
                                   ? AppLocalizations.of(context).translate("vrp_preview_page_title_edit")
                                   : AppLocalizations.of(context).translate("vrp_preview_page_title_edit")),
-                              Padding(
-                                padding: EdgeInsets.only(top: SizeConfig.blockSizeVertical * 3),
-                                child: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                                    children: [
-                                      Center(
-                                        child: Padding(
-                                            padding: EdgeInsets.only(bottom: 10),
-                                            child: Text(
-                                              "${AppLocalizations.of(context).translate("vrp_preview_page_scanned_at")} ${DateFormat('dd.MM.yyyy HH:mm').format(_record.date)},",
-                                              style: TextStyles.monserratStyle,
-                                            )),
-                                      ),
-                                      Center(
-                                          child: _buildVrp(VRP(
-                                              _record.firstPart, _record.secondPart, VRPType.values[_record.type]))),
-                                      Center(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              _buildEditButton(context),
-                                              _buildRescanButton(context),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                              _buildVrpPreview(context),
                               Row(
                                 children: <Widget>[
                                   Expanded(
@@ -197,35 +156,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                                   _buildShowInMapIcon(context)
                                 ],
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(22.0),
-                                child: Column(
-                                  children: <Widget>[
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: TextField(
-                                            controller: _addressController,
-                                            decoration: InputDecoration(
-                                              hintText: AppLocalizations.of(context)
-                                                  .translate("vrp_preview_page_address_hint"),
-                                              border: OutlineInputBorder(
-                                                borderRadius: BorderRadius.circular(5.0),
-                                                borderSide: BorderSide(
-                                                  color: Colors.amber,
-                                                  style: BorderStyle.solid,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        _buildGetLocationIcon(context)
-                                      ],
-                                    ),
-                                    _buildCoordinates(context)
-                                  ],
-                                ),
-                              ),
+                              _buildAddressSection(context),
                               HeadingText(
                                 AppLocalizations.of(context).translate("vrp_preview_page_note"),
                                 fontSize: SizeConfig.blockSizeHorizontal * 5.5,
@@ -240,62 +171,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: SizeConfig.blockSizeVertical * 1.5),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: <Widget>[
-                            RaisedButton(
-                              shape: new RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(7.0),
-                              ),
-                              onPressed: () {
-                                onPop(context);
-                              },
-                              color: Colors.blue,
-                              textColor: Colors.white,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 5.0),
-                                    child: Icon(Icons.close),
-                                  ),
-                                  Text(AppLocalizations.of(context).translate("cancel"),
-                                      style: TextStyle(fontSize: 18)),
-                                ],
-                              ),
-                            ),
-                            RaisedButton(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(7.0),
-                              ),
-                              onPressed: () {
-                                var recordingBloc = BlocProvider.of<VrpPreviewRecordingBloc>(context);
-                                var mainBloc = BlocProvider.of<VrpPreviewBloc>(context);
-
-                                mainBloc.add(SubmitVRP(_record,
-                                    edit: _edit,
-                                    audioNotePath: recordingBloc.audioPath,
-                                    audioNoteEdited: recordingBloc.audioNoteEdited,
-                                    audioNoteDeleted: recordingBloc.deletedNote));
-                              },
-                              color: Colors.orange,
-                              textColor: Colors.white,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 5.0),
-                                    child: Icon(Icons.done),
-                                  ),
-                                  Text(AppLocalizations.of(context).translate("save"), style: TextStyle(fontSize: 18)),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      _buildBottomButtons(context),
                     ],
                   ),
                 ),
@@ -303,6 +179,132 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Padding _buildAddressSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(22.0),
+      child: Column(
+        children: <Widget>[
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _addressController,
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context).translate("vrp_preview_page_address_hint"),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                      borderSide: BorderSide(
+                        color: Colors.amber,
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              _buildGetLocationIcon(context)
+            ],
+          ),
+          _buildCoordinates(context)
+        ],
+      ),
+    );
+  }
+
+  Padding _buildVrpPreview(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(top: SizeConfig.blockSizeVertical * 3),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    "${AppLocalizations.of(context).translate("vrp_preview_page_scanned_at")} ${DateFormat('dd.MM.yyyy HH:mm').format(_record.date)},",
+                    style: TextStyles.montserratStyle,
+                  )),
+            ),
+            Center(child: VrpPreview(VRP(_record.firstPart, _record.secondPart, VRPType.values[_record.type]))),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildEditButton(context),
+                    _buildRescanButton(context),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Padding _buildBottomButtons(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: SizeConfig.blockSizeVertical * 1.5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[
+          RaisedButton(
+            shape: new RoundedRectangleBorder(
+              borderRadius: new BorderRadius.circular(7.0),
+            ),
+            onPressed: () {
+              onPop(context);
+            },
+            color: Colors.blue,
+            textColor: Colors.white,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(right: 5.0),
+                  child: Icon(Icons.close),
+                ),
+                Text(AppLocalizations.of(context).translate("cancel"), style: TextStyle(fontSize: 18)),
+              ],
+            ),
+          ),
+          RaisedButton(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(7.0),
+            ),
+            onPressed: () {
+              var recordingBloc = BlocProvider.of<VrpPreviewRecordingBloc>(context);
+              var mainBloc = BlocProvider.of<VrpPreviewBloc>(context);
+
+              mainBloc.add(SubmitVRP(_record,
+                  edit: _edit,
+                  audioNotePath: recordingBloc.audioPath,
+                  audioNoteEdited: recordingBloc.audioNoteEdited,
+                  audioNoteDeleted: recordingBloc.deletedNote));
+            },
+            color: Colors.orange,
+            textColor: Colors.white,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(right: 5.0),
+                  child: Icon(Icons.done),
+                ),
+                Text(AppLocalizations.of(context).translate("save"), style: TextStyle(fontSize: 18)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -584,168 +586,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
     );
   }
 
-  Widget _buildVrp(VRP vrp) {
-    if (vrp.type == VRPType.ONE_LINE_CLASSIC) {
-      return Container(
-        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(6)),
-        child: Padding(padding: EdgeInsets.all(4), child: _buildVrpInner(vrp.firstPart, vrp.secondPart)),
-      );
-    } else if (vrp.type == VRPType.ONE_LINE_VIP) {
-      return Container(
-        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(6)),
-        child: Padding(padding: EdgeInsets.all(4), child: _buildVrpInner(vrp.firstPart, vrp.secondPart, vip: true)),
-      );
-    } else if (vrp.type == VRPType.ONE_LINE_OLD) {
-      return Container(
-        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(6)),
-        child: Padding(padding: EdgeInsets.all(4), child: _buildVrpInner(vrp.firstPart, vrp.secondPart, old: true)),
-      );
-    } else if (vrp.type == VRPType.TWO_LINE_BIKE || vrp.type == VRPType.TWO_LINE_OTHER) {
-      return Container(
-        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(6)),
-        child: Padding(
-            padding: EdgeInsets.all(4), child: _buildVrpInnerTwoRows(vrp.firstPart, vrp.secondPart, bike: true)),
-      );
-    }
-  }
-
-  Widget _buildVrpContentRow(String firstPart, String secondPart, {vip = false, twoRows = false}) {
-    return Padding(
-      padding: EdgeInsets.all(8),
-      child: Column(
-        crossAxisAlignment: !twoRows ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(top: 5.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  firstPart,
-                  style: vip ? _vrpStyleSmaller : _vrpStyle,
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockSizeHorizontal * 3),
-                ),
-                if (!twoRows)
-                  Text(
-                    secondPart,
-                    style: vip ? _vrpStyleSmaller : _vrpStyle,
-                  )
-              ],
-            ),
-          ),
-          if (twoRows)
-            Text(
-              secondPart,
-              style: vip ? _vrpStyleSmaller : _vrpStyle,
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVrpInner(String firstPart, String secondPart, {bool vip = false, old = false}) {
-    return Container(
-      decoration: BoxDecoration(color: Colors.blue[900]),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          if (!old)
-            Container(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 2),
-                child: Column(
-                  children: <Widget>[
-                    if (vip)
-                      Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                      )
-                    else
-                      Icon(
-                        Icons.blur_circular,
-                        color: Colors.yellow,
-                      ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                    ),
-                    Text(
-                      vip ? "VIP" : "CZ",
-                      style: TextStyle(color: Colors.white),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          Container(
-              decoration: BoxDecoration(color: Colors.white),
-              padding: EdgeInsets.only(top: 0),
-              child: _buildVrpContentRow(firstPart, secondPart, vip: vip))
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVrpInnerTwoRows(String firstPart, String secondPart, {bool bike = false}) {
-    return Container(
-      decoration: BoxDecoration(color: Colors.blue[900]),
-      child: Column(
-        children: <Widget>[
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Container(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 2),
-                  child: Column(
-                    children: <Widget>[
-                      Icon(
-                        Icons.blur_circular,
-                        color: Colors.yellow,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                      ),
-                      Text(
-                        "CZ",
-                        style: TextStyle(color: Colors.white),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              Container(
-                  decoration: BoxDecoration(color: Colors.white),
-                  padding: EdgeInsets.only(top: 0),
-                  child: _buildVrpContentRow(firstPart, secondPart, twoRows: true))
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  _showEditVrpDialog(BuildContext context) async {
-    var result = await showDialog<VRP>(
-      context: context,
-      barrierDismissible: false, // dialog is dismissible with a tap on the barrier
-      builder: (BuildContext context) {
-        return EditVrpDialog(VRP(_record.firstPart, _record.secondPart, VRPType.values[_record.type]));
-      },
-    );
-    if (result != null) {
-      setState(() {
-        _record = _record.copyWith(
-            firstPart: result.firstPart.toUpperCase(),
-            secondPart: result.secondPart.toUpperCase(),
-            type: result.type.index);
-      });
-    }
-  }
-
-  _buildCoordinates(BuildContext context) {
+  Widget _buildCoordinates(BuildContext context) {
     return BlocBuilder<VrpPreviewBloc, VrpPreviewState>(builder: (context, state) {
       if (state is PositionLoaded) {
         return _buildCoordinatesLabel(context, LatLng(state.latitude, state.longitude));
@@ -766,5 +607,23 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
           padding: const EdgeInsets.only(top: 8.0, left: 8.0),
           child: Text("${position.latitude} °N, ${position.longitude}°E"),
         ));
+  }
+
+  _showEditVrpDialog(BuildContext context) async {
+    var result = await showDialog<VRP>(
+      context: context,
+      barrierDismissible: false, // dialog is dismissible with a tap on the barrier
+      builder: (BuildContext context) {
+        return EditVrpDialog(VRP(_record.firstPart, _record.secondPart, VRPType.values[_record.type]));
+      },
+    );
+    if (result != null) {
+      setState(() {
+        _record = _record.copyWith(
+            firstPart: result.firstPart.toUpperCase(),
+            secondPart: result.secondPart.toUpperCase(),
+            type: result.type.index);
+      });
+    }
   }
 }

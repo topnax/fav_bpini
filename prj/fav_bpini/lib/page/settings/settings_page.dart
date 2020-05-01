@@ -143,6 +143,7 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
     );
   }
 
+  /// upon [_versionTappedLimit] taps perform a recognizer test
   _onVersionTapped() async {
     _versionTappedCounter++;
     if (_versionTappedCounter >= _versionTappedLimit) {

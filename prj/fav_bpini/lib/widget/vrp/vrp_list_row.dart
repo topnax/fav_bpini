@@ -24,12 +24,12 @@ class VrpListRow extends StatelessWidget {
       @required this.dateTime,
       @required this.onDismissed,
       @required this.onTap}) {
-    _dateTextStyle = TextStyles.monserratStyle
+    _dateTextStyle = TextStyles.montserratStyle
         .copyWith(fontSize: SizeConfig.blockSizeHorizontal * 3.5, color: Colors.white, fontWeight: FontWeight.w300);
     _addressStyle =
         TextStyle(color: Colors.white, fontSize: SizeConfig.blockSizeHorizontal * 3.6, fontWeight: FontWeight.w300);
     _vrpTitleStyle =
-        TextStyles.monserratStyle.copyWith(fontSize: SizeConfig.blockSizeHorizontal * 5, color: Colors.white);
+        TextStyles.montserratStyle.copyWith(fontSize: SizeConfig.blockSizeHorizontal * 5, color: Colors.white);
   }
 
   @override

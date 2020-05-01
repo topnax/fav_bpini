@@ -20,10 +20,10 @@ class VrpListPage extends StatefulWidget {
 }
 
 class VrpListPageState extends State<VrpListPage> {
-  // currently selected VRP type by which the records should be filtered
+  /// currently selected VRP type by which the records should be filtered
   VRPType _typeFilter;
 
-  // a flag indicating whether the records should be sorted by the chronologically asc/desc
+  /// a flag indicating whether the records should be sorted by the chronologically asc/desc
   var _sortByNewest = true;
 
   @override
@@ -74,7 +74,7 @@ class VrpListPageState extends State<VrpListPage> {
                 return ListView.builder(
                   padding: EdgeInsets.all(0),
                   itemCount: snapshot.data.length,
-                  itemBuilder: (context, index) => _listRowFromRecord(context, snapshot.data[index], snapshot),
+                  itemBuilder: (context, index) => _buildRow(context, snapshot.data[index], snapshot),
                 );
               } else {
                 return Center(
@@ -90,7 +90,7 @@ class VrpListPageState extends State<VrpListPage> {
     );
   }
 
-  Widget _listRowFromRecord(BuildContext context, FoundVrpRecord record, AsyncSnapshot<List<FoundVrpRecord>> snapshot) {
+  Widget _buildRow(BuildContext context, FoundVrpRecord record, AsyncSnapshot<List<FoundVrpRecord>> snapshot) {
     return VrpListRow(
         onTap: () => Navigator.of(context).pushNamed("/found", arguments: VrpPreviewPageArguments(record, edit: true)),
         vrp: VRP(record.firstPart, record.secondPart, VRPType.values[record.type]),
@@ -112,6 +112,7 @@ class VrpListPageState extends State<VrpListPage> {
         });
   }
 
+  /// displays a filter dialog
   _openFilterRecordsDialog() async {
     var result = await showDialog<FilterDialogResult>(
       context: context,

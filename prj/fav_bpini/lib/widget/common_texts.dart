@@ -2,7 +2,7 @@ import 'package:favbpini/utils/size_config.dart';
 import 'package:flutter/material.dart';
 
 class TextStyles {
-  static const TextStyle monserratStyle = TextStyle(fontFamily: "Montserrat");
+  static const TextStyle montserratStyle = TextStyle(fontFamily: "Montserrat");
 }
 
 class HeadingText extends StatelessWidget {
@@ -22,7 +22,7 @@ class HeadingText extends StatelessWidget {
   }
 
   Widget _buildText() {
-    return Text(text, style: TextStyles.monserratStyle.copyWith(fontSize: fontSize));
+    return Text(text, style: TextStyles.montserratStyle.copyWith(fontSize: fontSize));
   }
 }
 
