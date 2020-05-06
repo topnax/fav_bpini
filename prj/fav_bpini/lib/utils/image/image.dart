@@ -41,6 +41,16 @@ imglib.Image convertCameraImageYuv420(CameraImage image) {
   return rotated;
 }
 
+/// A method that converts a [CameraImage] in format BGRA (iOS devices) to [imglib.Image] image. Not tested on an iOS device.
+imglib.Image convertCameraImageBgra8888(CameraImage image) {
+  return imglib.Image.fromBytes(
+    image.width,
+    image.height,
+    image.planes[0].bytes,
+    format: imglib.Format.bgra,
+  );
+}
+
 /// Calculates the black and white ratio in an image in the given bounding box
 double getWhiteToBlackRatio(Rect boundingBox, imglib.Image img) {
   int total = 0;
