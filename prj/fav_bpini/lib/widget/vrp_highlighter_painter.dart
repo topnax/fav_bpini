@@ -1,7 +1,7 @@
 import 'package:favbpini/vrp_locator/vrp_finder.dart';
 import 'package:flutter/material.dart';
 
-/// used for debug purposes
+/// Used for debug purposes
 class VrpHighlighterPainter extends CustomPainter {
   static const _latencyTextStyle = TextStyle(
     color: Colors.red,
@@ -49,7 +49,7 @@ class VrpHighlighterPainter extends CustomPainter {
 
       canvas.drawRect(rect, p2);
       var textPainter = TextPainter(
-        text: TextSpan(text: result.wtb.toString() + " - " + result.meta, style: textStyle),
+        text: TextSpan(text: result.wtbRatio.toString() + " - " + result.meta, style: textStyle),
         textDirection: TextDirection.ltr,
       );
       textPainter.layout(
@@ -71,7 +71,6 @@ class VrpHighlighterPainter extends CustomPainter {
       maxWidth: 500,
     );
     textPainter.paint(canvas, Offset(20, 20));
-//    canvas.drawRect(Offset.zero & size, p);
   }
 
   @override

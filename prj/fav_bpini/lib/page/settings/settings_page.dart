@@ -19,9 +19,14 @@ class SettingsPage extends StatefulWidget {
 }
 
 class SettingsPageState extends State<SettingsPage> with SingleTickerProviderStateMixin {
-  var _loading = false;
-  var _versionTappedCounter = 0;
+  /// Limit after how many taps a test is started
   static const _versionTappedLimit = 3;
+
+  /// A flag indicating whether a test is in progress
+  var _testInProgress = false;
+
+  /// Counter of version text taps
+  var _versionTappedCounter = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +123,7 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
                                         "${snapshot.data.version}+${snapshot.data.buildNumber}",
                                         style: Theme.of(context).textTheme.caption,
                                       ),
-                                      if (_loading)
+                                      if (_testInProgress)
                                         Padding(
                                           padding: const EdgeInsets.only(left: 8.0),
                                           child: Text(
@@ -153,13 +158,13 @@ class SettingsPageState extends State<SettingsPage> with SingleTickerProviderSta
         allowedExtensions: ['jpg', 'png'],
       );
 
-      if (files.length > 0) {
+      if (files != null && files.length > 0) {
         setState(() {
-          _loading = true;
+          _testInProgress = true;
         });
         var results = await VrpFinderTester().startTestInFolder(files);
         setState(() {
-          _loading = false;
+          _testInProgress = false;
         });
 
         await showDialog(

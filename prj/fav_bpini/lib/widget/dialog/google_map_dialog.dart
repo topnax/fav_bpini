@@ -5,8 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class GoogleMapDialog extends StatelessWidget {
+  /// The title of the dialog
   final String title;
+
+  /// The position of the marker to be shown on the map
   final LatLng markerPosition;
+
+  // The title of the marker
   final String markerTitle;
 
   GoogleMapDialog({@required this.title, this.markerPosition, this.markerTitle});

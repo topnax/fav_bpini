@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+/// used for scaling the UI
 class SizeConfig {
   static MediaQueryData _mediaQueryData;
   static double screenWidth;
@@ -16,6 +17,7 @@ class SizeConfig {
     _mediaQueryData = MediaQuery.of(context);
     screenWidth = _mediaQueryData.size.width;
     screenHeight = _mediaQueryData.size.height;
+    // block size is calculated by using device's screen size
     blockSizeHorizontal = screenWidth / 100;
     blockSizeVertical = screenHeight / 100;
 

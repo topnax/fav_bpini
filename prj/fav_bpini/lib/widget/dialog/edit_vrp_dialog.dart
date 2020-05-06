@@ -13,16 +13,24 @@ class EditVrpDialog extends StatefulWidget {
 }
 
 class _EditVrpDialogState extends State<EditVrpDialog> {
+  /// VRP to be edited
   final VRP vrp;
+
+  /// First part of the VRP identifier
   String _firstPart;
+
+  /// Second part of the VRP identifier
   String _secondPart;
+
+  /// Type of the VRP
   int _type;
+
+  /// An attribute containing the state of the form
+  final _formState = GlobalKey<FormState>();
 
   _EditVrpDialogState(this.vrp) {
     _type = vrp.type.index;
   }
-
-  var _formState = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {

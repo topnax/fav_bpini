@@ -2,8 +2,13 @@ import 'package:favbpini/widget/common_texts.dart';
 import 'package:flutter/material.dart';
 
 class CustomDialog extends StatelessWidget {
+  /// Child widget that will be displayed in the body of the dialog
   final Widget child;
+
+  /// Title of the dialog
   final String title;
+
+  /// Padding of the content of the dialog
   final EdgeInsets padding;
 
   CustomDialog({this.child, this.title, this.padding = const EdgeInsets.all(25)});

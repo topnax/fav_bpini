@@ -26,6 +26,7 @@ class VrpFinderPage extends StatefulWidget {
 }
 
 class VrpFinderPageState extends State<VrpFinderPage> {
+  /// Blur intensity
   static const _sigma = 10.0;
 
   /// a flag indicating whether the user is rescanning

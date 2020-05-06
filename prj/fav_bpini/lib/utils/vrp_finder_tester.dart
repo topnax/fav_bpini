@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:favbpini/main.dart';
 import 'package:favbpini/model/vrp.dart';
-import 'package:favbpini/utils/image_wrappers.dart';
+import 'package:favbpini/utils/image/image_wrappers.dart';
 import 'package:favbpini/vrp_locator/vrp_finder_impl.dart';
 import 'package:image/image.dart' as imglib;
 import 'package:path/path.dart';
@@ -45,7 +45,7 @@ class VrpFinderTester {
               found = true;
             }
             if (found) {
-              log.e("bht is: ${result.wtb}");
+              log.e("bht is: ${result.wtbRatio}");
             }
             results.add(VrpFinderTesterTestCaseResult(
                 VRP(parts[0], parts[1], VRPType.ONE_LINE_CLASSIC), result.foundVrp, file.path));

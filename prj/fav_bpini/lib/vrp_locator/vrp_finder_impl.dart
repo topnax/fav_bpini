@@ -3,23 +3,28 @@ import 'dart:math' as m;
 import 'package:favbpini/main.dart';
 import 'package:favbpini/model/vrp.dart';
 import 'package:favbpini/ocr/ocr.dart';
-import 'package:favbpini/utils/image.dart';
-import 'package:favbpini/utils/image_wrappers.dart';
+import 'package:favbpini/utils/image/image.dart';
+import 'package:favbpini/utils/image/image_wrappers.dart';
 import 'package:favbpini/vrp_locator/validator/vrp_validators.dart';
 import 'package:favbpini/vrp_locator/vrp_finder.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as imglib;
 
-const vrpWTBThreshold = 0.55;
-
 class VrpFinderImpl implements VrpFinder {
+  /// The threshold that divides VRP candidates into false positives and true positives
+  static const VRP_WTB_THRESHOLD = 0.55;
+
+  /// A limit, that if exceeded, further analysis on the image is not done
   static const OCR_TIME_LIMIT_MS = 700;
 
+  /// A map that improves OCR accuracy by  mapping forbidden characters to valid ones
   static const INVALID_TO_VALID_CHAR_MAP = {"Q": "0", "O": "0"};
 
+  /// A set of forbidden characters
   static const INVALID_CHAR_SET = {"CH", "G", "W", ",", "."};
 
+  /// List of VRP validators
   static const _VALIDATORS = [const ClassicVehicleVrpValidator(), const TwoLineVrpVehicleValidator()];
 
   Future<VrpFinderResult> findVrpInImage(ImageWrapper imageWrapper) async {
@@ -43,7 +48,7 @@ class VrpFinderImpl implements VrpFinder {
       VrpFinderResult result;
 
       if (!doThreshold) {
-        result = VrpFinderResult(possibleVrp.vrp, vrpWTBThreshold, "found without having to perform wtb",
+        result = VrpFinderResult(possibleVrp.vrp, VRP_WTB_THRESHOLD, "found without having to perform wtb",
             rect: possibleVrp.textBlock.boundingBox, image: img);
       } else {
         start = DateTime.now();
@@ -59,7 +64,7 @@ class VrpFinderImpl implements VrpFinder {
         });
 
         return VrpFinderResult(
-            VRP(firstPart.toUpperCase(), secondPart.toUpperCase(), result.foundVrp.type), result.wtb, result.meta,
+            VRP(firstPart.toUpperCase(), secondPart.toUpperCase(), result.foundVrp.type), result.wtbRatio, result.meta,
             rect: result.rect, image: result.image);
       }
     }
@@ -109,7 +114,7 @@ Future<VrpFinderResult> findVrpByThreshold(imglib.Image img, List<VrpCandidate> 
   var start = DateTime.now();
   if (candidates.isNotEmpty) {
     for (var candidate in candidates) {
-      var wb = (await getBlackAndWhiteImage(getImageCutout(img, candidate.textBlock.boundingBox))).getWhiteBalance();
+      var wb = (await getBlackAndWhiteImage(cropImage(img, candidate.textBlock.boundingBox))).getWhiteBalance();
       log.i("got wb of $wb");
       if (_isRectangleWithinImage(candidate.textBlock.boundingBox, img.width, img.height) && wb > 120) {
         log.i("bwi filter took: ${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch).toString()}");
@@ -121,6 +126,7 @@ Future<VrpFinderResult> findVrpByThreshold(imglib.Image img, List<VrpCandidate> 
   return null;
 }
 
+/// A class that wraps over a [TextBlock] and represents an OCR result that might contain a VRP
 class VrpCandidate {
   final VRP vrp;
   final TextBlock textBlock;
@@ -128,10 +134,12 @@ class VrpCandidate {
   VrpCandidate(this.vrp, this.textBlock);
 }
 
+/// Calculates distance between two offsets
 double distanceBetweenOffsets(Offset a, Offset b) {
   return m.sqrt((m.pow(a.dx - b.dx, 2) - m.pow(a.dy - b.dy, 2)).abs());
 }
 
+/// Returns [true] if the rectangle is within bounds of an image defined by parameters [width] and [height]
 bool _isRectangleWithinImage(Rect rect, int width, int height) {
   return rect.left >= 0 &&
       rect.top >= 0 &&

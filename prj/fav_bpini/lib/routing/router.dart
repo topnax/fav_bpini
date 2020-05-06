@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 class Router {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     // Getting arguments passed in while calling Navigator.pushNamed
-//    final args = settings.arguments;
-
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => MainPage(), settings: RouteSettings(name: "/"));
+
       case '/settings':
         return MaterialPageRoute(builder: (_) => SettingsPage());
+
       case '/finder':
         if (settings.arguments is VrpFinderPageArguments) {
           return MaterialPageRoute(builder: (_) => VrpFinderPage(settings.arguments));
@@ -25,11 +25,8 @@ class Router {
           return MaterialPageRoute(builder: (_) => VrpPreviewPage(settings.arguments));
         }
         return _errorRoute();
-//      case '/camera':
-//        return MaterialPageRoute(builder: (_) => TakePictureScreen(args));
 
       default:
-        // If there is no such named route in the switch statement, e.g. /third
         return _errorRoute();
     }
   }

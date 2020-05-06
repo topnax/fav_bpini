@@ -43,13 +43,19 @@ class VrpPreviewPage extends StatefulWidget {
 }
 
 class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProviderStateMixin {
+  /// Text controller of the address field
   final TextEditingController _addressController = TextEditingController();
+
+  /// Text controller of the note field
   final TextEditingController _noteController = TextEditingController();
 
+  /// Displayed VRP record
   FoundVrpRecord _record;
+
+  /// A flag indicating whether the record is being edited or is about to be created
   final bool _edit;
 
-  bool bottomSheetShown = false;
+  bool mapDialogShown = false;
 
   VrpPreviewPageState(this._record, this._edit) {
     _addressController.text = _record.address;
@@ -448,16 +454,16 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
               child: IconButton(
                 icon: Icon(Icons.map),
                 onPressed: () async {
-                  if (!bottomSheetShown) {
+                  if (!mapDialogShown) {
                     BlocProvider.of<VrpPreviewBloc>(context).mapController = Completer();
-                    bottomSheetShown = true;
+                    mapDialogShown = true;
                     await showDialog(
                         context: context,
                         builder: (context) => GoogleMapDialog(
                             title: AppLocalizations.of(context)
                                 .translate("vrp_preview_page_dialog_position_address_on_a_map"),
                             markerPosition: position));
-                    bottomSheetShown = false;
+                    mapDialogShown = false;
                   }
                 },
               ),
@@ -526,7 +532,7 @@ class VrpPreviewPageState extends State<VrpPreviewPage> with SingleTickerProvide
   }
 
   Future<bool> onPop(BuildContext context) async {
-    if (bottomSheetShown) {
+    if (mapDialogShown) {
       return true;
     }
     BlocProvider.of<VrpPreviewBloc>(context).add(DiscardVRP(_record.sourceImagePath));

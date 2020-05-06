@@ -1,6 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:favbpini/ocr/ocr.dart';
-import 'package:favbpini/utils/image.dart';
+import 'package:favbpini/utils/image/image.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:image/image.dart' as imglib;
 
@@ -18,7 +18,7 @@ class CameraImageWrapper extends ImageWrapper {
 
   @override
   imglib.Image getImage() {
-    return convertCameraImage(_cameraImage);
+    return convertCameraImageYuv420(_cameraImage);
   }
 
   @override

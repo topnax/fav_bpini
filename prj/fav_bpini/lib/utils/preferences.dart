@@ -5,8 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Preferences {
+  /// THEME PREFERENCE KEY
   static const THEME_STATUS_KEY = "THEMESTATUS";
+
+  /// AUTO POSITION PREFERENCE KEY
   static const AUTO_POSITION_LOOKUP_KEY = "AUTOPOSITIONLOOKUP";
+
+  /// APP LANGUAGE PREFERENCE KEY
   static const APP_LANGUAGE_KEY = "APPLANGUAGE";
 
   setDarkTheme(bool value) async {

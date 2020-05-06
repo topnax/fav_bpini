@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:favbpini/main.dart';
-import 'package:favbpini/utils/image_wrappers.dart';
+import 'package:favbpini/utils/image/image_wrappers.dart';
 import 'package:favbpini/vrp_locator/vrp_finder.dart';
 import 'package:favbpini/vrp_locator/vrp_finder_impl.dart';
 import 'package:flutter/services.dart';

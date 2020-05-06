@@ -5,11 +5,22 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class VrpListRow extends StatelessWidget {
+  /// The VRP this row is displaying
   final VRP vrp;
+
+  /// The address to be displayed
   final String address;
+
+  /// The datetime at which the VRP was scanned
   final DateTime dateTime;
+
+  /// The function to be executed once the user dismisses this row
   final Function onDismissed;
+
+  /// The function to be executed once the user taps this row
   final Function onTap;
+
+  /// Key of this row
   final Key key;
 
   static final _dateFormat = DateFormat('dd.MM.yyyy HH:mm');
