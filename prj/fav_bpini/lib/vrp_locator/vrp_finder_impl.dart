@@ -116,7 +116,7 @@ Future<VrpFinderResult> findVrpByThreshold(imglib.Image img, List<VrpCandidate> 
     for (var candidate in candidates) {
       var wb = (await getBlackAndWhiteImage(cropImage(img, candidate.textBlock.boundingBox))).getWhiteBalance();
       log.i("got wb of $wb");
-      if (_isRectangleWithinImage(candidate.textBlock.boundingBox, img.width, img.height) && wb > 120) {
+      if (isRectangleWithinImage(candidate.textBlock.boundingBox, img.width, img.height) && wb > 120) {
         log.i("bwi filter took: ${(DateTime.now().millisecondsSinceEpoch - start.millisecondsSinceEpoch).toString()}");
         return Future.value(VrpFinderResult(candidate.vrp, wb.toDouble(), "found by BWT",
             rect: candidate.textBlock.boundingBox, image: img));
@@ -136,11 +136,11 @@ class VrpCandidate {
 
 /// Calculates distance between two offsets
 double distanceBetweenOffsets(Offset a, Offset b) {
-  return m.sqrt((m.pow(a.dx - b.dx, 2) - m.pow(a.dy - b.dy, 2)).abs());
+  return m.sqrt((m.pow((a.dx - b.dx), 2) + m.pow((a.dy - b.dy), 2)));
 }
 
 /// Returns [true] if the rectangle is within bounds of an image defined by parameters [width] and [height]
-bool _isRectangleWithinImage(Rect rect, int width, int height) {
+bool isRectangleWithinImage(Rect rect, int width, int height) {
   return rect.left >= 0 &&
       rect.top >= 0 &&
       rect.left + rect.width.toInt() < width &&
